@@ -1,0 +1,10 @@
+.child-card { background: #fff; border-radius: var(--radius); padding: 16px; margin-bottom: 10px; display: flex; align-items: center; }
+.child-info { display: flex; align-items: center; gap: 12px; flex: 1; }
+.child-info:active { opacity: 0.7; }
+.child-avatar { font-size: 40px; } .child-name { font-size: 16px; font-weight: 600; display: block; } .child-detail { font-size: 13px; color: var(--text-secondary); display: block; margin-top: 2px; }
+.child-actions { display: flex; gap: 14px; font-size: 18px; } .child-actions text { padding: 4px; }
+.card-title { font-size: 17px; font-weight: 600; margin-bottom: 16px; display: block; }
+.gender-row { display: flex; gap: 12px; } .gender-btn { flex: 1; padding: 10px; text-align: center; border: 2rpx solid var(--border); border-radius: var(--radius-sm); font-size: 15px; } .gender-btn.selected { border-color: var(--primary); background: var(--primary-lighter); color: var(--primary); }
+.avatar-row { display: flex; gap: 10px; flex-wrap: wrap; } .avatar-opt { font-size: 32px; padding: 6px; border: 2rpx solid transparent; border-radius: var(--radius-sm); } .avatar-opt.selected { border-color: var(--primary); background: var(--primary-lighter); }
+.form-btns { display: flex; gap: 12px; margin-top: 16px; } .form-btns .btn { flex: 1; }
+.picker-like { line-height: 48px; }

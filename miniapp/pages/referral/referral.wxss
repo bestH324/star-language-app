@@ -1,0 +1,8 @@
+.referral-intro { font-size: 14px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.6; }
+.region-group { margin-bottom: 16px; }
+.region-title { font-size: 17px; font-weight: 600; color: var(--primary); display: block; margin-bottom: 10px; }
+.referral-card { background: #fff; border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; }
+.inst-name { font-size: 16px; font-weight: 600; display: block; }
+.inst-dept { font-size: 12px; color: var(--primary); background: var(--primary-lighter); padding: 2px 8px; border-radius: 4px; display: inline-block; margin: 6px 0; }
+.inst-info { font-size: 13px; color: var(--text-secondary); display: block; line-height: 1.8; }
+.inst-desc { font-size: 13px; color: var(--text-secondary); margin-top: 6px; display: block; line-height: 1.5; }

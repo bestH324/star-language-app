@@ -1,0 +1,11 @@
+<view class="page-content">
+    <view class="about-content">
+        <text class="about-logo" bindtap="onLogoClick">⭐</text>
+        <text class="about-title">星语</text>
+        <text class="about-ver">v1.0.0</text>
+        <text class="about-desc">星语是一款基于SACS量表的孤独症早期筛查支持平台，由南开大学儿童发育行为研究团队提供学术支持。</text>
+        <view class="about-section"><text class="as-title">免责声明</text><text class="as-text">本平台的筛查结果仅供早期参考，不能替代专业医疗诊断。如发现孩子有发育行为方面的疑虑，请及时到正规医疗机构就诊。</text></view>
+        <view class="about-section"><text class="as-title">联系我们</text><text class="as-text">📧 邮箱：autism-support@nankai.edu.cn</text><text class="as-text">📞 电话：400-XXX-XXXX</text></view>
+        <text class="about-copy">© 2026 南开大学 · 儿童发育行为研究</text>
+    </view>
+</view>

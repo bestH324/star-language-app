@@ -1,0 +1,73 @@
+<!-- 首页 -->
+<view class="page-content">
+    <!-- 轮播Banner -->
+    <swiper class="banner-swiper" indicator-dots="{{true}}" autoplay="{{true}}" interval="{{4000}}" circular="{{true}}">
+        <swiper-item>
+            <view class="banner-slide">
+                <text class="banner-title">早发现 · 早干预</text>
+                <text class="banner-desc">科学筛查，守护孩子健康成长</text>
+            </view>
+        </swiper-item>
+        <swiper-item>
+            <view class="banner-slide">
+                <text class="banner-title">权威量表 · SACS改编</text>
+                <text class="banner-desc">基于国际标准，专业可靠</text>
+            </view>
+        </swiper-item>
+        <swiper-item>
+            <view class="banner-slide">
+                <text class="banner-title">视频引导 · 简单易懂</text>
+                <text class="banner-desc">看视频做问卷，轻松完成筛查</text>
+            </view>
+        </swiper-item>
+    </swiper>
+
+    <!-- 功能入口 -->
+    <view class="feature-grid">
+        <view class="feature-card" bindtap="goScreening">
+            <text class="feature-icon">🔍</text>
+            <text class="feature-name">快速筛查</text>
+            <text class="feature-desc">看视频·做问卷·出报告</text>
+        </view>
+        <view class="feature-card" bindtap="goScience">
+            <text class="feature-icon">📚</text>
+            <text class="feature-name">科普知识</text>
+            <text class="feature-desc">了解孤独症</text>
+        </view>
+        <view class="feature-card" bindtap="goReferral">
+            <text class="feature-icon">🏥</text>
+            <text class="feature-name">转诊服务</text>
+            <text class="feature-desc">专业机构推荐</text>
+        </view>
+        <view class="feature-card" bindtap="goEmpowerment">
+            <text class="feature-icon">💪</text>
+            <text class="feature-name">赋能支持</text>
+            <text class="feature-desc">家庭干预资源</text>
+        </view>
+    </view>
+
+    <!-- 快捷操作 -->
+    <view class="section-card">
+        <text class="section-title">快捷操作</text>
+        <view class="quick-actions">
+            <view class="quick-action-item" bindtap="goChildManage">
+                <text>👶</text> 管理宝宝信息
+            </view>
+            <view class="quick-action-item" bindtap="goHistory">
+                <text>📋</text> 筛查历史记录
+            </view>
+            <view class="quick-action-item" bindtap="goProfile">
+                <text>⚙️</text> 个人中心
+            </view>
+        </view>
+    </view>
+
+    <!-- 温馨提示 -->
+    <view class="tips-card">
+        <text class="tips-icon">💡</text>
+        <view class="tips-content">
+            <text>本筛查仅为早期参考，不能替代专业诊断。</text>
+            <text>如有疑虑，请及时咨询专业医生。</text>
+        </view>
+    </view>
+</view>

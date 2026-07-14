@@ -1,0 +1,16 @@
+<view class="page-content">
+    <view class="referral-intro">
+        <text>以下为全国范围内具备孤独症诊疗能力的专业机构，按地区分类整理。如需进一步帮助，请联系客服。</text>
+    </view>
+
+    <view wx:for="{{groupedList}}" wx:key="region" class="region-group">
+        <text class="region-title">📍 {{item.region}}</text>
+        <view wx:for="{{item.institutions}}" wx:key="id" wx:for-item="inst" class="referral-card">
+            <text class="inst-name">{{inst.name}}</text>
+            <text class="inst-dept">{{inst.department}}</text>
+            <text class="inst-info">📍 {{inst.address}}</text>
+            <text class="inst-info">📞 {{inst.phone}}</text>
+            <text class="inst-desc">{{inst.description}}</text>
+        </view>
+    </view>
+</view>

@@ -1,0 +1,27 @@
+<view class="page-content">
+    <view class="login-logo">
+        <text class="logo-circle">⭐</text>
+        <text class="login-welcome">欢迎使用星语</text>
+    </view>
+    <view class="form-group">
+        <text class="form-label">手机号</text>
+        <view class="input-with-icon">
+            <text class="input-icon">📱</text>
+            <input class="form-input" type="text" placeholder="请输入手机号" maxlength="11" value="{{phone}}" bindinput="onPhoneInput" />
+        </view>
+    </view>
+    <view class="form-group">
+        <text class="form-label">验证码</text>
+        <view class="input-row">
+            <input class="form-input" type="text" placeholder="请输入验证码" maxlength="6" value="{{code}}" bindinput="onCodeInput" />
+            <button class="btn btn-code" bindtap="sendCode" disabled="{{countdown > 0}}">{{countdown > 0 ? countdown + 's后重发' : '获取验证码'}}</button>
+        </view>
+    </view>
+    <button class="btn btn-primary btn-block" bindtap="doLogin">登录</button>
+    <view class="divider-text"><text>其他方式</text></view>
+    <button class="btn btn-wechat btn-block" bindtap="doWechatLogin">💬 微信一键登录</button>
+    <view class="form-bottom-text">
+        <text>还没有账号？</text>
+        <text class="link" bindtap="goRegister">立即注册</text>
+    </view>
+</view>

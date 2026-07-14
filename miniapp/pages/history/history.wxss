@@ -1,0 +1,10 @@
+.history-item { background: #fff; border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; }
+.history-item:active { opacity: 0.7; }
+.hi-top { display: flex; justify-content: space-between; margin-bottom: 10px; }
+.hi-child { font-size: 16px; font-weight: 600; } .hi-date { font-size: 12px; color: var(--text-hint); }
+.hi-bottom { display: flex; justify-content: space-between; align-items: center; }
+.hi-badge { padding: 3px 12px; border-radius: 12px; font-size: 13px; }
+.hi-badge.low { background: var(--risk-low-bg); color: var(--risk-low); }
+.hi-badge.medium { background: var(--risk-medium-bg); color: var(--risk-medium); }
+.hi-badge.high { background: var(--risk-high-bg); color: var(--risk-high); }
+.hi-score { font-size: 13px; color: var(--text-secondary); }

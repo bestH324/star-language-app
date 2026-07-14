@@ -1,0 +1,27 @@
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.stat-card { background: #fff; border-radius: var(--radius); padding: 16px; text-align: center; }
+.stat-card.highlight { background: var(--risk-high-bg); }
+.stat-num { font-size: 28px; font-weight: 700; color: var(--primary); display: block; }
+.stat-card.highlight .stat-num { color: var(--risk-high); }
+.stat-label { font-size: 13px; color: var(--text-secondary); display: block; margin-top: 4px; }
+.chart-card { background: #fff; border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
+.chart-title { font-size: 16px; font-weight: 600; display: block; margin-bottom: 14px; }
+.chart-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.chart-label { font-size: 13px; width: 50px; }
+.chart-bar-wrap { flex: 1; height: 20px; background: #f0f0f0; border-radius: 10px; overflow: hidden; }
+.chart-bar { height: 100%; border-radius: 10px; transition: width 0.5s; }
+.chart-bar.danger { background: var(--risk-high); } .chart-bar.warn { background: var(--risk-medium); } .chart-bar.safe { background: var(--risk-low); }
+.chart-val { font-size: 14px; font-weight: 600; width: 30px; text-align: right; }
+.admin-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+.admin-tab { flex: 1; text-align: center; padding: 10px; font-size: 14px; background: #fff; border-radius: var(--radius-sm); color: var(--text-secondary); }
+.admin-tab.active { background: var(--primary); color: #fff; }
+.data-table { background: #fff; border-radius: var(--radius); overflow: hidden; }
+.dt-header { display: flex; padding: 12px 14px; background: var(--bg-page); font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+.dt-row { display: flex; padding: 12px 14px; border-bottom: 1rpx solid var(--border); font-size: 14px; align-items: center; }
+.dt-row:last-child { border-bottom: none; }
+.dt-row:active { background: var(--bg-page); }
+.dt-empty { display: block; text-align: center; padding: 30px; color: var(--text-hint); font-size: 14px; }
+.badge-sm { padding: 2px 8px; border-radius: 10px; font-size: 12px; }
+.badge-sm.low { background: var(--risk-low-bg); color: var(--risk-low); }
+.badge-sm.medium { background: var(--risk-medium-bg); color: var(--risk-medium); }
+.badge-sm.high { background: var(--risk-high-bg); color: var(--risk-high); }

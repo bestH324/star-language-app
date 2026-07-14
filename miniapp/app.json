@@ -1,0 +1,65 @@
+{
+    "pages": [
+        "pages/splash/splash",
+        "pages/index/index",
+        "pages/screening/screening",
+        "pages/science/science",
+        "pages/referral/referral",
+        "pages/profile/profile",
+        "pages/login/login",
+        "pages/register/register",
+        "pages/child-manage/child-manage",
+        "pages/result/result",
+        "pages/history/history",
+        "pages/empowerment/empowerment",
+        "pages/about/about",
+        "pages/admin-login/admin-login",
+        "pages/admin-dashboard/admin-dashboard"
+    ],
+    "window": {
+        "navigationBarBackgroundColor": "#6B1D5E",
+        "navigationBarTitleText": "星语",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#F5F0F5"
+    },
+    "tabBar": {
+        "color": "#7F8C8D",
+        "selectedColor": "#6B1D5E",
+        "backgroundColor": "#FFFFFF",
+        "borderStyle": "white",
+        "list": [
+            {
+                "pagePath": "pages/index/index",
+                "text": "首页",
+                "iconPath": "assets/icons/home.png",
+                "selectedIconPath": "assets/icons/home-active.png"
+            },
+            {
+                "pagePath": "pages/science/science",
+                "text": "科普",
+                "iconPath": "assets/icons/science.png",
+                "selectedIconPath": "assets/icons/science-active.png"
+            },
+            {
+                "pagePath": "pages/screening/screening",
+                "text": "筛查",
+                "iconPath": "assets/icons/screening.png",
+                "selectedIconPath": "assets/icons/screening-active.png"
+            },
+            {
+                "pagePath": "pages/referral/referral",
+                "text": "转诊",
+                "iconPath": "assets/icons/referral.png",
+                "selectedIconPath": "assets/icons/referral-active.png"
+            },
+            {
+                "pagePath": "pages/profile/profile",
+                "text": "我的",
+                "iconPath": "assets/icons/profile.png",
+                "selectedIconPath": "assets/icons/profile-active.png"
+            }
+        ]
+    },
+    "style": "v2",
+    "sitemapLocation": "sitemap.json"
+}

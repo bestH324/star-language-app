@@ -1,0 +1,7 @@
+<view class="page-content">
+    <view wx:if="{{list.length === 0}}" class="empty-state"><text class="empty-icon">📋</text><text>暂无筛查记录</text><button class="btn btn-primary" style="margin-top:16px" bindtap="goScreening">去做筛查</button></view>
+    <view wx:for="{{list}}" wx:key="id" class="history-item" bindtap="viewDetail" data-id="{{item.id}}">
+        <view class="hi-top"><text class="hi-child">{{item.childAvatar || '👶'}} {{item.childName}}</text><text class="hi-date">{{item.time}}</text></view>
+        <view class="hi-bottom"><text class="hi-badge {{item.riskLevel}}">{{item.riskText}}</text><text class="hi-score">得分：{{item.totalScore}}</text></view>
+    </view>
+</view>
