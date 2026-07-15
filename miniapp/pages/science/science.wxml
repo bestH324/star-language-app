@@ -1,0 +1,18 @@
+<view class="page-content">
+    <scroll-view class="science-tabs" scroll-x>
+        <text class="science-tab {{activeTab==='all'?'active':''}}" bindtap="switchTab" data-tab="all">全部</text>
+        <text class="science-tab {{activeTab==='knowledge'?'active':''}}" bindtap="switchTab" data-tab="knowledge">认识孤独症</text>
+        <text class="science-tab {{activeTab==='early'?'active':''}}" bindtap="switchTab" data-tab="early">早期信号</text>
+        <text class="science-tab {{activeTab==='intervene'?'active':''}}" bindtap="switchTab" data-tab="intervene">干预方法</text>
+    </scroll-view>
+
+    <view wx:for="{{articles}}" wx:key="id" class="article-card" bindtap="showDetail" data-id="{{item.id}}">
+        <text class="article-title">{{item.title}}</text>
+        <text class="article-summary">{{item.summary}}</text>
+        <text class="article-meta">{{item.date}} · {{item.author}}</text>
+    </view>
+
+    <view wx:if="{{articles.length === 0}}" class="empty-state">
+        <text>暂无相关文章</text>
+    </view>
+</view>

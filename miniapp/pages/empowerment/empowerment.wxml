@@ -1,0 +1,6 @@
+<view class="page-content">
+    <view wx:for="{{resources}}" wx:key="id" class="empower-card" bindtap="onTap" data-title="{{item.title}}">
+        <text class="empower-icon">{{item.icon}}</text>
+        <view class="empower-info"><text class="empower-title">{{item.title}}</text><text class="empower-desc">{{item.desc}}</text></view>
+    </view>
+</view>

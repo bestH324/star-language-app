@@ -1,0 +1,6 @@
+.empower-card { background: #fff; border-radius: var(--radius); padding: 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 14px; }
+.empower-card:active { opacity: 0.7; }
+.empower-icon { font-size: 36px; }
+.empower-info { flex: 1; }
+.empower-title { font-size: 16px; font-weight: 600; display: block; }
+.empower-desc { font-size: 13px; color: var(--text-secondary); margin-top: 4px; display: block; }

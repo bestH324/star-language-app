@@ -1,0 +1,29 @@
+<view class="page-content">
+    <view wx:if="{{list.length === 0}}" class="empty-state"><text class="empty-icon">👶</text><text>还没有添加宝宝信息</text><text style="font-size:13px;color:var(--text-hint)">点击下方按钮添加宝宝，开始筛查</text></view>
+    <view wx:for="{{list}}" wx:key="id" class="child-card">
+        <view class="child-info" bindtap="goScreening" data-id="{{item.id}}">
+            <text class="child-avatar">{{item.avatar || '👶'}}</text>
+            <view><text class="child-name">{{item.name}}</text><text class="child-detail">{{item.gender === 'male' ? '👦' : '👧'}} {{item.ageText}} · {{item.birthFmt}}</text></view>
+        </view>
+        <view class="child-actions"><text bindtap="editChild" data-id="{{item.id}}">✏️</text><text bindtap="deleteChild" data-id="{{item.id}}">🗑️</text></view>
+    </view>
+    <button class="btn btn-outline btn-block" bindtap="showForm" wx:if="{{!showForm}}">+ 添加宝宝</button>
+
+    <view wx:if="{{showForm}}" class="card">
+        <text class="card-title">{{editingId ? '编辑宝宝信息' : '添加宝宝信息'}}</text>
+        <view class="form-group"><text class="form-label">宝宝昵称</text><input class="form-input" placeholder="请输入宝宝昵称" value="{{form.name}}" bindinput="onFName" /></view>
+        <view class="form-group"><text class="form-label">性别</text>
+            <view class="gender-row">
+                <view class="gender-btn {{form.gender==='male'?'selected':''}}" bindtap="onGender" data-g="male">👦 男宝</view>
+                <view class="gender-btn {{form.gender==='female'?'selected':''}}" bindtap="onGender" data-g="female">👧 女宝</view>
+            </view>
+        </view>
+        <view class="form-group"><text class="form-label">出生日期</text>
+            <picker mode="date" end="{{today}}" bindchange="onDate"><view class="form-input picker-like">{{form.birth || '请选择出生日期'}}</view></picker>
+        </view>
+        <view class="form-group"><text class="form-label">头像</text>
+            <view class="avatar-row"><text wx:for="{{avatars}}" wx:key="*this" class="avatar-opt {{form.avatar===item?'selected':''}}" bindtap="onAvatar" data-a="{{item}}">{{item}}</text></view>
+        </view>
+        <view class="form-btns"><button class="btn btn-outline" bindtap="cancelForm">取消</button><button class="btn btn-primary" bindtap="saveChild">保存</button></view>
+    </view>
+</view>

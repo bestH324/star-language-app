@@ -1,0 +1,9 @@
+.about-content { text-align: center; padding: 20px 0; }
+.about-logo { font-size: 64px; display: block; }
+.about-title { font-size: 28px; font-weight: 700; display: block; margin-top: 12px; }
+.about-ver { font-size: 14px; color: var(--text-hint); display: block; margin-top: 4px; }
+.about-desc { font-size: 15px; color: var(--text-secondary); line-height: 1.6; display: block; margin: 20px 0; padding: 0 10px; }
+.about-section { background: #fff; border-radius: var(--radius); padding: 16px; margin-bottom: 12px; text-align: left; }
+.as-title { font-size: 16px; font-weight: 600; display: block; margin-bottom: 8px; }
+.as-text { font-size: 14px; color: var(--text-secondary); line-height: 1.8; display: block; }
+.about-copy { font-size: 12px; color: var(--text-hint); display: block; margin-top: 20px; }

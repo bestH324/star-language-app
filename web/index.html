@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>星语 · 孤独症早期支持平台</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- ==================== 应用容器 ==================== -->
+    <div id="app">
+
+        <!-- ========== 1. 启动页 ========== -->
+        <section id="page-splash" class="page active">
+            <div class="splash-container">
+                <div class="splash-logo">
+                    <div class="logo-icon">⭐</div>
+                    <h1 class="splash-title">星语</h1>
+                    <p class="splash-subtitle">孤独症早期支持平台</p>
+                </div>
+                <div class="splash-actions">
+                    <button class="btn btn-primary btn-block" onclick="navigateTo('login')">登录 / 注册</button>
+                    <button class="btn btn-outline btn-block" onclick="navigateTo('home')">先看看</button>
+                </div>
+                <p class="splash-footer">南开大学 · 儿童发育行为研究</p>
+            </div>
+        </section>
+
+        <!-- ========== 2. 首页/主页 ========== -->
+        <section id="page-home" class="page">
+            <div class="page-header">
+                <div class="header-brand">
+                    <span class="brand-icon">⭐</span>
+                    <span class="brand-name">星语</span>
+                </div>
+                <div class="header-actions">
+                    <span class="header-btn" onclick="navigateTo('profile')">👤</span>
+                </div>
+            </div>
+
+            <div class="page-content">
+                <!-- 轮播Banner -->
+                <div class="banner-swiper" id="homeBanner">
+                    <div class="banner-slide active">
+                        <div class="banner-content">
+                            <h3>早发现 · 早干预</h3>
+                            <p>科学筛查，守护孩子健康成长</p>
+                        </div>
+                    </div>
+                    <div class="banner-slide">
+                        <div class="banner-content">
+                            <h3>权威量表 · SACS改编</h3>
+                            <p>基于国际标准，专业可靠</p>
+                        </div>
+                    </div>
+                    <div class="banner-slide">
+                        <div class="banner-content">
+                            <h3>视频引导 · 简单易懂</h3>
+                            <p>看视频做问卷，轻松完成筛查</p>
+                        </div>
+                    </div>
+                    <div class="banner-dots">
+                        <span class="dot active" data-index="0"></span>
+                        <span class="dot" data-index="1"></span>
+                        <span class="dot" data-index="2"></span>
+                    </div>
+                </div>
+
+                <!-- 功能入口 -->
+                <div class="feature-grid">
+                    <div class="feature-card" onclick="navigateTo('screening')">
+                        <div class="feature-icon">🔍</div>
+                        <div class="feature-name">快速筛查</div>
+                        <div class="feature-desc">看视频·做问卷·出报告</div>
+                    </div>
+                    <div class="feature-card" onclick="navigateTo('science')">
+                        <div class="feature-icon">📚</div>
+                        <div class="feature-name">科普知识</div>
+                        <div class="feature-desc">了解孤独症</div>
+                    </div>
+                    <div class="feature-card" onclick="navigateTo('referral')">
+                        <div class="feature-icon">🏥</div>
+                        <div class="feature-name">转诊服务</div>
+                        <div class="feature-desc">专业机构推荐</div>
+                    </div>
+                    <div class="feature-card" onclick="navigateTo('empowerment')">
+                        <div class="feature-icon">💪</div>
+                        <div class="feature-name">赋能支持</div>
+                        <div class="feature-desc">家庭干预资源</div>
+                    </div>
+                </div>
+
+                <!-- 快捷操作 -->
+                <div class="section-card">
+                    <div class="section-title">快捷操作</div>
+                    <div class="quick-actions">
+                        <div class="quick-action-item" onclick="navigateTo('child-manage')">
+                            <span>👶</span> 管理宝宝信息
+                        </div>
+                        <div class="quick-action-item" onclick="navigateTo('history')">
+                            <span>📋</span> 筛查历史记录
+                        </div>
+                        <div class="quick-action-item" onclick="navigateTo('profile')">
+                            <span>⚙️</span> 个人中心
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 温馨提示 -->
+                <div class="tips-card">
+                    <div class="tips-icon">💡</div>
+                    <div class="tips-content">
+                        <p>本筛查仅为早期参考，不能替代专业诊断。</p>
+                        <p>如有疑虑，请及时咨询专业医生。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== 3. 登录页 ========== -->
+        <section id="page-login" class="page">
+            <div class="page-header">
+                <div class="header-back" onclick="navigateTo('splash')">← 返回</div>
+                <div class="header-title">登录</div>
+                <div class="header-placeholder"></div>
+            </div>
+
+            <div class="page-content">
+                <div class="login-logo">
+                    <div class="logo-circle">⭐</div>
+                    <h2>欢迎使用星语</h2>
+                </div>
+
+                <form class="login-form" id="loginForm">
+                    <div class="form-group">
+                        <label class="form-label">手机号</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">📱</span>
+                            <input type="tel" class="form-input" id="loginPhone" placeholder="请输入手机号" maxlength="11">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">验证码</label>
+                        <div class="input-row">
+                            <input type="text" class="form-input flex-1" id="loginCode" placeholder="请输入验证码" maxlength="6">
+                            <button type="button" class="btn btn-code" id="btnSendCode" onclick="sendVerifyCode()">获取验证码</button>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-primary btn-block mt-20" onclick="doLogin()">登录</button>
+                </form>
+
+                <div class="divider-text"><span>其他方式</span></div>
+
+                <button class="btn btn-wechat btn-block" onclick="doWechatLogin()">
+                    <span>💬</span> 微信一键登录
+                </button>
+
+                <p class="form-bottom-text">
+                    还没有账号？<a href="#" onclick="navigateTo('register')">立即注册</a>
+                </p>
+            </div>
+        </section>
+
+        <!-- ========== 4. 注册页 ========== -->
+        <section id="page-register" class="page">
+            <div class="page-header">
+                <div class="header-back" onclick="navigateTo('login')">← 返回</div>
+                <div class="header-title">注册</div>
+                <div class="header-placeholder"></div>
+            </div>
+
+            <div class="page-content">
+                <form class="login-form" id="registerForm">
+                    <div class="form-group">
+                        <label class="form-label">手机号</label>
+                        <input type="tel" class="form-input" id="regPhone" placeholder="请输入手机号" maxlength="11">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">验证码</label>
+                        <div class="input-row">
+                            <input type="text" class="form-input flex-1" id="regCode" placeholder="请输入验证码" maxlength="6">
+                            <button type="button" class="btn btn-code" onclick="sendRegCode()">获取验证码</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">设置密码</label>
+                        <input type="password" class="form-input" id="regPassword" placeholder="请设置6-16位密码" maxlength="16">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">确认密码</label>
+                        <input type="password" class="form-input" id="regPasswordConfirm" placeholder="请再次输入密码" maxlength="16">
+                    </div>
+
+                    <div class="form-agreement">
+                        <input type="checkbox" id="agreeTerms">
+                        <label for="agreeTerms">我已阅读并同意 <a href="#" onclick="showTerms()">《用户服务协议》</a> 和 <a href="#" onclick="showPrivacy()">《隐私政策》</a></label>
+                    </div>
+
+                    <button type="button" class="btn btn-primary btn-block" onclick="doRegister()">注册</button>
+                </form>
+
+                <p class="form-bottom-text">
+                    已有账号？<a href="#" onclick="navigateTo('login')">立即登录</a>
+                </p>
+            </div>
+        </section>
+
+        <!-- ========== 5. 儿童管理页 ========== -->
+        <section id="page-child-manage" class="page">
+            <div class="page-header">
+                <div class="header-back" onclick="navigateTo('home')">← 返回</div>
+                <div class="header-title">宝宝信息管理</div>
+                <div class="header-placeholder"></div>
+            </div>
+
+            <div class="page-content">
+                <!-- 儿童列表 -->
+                <div id="childrenList" class="children-list">
+                    <!-- 动态渲染 -->
+                </div>
+
+                <!-- 添加儿童按钮 -->
+                <div class="add-child-area">
+                    <button class="btn btn-outline btn-block btn-add-child" onclick="showAddChildForm()">
+                        + 添加宝宝
+                    </button>
+                </div>
+
+                <!-- 添加/编辑儿童表单（默认隐藏） -->
+                <div id="childFormCard" class="form-card hidden">
+                    <div class="form-card-title" id="childFormTitle">添加宝宝信息</div>
+                    <div class="form-group">
+                        <label class="form-label">宝宝昵称</label>
+                        <input type="text" class="form-input" id="childName" placeholder="请输入宝宝昵称">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">性别</label>
+                        <div class="gender-selector">
+                            <button class="gender-btn" data-gender="male" onclick="selectGender('male', this)">👦 男宝</button>
+                            <button class="gender-btn" data-gender="female" onclick="selectGender('female', this)">👧 女宝</button>
+                        </div>
+                        <input type="hidden" id="childGender" value="">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">出生日期</label>
+                        <input type="date" class="form-input" id="childBirth" max="">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">头像</label>
+                        <div class="avatar-selector">
+                            <div class="avatar-options">
+                                <span class="avatar-option" data-avatar="👶" onclick="selectAvatar('👶', this)">👶</span>
+                                <span class="avatar-option" data-avatar="👦" onclick="selectAvatar('👦', this)">👦</span>
+                                <span class="avatar-option" data-avatar="👧" onclick="selectAvatar('👧', this)">👧</span>
+                                <span class="avatar-option" data-avatar="🧒" onclick="selectAvatar('🧒', this)">🧒</span>
+                                <span class="avatar-option" data-avatar="🐻" onclick="selectAvatar('🐻', this)">🐻</span>
+                                <span class="avatar-option" data-avatar="🐰" onclick="selectAvatar('🐰', this)">🐰</span>
+                            </div>
+                        </div>
+                        <input type="hidden" id="childAvatar" value="👶">
+                    </div>
+                    <div class="form-buttons">
+                        <button class="btn btn-outline" onclick="hideChildForm()">取消</button>
+                        <button class="btn btn-primary" onclick="saveChild()">保存</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== 6. 筛查问卷页 ========== -->
+        <section id="page-screening" class="page">
+            <div class="page-header">
+                <div class="header-back" onclick="confirmExitScreening()">← 退出</div>
+                <div class="header-title">快速筛查</div>
+                <div class="header-step" id="screeningStep">1/20</div>
+            </div>
+
+            <div class="page-content">
+                <!-- 筛查前选择儿童 -->
+                <div id="screeningPreStart" class="screening-pre">
+                    <div class="screening-info-card">
+                        <h3>📋 筛查须知</h3>
+                        <ul>
+                            <li>本筛查采用SACS改编量表，适用于<strong>1-5岁</strong>儿童</li>
+                            <li>共<strong>20道题</strong>，每道题前有一段示范视频</li>
+                            <li>请仔细观看视频后，根据<strong>宝宝日常表现</strong>作答</li>
+                            <li>预计用时 <strong>10-15分钟</strong></li>
+                        </ul>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">选择筛查宝宝</label>
+                        <select class="form-input" id="selectChildForScreening">
+                            <option value="">-- 请先添加宝宝信息 --</option>
+                        </select>
+                    </div>
+
+                    <button class="btn btn-primary btn-block" onclick="startScreening()">开始筛查</button>
+                </div>
+
+                <!-- 筛查中 -->
+                <div id="screeningInProgress" class="screening-main hidden">
+                    <!-- 进度条 -->
+                    <div class="progress-bar-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                        </div>
+                        <span class="progress-text" id="progressText">0/20</span>
+                    </div>
+
+                    <!-- 视频区域 -->
+                    <div class="video-container">
+                        <video id="screeningVideo" class="screening-video" controls playsinline>
+                            <source src="" type="video/mp4">
+                            您的浏览器不支持视频播放
+                        </video>
+                        <div class="video-placeholder" id="videoPlaceholder">
+                            <div class="video-placeholder-icon">🎬</div>
+                            <p>点击播放示范视频</p>
+                        </div>
+                    </div>
+
+                    <!-- 题目区域 -->
+                    <div class="question-card" id="questionCard">
+                        <div class="question-number">第 <span id="currentQuestionNum">1</span> 题</div>
+                        <div class="question-text" id="questionText">题目内容加载中...</div>
+                        <div class="question-options" id="questionOptions">
+                            <!-- 动态渲染 -->
+                        </div>
+                    </div>
+
+                    <!-- 导航按钮 -->
+                    <div class="question-nav">
+                        <button class="btn btn-outline" id="btnPrev" onclick="prevQuestion()" disabled>上一题</button>
+                        <button class="btn btn-primary" id="btnNext" onclick="nextQuestion()">下一题</button>
+                    </div>
+
+                    <button class="btn btn-primary btn-block mt-10 hidden" id="btnSubmit" onclick="submitScreening()">提交筛查</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== 7. 筛查结果页 ========== -->
+        <section id="page-result" class="page">
+            <div class="page-header">
+                <div class="header-back" onclick="navigateTo('home')">← 首页</div>
+                <div class="header-title">筛查结果</div>
+                <div class="header-share" onclick="shareResult()">📤</div>
+            </div>
+
+            <div class="page-content" id="resultContent">
+                <!-- 动态渲染结果 -->
+            </div>
+        </section>
+
+        <!-- ========== 8. 历史记录页 ========== -->
+        <section id="page-history" class="page">
+            <div class="page-header">
+                <div class="header-back" onclick="navigateTo('home')">← 首页</div>
+                <div class="header-title">筛查历史</div>
+                <div class="header-placeholder"></div>
+            </div>
+
+            <div class="page-content">
+                <div id="historyList" class="history-list">
+                    <!-- 动态渲染 -->
+                </div>
+                <div id="historyEmpty" class="empty-state hidden">
+                    <div class="empty-icon">📋</div>
+                    <p>暂无筛查记录</p>
+                    <button class="btn btn-primary" onclick="navigateTo('screening')">去做筛查</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== 9. 科普知识页 ========== -->
+        <section id="page-science" class="page">
+            <div class="page-header">
+                <div class="header-back" onclick="navigateTo('home')">← 首页</div>
+                <div class="header-title">科普知识</div>
+                <div class="header-placeholder"></div>
+            </div>
+
+            <div class="page-content">
+                <div class="science-tabs">
+                    <button class="science-tab active" onclick="switchScienceTab('all', this)">全部</button>
+                    <button class="science-tab" onclick="switchScienceTab('knowledge', this)">认识孤独症</button>
+                    <button class="science-tab" onclick="switchScienceTab('early', this)">早期信号</button>
+                    <button class="science-tab" onclick="switchScienceTab('intervene', this)">干预方法</button>
+                </div>
+                <div id="scienceArticleList" class="article-list">
+                    <!-- 动态渲染 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== 10. 转诊服务页 ========== -->
+        <section id="page-referral" class="page">
+            <div class="page-header">
+                <div class="header-back" onclick="navigateTo('home')">← 首页</div>
+                <div class="header-title">转诊服务</div>
+                <div class="header-placeholder"></div>
+            </div>
+
+            <div class="page-content">
+                <div class="referral-intro">
+                    <p>以下为全国范围内具备孤独症诊疗能力的专业机构，按地区分类整理。如需进一步帮助，请联系客服。</p>
+                </div>
+                <div class="referral-list" id="referralList">
+                    <!-- 动态渲染 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== 11. 赋能支持页 ========== -->
+        <section id="page-empowerment" class="page">
+            <div class="page-header">
+                <div class="header-back" onclick="navigateTo('home')">← 首页</div>
+                <div class="header-title">赋能支持</div>
+                <div class="header-placeholder"></div>
+            </div>
+
+            <div class="page-content">
+                <div class="empowerment-grid" id="empowermentGrid">
+                    <!-- 动态渲染 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== 12. 个人中心 ========== -->
+        <section id="page-profile" class="page">
+            <div class="page-header">
+                <div class="header-back" onclick="navigateTo('home')">← 首页</div>
+                <div class="header-title">个人中心</div>
+                <div class="header-settings" onclick="navigateTo('about')">ℹ️</div>
+            </div>
+
+            <div class="page-content">
+                <div class="profile-header-card" id="profileHeaderCard">
+                    <div class="profile-avatar" id="profileAvatar">👤</div>
+                    <div class="profile-info">
+                        <div class="profile-name" id="profileName">未登录</div>
+                        <div class="profile-phone" id="profilePhone"></div>
+                    </div>
+                    <div class="profile-arrow">›</div>
+                </div>
+
+                <div class="profile-menu">
+                    <div class="menu-item" onclick="navigateTo('child-manage')">
+                        <span class="menu-icon">👶</span>
+                        <span class="menu-text">宝宝管理</span>
+                        <span class="menu-arrow">›</span>
+                    </div>
+                    <div class="menu-item" onclick="navigateTo('history')">
+                        <span class="menu-icon">📋</span>
+                        <span class="menu-text">筛查记录</span>
+                        <span class="menu-arrow">›</span>
+                    </div>
+                    <div class="menu-item" onclick="navigateTo('about')">
+                        <span class="menu-icon">ℹ️</span>
+                        <span class="menu-text">关于我们</span>
+                        <span class="menu-arrow">›</span>
+                    </div>
+                    <div class="menu-item" onclick="showPrivacy()">
+                        <span class="menu-icon">🔒</span>
+                        <span class="menu-text">隐私政策</span>
+                        <span class="menu-arrow">›</span>
+                    </div>
+                </div>
+
+                <button class="btn btn-outline btn-block mt-20" id="btnLogout" onclick="doLogout()">退出登录</button>
+            </div>
+        </section>
+
+        <!-- ========== 13. 关于页面 ========== -->
+        <section id="page-about" class="page">
+            <div class="page-header">
+                <div class="header-back" onclick="navigateTo('profile')">← 返回</div>
+                <div class="header-title">关于星语</div>
+                <div class="header-placeholder"></div>
+            </div>
+
+            <div class="page-content">
+                <div class="about-content">
+                    <div class="about-logo">⭐</div>
+                    <h2>星语</h2>
+                    <p class="about-version">v1.0.0</p>
+                    <p class="about-desc">
+                        星语是一款基于SACS量表的孤独症早期筛查支持平台，
+                        由南开大学儿童发育行为研究团队提供学术支持。
+                    </p>
+                    <div class="about-section">
+                        <h4>免责声明</h4>
+                        <p>本平台的筛查结果仅供早期参考，不能替代专业医疗诊断。如发现孩子有发育行为方面的疑虑，请及时到正规医疗机构就诊。</p>
+                    </div>
+                    <div class="about-section">
+                        <h4>联系我们</h4>
+                        <p>📧 邮箱：autism-support@nankai.edu.cn</p>
+                        <p>📞 电话：400-XXX-XXXX</p>
+                    </div>
+                    <p class="about-copyright">© 2026 南开大学 · 儿童发育行为研究</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== 管理员相关页面 ========== -->
+        <!-- 管理员登录 -->
+        <section id="page-admin-login" class="page">
+            <div class="page-header">
+                <div class="header-back" onclick="navigateTo('home')">← 返回</div>
+                <div class="header-title">管理员登录</div>
+                <div class="header-placeholder"></div>
+            </div>
+
+            <div class="page-content">
+                <div class="admin-login-notice">
+                    <p>🔐 此页面仅限平台管理人员使用</p>
+                </div>
+                <form class="login-form" id="adminLoginForm">
+                    <div class="form-group">
+                        <label class="form-label">管理员账号</label>
+                        <input type="text" class="form-input" id="adminUsername" placeholder="请输入管理员账号">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">密码</label>
+                        <input type="password" class="form-input" id="adminPassword" placeholder="请输入密码">
+                    </div>
+                    <button type="button" class="btn btn-primary btn-block" onclick="doAdminLogin()">管理员登录</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- 管理员后台 -->
+        <section id="page-admin-dashboard" class="page">
+            <div class="page-header">
+                <div class="header-back" onclick="navigateTo('home')">← 首页</div>
+                <div class="header-title">管理后台</div>
+                <div class="header-logout" onclick="doAdminLogout()">退出</div>
+            </div>
+
+            <div class="page-content">
+                <!-- 统计卡片 -->
+                <div class="admin-stats-grid">
+                    <div class="admin-stat-card">
+                        <div class="stat-number" id="statUsers">0</div>
+                        <div class="stat-label">注册用户</div>
+                    </div>
+                    <div class="admin-stat-card">
+                        <div class="stat-number" id="statChildren">0</div>
+                        <div class="stat-label">建档儿童</div>
+                    </div>
+                    <div class="admin-stat-card">
+                        <div class="stat-number" id="statScreenings">0</div>
+                        <div class="stat-label">筛查次数</div>
+                    </div>
+                    <div class="admin-stat-card highlight">
+                        <div class="stat-number" id="statHighRisk">0</div>
+                        <div class="stat-label">高风险数</div>
+                    </div>
+                </div>
+
+                <!-- 风险分布图 -->
+                <div class="admin-chart-card">
+                    <div class="chart-title">📊 风险等级分布</div>
+                    <div class="chart-bar-container">
+                        <div class="chart-bar-row">
+                            <span class="chart-label">高风险</span>
+                            <div class="chart-bar-wrapper">
+                                <div class="chart-bar bar-danger" id="barHigh" style="width: 0%"></div>
+                            </div>
+                            <span class="chart-value" id="valHigh">0</span>
+                        </div>
+                        <div class="chart-bar-row">
+                            <span class="chart-label">中风险</span>
+                            <div class="chart-bar-wrapper">
+                                <div class="chart-bar bar-warning" id="barMedium" style="width: 0%"></div>
+                            </div>
+                            <span class="chart-value" id="valMedium">0</span>
+                        </div>
+                        <div class="chart-bar-row">
+                            <span class="chart-label">低风险</span>
+                            <div class="chart-bar-wrapper">
+                                <div class="chart-bar bar-safe" id="barLow" style="width: 0%"></div>
+                            </div>
+                            <span class="chart-value" id="valLow">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 管理标签切换 -->
+                <div class="admin-tabs">
+                    <button class="admin-tab active" onclick="switchAdminTab('users', this)">用户列表</button>
+                    <button class="admin-tab" onclick="switchAdminTab('children', this)">儿童列表</button>
+                    <button class="admin-tab" onclick="switchAdminTab('records', this)">筛查记录</button>
+                </div>
+
+                <!-- 数据列表 -->
+                <div id="adminDataTable" class="admin-data-table">
+                    <!-- 动态渲染 -->
+                </div>
+
+                <!-- 导出按钮 -->
+                <button class="btn btn-outline btn-block mt-10" onclick="exportData()">📥 导出数据 (CSV)</button>
+            </div>
+        </section>
+
+        <!-- ========== 底部导航栏 ========== -->
+        <nav class="bottom-nav" id="bottomNav">
+            <div class="nav-item" data-page="home" onclick="navigateTo('home')">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-text">首页</span>
+            </div>
+            <div class="nav-item" data-page="science" onclick="navigateTo('science')">
+                <span class="nav-icon">📚</span>
+                <span class="nav-text">科普</span>
+            </div>
+            <div class="nav-item nav-item-center" data-page="screening" onclick="navigateTo('screening')">
+                <div class="nav-center-btn">
+                    <span>🔍</span>
+                </div>
+                <span class="nav-text">筛查</span>
+            </div>
+            <div class="nav-item" data-page="referral" onclick="navigateTo('referral')">
+                <span class="nav-icon">🏥</span>
+                <span class="nav-text">转诊</span>
+            </div>
+            <div class="nav-item" data-page="profile" onclick="navigateTo('profile')">
+                <span class="nav-icon">👤</span>
+                <span class="nav-text">我的</span>
+            </div>
+        </nav>
+
+        <!-- ========== 弹窗/Toast ========== -->
+        <div id="toast" class="toast hidden"></div>
+        <div id="modal" class="modal-overlay hidden">
+            <div class="modal-content" id="modalContent"></div>
+        </div>
+    </div>
+
+    <!-- ==================== JavaScript ==================== -->
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

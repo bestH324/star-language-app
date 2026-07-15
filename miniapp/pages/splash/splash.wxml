@@ -1,0 +1,13 @@
+<!-- 启动页 -->
+<view class="splash-container">
+    <view class="splash-logo">
+        <text class="logo-icon">⭐</text>
+        <text class="splash-title">星语</text>
+        <text class="splash-subtitle">孤独症早期支持平台</text>
+    </view>
+    <view class="splash-actions">
+        <button class="btn btn-primary btn-block" bindtap="goToLogin">登录 / 注册</button>
+        <button class="btn btn-outline btn-block" bindtap="goToHome">先看看</button>
+    </view>
+    <text class="splash-footer">南开大学 · 儿童发育行为研究</text>
+</view>

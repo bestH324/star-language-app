@@ -1,0 +1,47 @@
+server:
+  port: 8081
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+
+spring:
+  application:
+    name: autism-screening-backend
+  # SQLite 数据源
+  datasource:
+    driver-class-name: org.sqlite.JDBC
+    url: jdbc:sqlite:data/autism.db
+    # SQLite 不需要用户名密码
+    username:
+    password:
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+  # 启动时执行建表与种子数据
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:data.sql
+      continue-on-error: false
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+# 业务自定义配置
+autism:
+  # 视频文件存放目录（绝对或相对路径）
+  video-dir: data/videos
+  # 演示验证码（实际短信通道未接入时使用）
+  demo-code: "123456"
+  # Token 有效期（小时）
+  token-expire-hours: 72
+  # 防盗链允许的 Referer 前缀（空表示不校验）
+  allowed-referer: ""
+
+logging:
+  level:
+    com.xingyu.autism: INFO
+    org.springframework: WARN
