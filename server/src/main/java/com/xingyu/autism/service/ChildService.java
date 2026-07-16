@@ -86,8 +86,9 @@ public class ChildService {
 
     /** 校验归属权 */
     private void checkOwnership(long childId, long uid) {
-        Integer owner = jdbc.queryForObject("SELECT user_id FROM children WHERE id=?", Integer.class, childId);
-        if (owner == null) throw new BizException("儿童档案不存在");
+        List<Map<String, Object>> rows = jdbc.queryForList("SELECT user_id FROM children WHERE id=?", childId);
+        if (rows.isEmpty()) throw new BizException("儿童档案不存在");
+        int owner = ((Number) rows.get(0).get("user_id")).intValue();
         if (owner != uid) throw new BizException(403, "无权操作他人儿童档案");
     }
 }

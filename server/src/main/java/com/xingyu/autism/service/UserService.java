@@ -38,11 +38,9 @@ public class UserService {
     /** 发送验证码（演示模式：固定 123456，写入 users.code） */
     public String sendCode(SendCodeRequest req) {
         String phone = req.getPhone();
-        // 实际项目此处应调用短信网关；演示模式统一使用 demoCode
         String code = demoCode;
-        // 若用户不存在，先建立占位记录便于保存 code
-        Integer cnt = jdbc.queryForObject("SELECT COUNT(*) FROM users WHERE phone=?", Integer.class, phone);
-        if (cnt != null && cnt == 0) {
+        List<Map<String, Object>> rows = jdbc.queryForList("SELECT id FROM users WHERE phone=?", phone);
+        if (rows.isEmpty()) {
             jdbc.update("INSERT INTO users(phone, code) VALUES(?,?)", phone, code);
         } else {
             jdbc.update("UPDATE users SET code=?, update_time=datetime('now','localtime') WHERE phone=?", code, phone);
@@ -55,22 +53,24 @@ public class UserService {
         if (req.getPasswordConfirm() != null && !req.getPassword().equals(req.getPasswordConfirm())) {
             throw new BizException("两次密码不一致");
         }
-        // 校验验证码
         verifyCode(req.getPhone(), req.getCode());
         // 是否已注册
-        Integer cnt = jdbc.queryForObject("SELECT COUNT(*) FROM users WHERE phone=? AND password IS NOT NULL", Integer.class, req.getPhone());
-        if (cnt != null && cnt > 0) {
+        List<Map<String, Object>> registeredRows = jdbc.queryForList(
+                "SELECT id FROM users WHERE phone=? AND password IS NOT NULL", req.getPhone());
+        if (!registeredRows.isEmpty()) {
             throw new BizException("该手机号已注册，请直接登录");
         }
         String hashed = passwordEncoder.encode(req.getPassword());
-        Integer existing = jdbc.queryForObject("SELECT id FROM users WHERE phone=?", Integer.class, req.getPhone());
+        List<Map<String, Object>> existingRows = jdbc.queryForList(
+                "SELECT id FROM users WHERE phone=?", req.getPhone());
         long userId;
-        if (existing != null) {
+        if (!existingRows.isEmpty()) {
+            userId = ((Number) existingRows.get(0).get("id")).longValue();
             jdbc.update("UPDATE users SET password=?, code=NULL, update_time=datetime('now','localtime') WHERE phone=?", hashed, req.getPhone());
-            userId = existing;
         } else {
             jdbc.update("INSERT INTO users(phone, password) VALUES(?,?)", req.getPhone(), hashed);
-            userId = jdbc.queryForObject("SELECT last_insert_rowid()", Long.class);
+            List<Map<String, Object>> idRows = jdbc.queryForList("SELECT last_insert_rowid() AS id");
+            userId = ((Number) idRows.get(0).get("id")).longValue();
         }
         String token = tokenService.create(userId, TokenService.ROLE_USER);
         return new LoginResponse(token, userId, req.getPhone(), null, null);
@@ -185,10 +185,10 @@ public class UserService {
     /** 校验验证码 */
     private void verifyCode(String phone, String code) {
         if (demoCode.equals(code)) {
-            // 演示模式放行
             return;
         }
-        String saved = jdbc.queryForObject("SELECT code FROM users WHERE phone=?", String.class, phone);
+        List<Map<String, Object>> rows = jdbc.queryForList("SELECT code FROM users WHERE phone=?", phone);
+        String saved = rows.isEmpty() ? null : (String) rows.get(0).get("code");
         if (saved == null || !saved.equals(code)) {
             throw new BizException("验证码错误");
         }

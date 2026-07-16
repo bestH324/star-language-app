@@ -29,8 +29,10 @@ public class AnswerService {
         long uid = AuthContext.currentUserId();
 
         // 校验儿童归属
-        Integer owner = jdbc.queryForObject("SELECT user_id FROM children WHERE id=?", Integer.class, req.getChildId());
-        if (owner == null) throw new BizException("儿童档案不存在");
+        List<Map<String, Object>> ownerRows = jdbc.queryForList(
+                "SELECT user_id FROM children WHERE id=?", req.getChildId());
+        if (ownerRows.isEmpty()) throw new BizException("儿童档案不存在");
+        int owner = ((Number) ownerRows.get(0).get("user_id")).intValue();
         if (owner != uid) throw new BizException(403, "无权为他人儿童提交筛查");
 
         // 拉取该问卷所有题目
@@ -146,9 +148,10 @@ public class AnswerService {
     /** 历史详情（校验归属） */
     public Map<String, Object> historyDetail(long answerId) {
         long uid = AuthContext.currentUserId();
-        Integer owner = jdbc.queryForObject(
-                "SELECT c.user_id FROM answers a JOIN children c ON a.child_id=c.id WHERE a.id=?", Integer.class, answerId);
-        if (owner == null) throw new BizException("记录不存在");
+        List<Map<String, Object>> ownerRows = jdbc.queryForList(
+                "SELECT c.user_id FROM answers a JOIN children c ON a.child_id=c.id WHERE a.id=?", answerId);
+        if (ownerRows.isEmpty()) throw new BizException("记录不存在");
+        int owner = ((Number) ownerRows.get(0).get("user_id")).intValue();
         if (owner != uid) throw new BizException(403, "无权查看他人记录");
         return report(answerId);
     }
