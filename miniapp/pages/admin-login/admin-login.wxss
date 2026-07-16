@@ -1,0 +1,1 @@
+.admin-notice { text-align: center; padding: 20px; margin-bottom: 20px; background: var(--primary-lighter); border-radius: var(--radius); font-size: 14px; color: var(--primary); }

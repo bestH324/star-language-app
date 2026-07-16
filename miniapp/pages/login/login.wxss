@@ -1,0 +1,12 @@
+.login-tabs { display: flex; margin-bottom: 10px; }
+.tab-item { flex: 1; text-align: center; padding: 14px 0; font-size: 16px; color: var(--text-secondary); border-bottom: 2px solid transparent; transition: all 0.2s; }
+.tab-active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+.login-logo { text-align: center; margin: 40px 0 30px; }
+.logo-circle { font-size: 64px; display: block; }
+.login-welcome { font-size: 20px; font-weight: 600; display: block; margin-top: 12px; }
+.divider-text { text-align: center; margin: 24px 0; color: var(--text-hint); font-size: 14px; padding: 10px 0; border-top: 1rpx solid var(--border); }
+.divider-text text { background: var(--bg-page); padding: 0 16px; position: relative; top: -10px; }
+.form-bottom-text { text-align: center; margin-top: 24px; font-size: 14px; color: var(--text-secondary); }
+.link { color: var(--primary); margin-left: 4px; }
+.admin-entry { margin-top: 12px; }
+.admin-link { color: var(--text-hint); font-size: 13px; }

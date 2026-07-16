@@ -1,0 +1,59 @@
+.page { background: #f5f0f5; min-height: 100vh; }
+
+/* 加载 */
+.status-wrap { display: flex; flex-direction: column; align-items: center; padding: 80px 0; }
+.status-text { font-size: 14px; color: #999; margin-top: 12px; }
+.loading-spinner { width: 32px; height: 32px; border: 3px solid #e8d5e8; border-top-color: #6B1D5E; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* 头部 */
+.detail-header { background: linear-gradient(135deg, #6B1D5E 0%, #8B3A7B 100%); padding: 48px 20px 24px; color: #fff; }
+.header-back { font-size: 13px; opacity: 0.8; margin-bottom: 8px; }
+.header-name { font-size: 22px; font-weight: 700; display: block; }
+.header-grade { display: inline-block; font-size: 12px; padding: 3px 10px; border-radius: 4px; margin-top: 6px; }
+.grade-A { background: #e74c3c; } .grade-B { background: #e8a838; } .grade-C { background: #3498db; } .grade-D { background: #2ecc71; }
+
+/* 区块 */
+.section { background: #fff; margin: 12px 16px; border-radius: 12px; padding: 16px; }
+.section-title { font-size: 16px; font-weight: 700; color: #333; display: block; margin-bottom: 10px; }
+.section-text { font-size: 14px; color: #666; line-height: 1.7; }
+
+/* 标签 */
+.tag-row { display: flex; gap: 8px; }
+.tag { font-size: 12px; padding: 4px 12px; border-radius: 20px; }
+.tag-age { background: #fff0e6; color: #e8a838; }
+.tag-risk { background: #ffe6e6; color: #e74c3c; }
+
+/* 医生 */
+.doctor-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+.doctor-item:last-child { border-bottom: none; }
+.doctor-avatar { width: 40px; height: 40px; border-radius: 20px; background: #6B1D5E; color: #fff; text-align: center; line-height: 40px; font-size: 16px; font-weight: 600; }
+.doctor-name { font-size: 15px; font-weight: 600; display: block; }
+.doctor-title { font-size: 12px; color: #999; }
+
+/* 评分网格 */
+.score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.score-cell { background: #f8f0f8; border-radius: 8px; padding: 12px; text-align: center; }
+.score-num { font-size: 22px; font-weight: 700; color: #6B1D5E; display: block; }
+.score-label { font-size: 12px; color: #999; margin-top: 2px; display: block; }
+
+/* 联系方式 */
+.info-line { font-size: 14px; color: #666; display: block; margin-top: 6px; }
+.info-phone { color: #6B1D5E; }
+
+/* 底部预约栏 */
+.bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; padding: 12px 20px; background: #fff; border-top: 1px solid #eee; z-index: 100; display: flex; justify-content: center; }
+.book-btn { background: linear-gradient(135deg, #6B1D5E, #8B3A7B); color: #fff; padding: 12px 60px; border-radius: 24px; font-size: 16px; font-weight: 600; }
+
+/* 预约弹窗 */
+.modal-mask { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: flex-end; justify-content: center; }
+.booking-sheet { background: #fff; border-radius: 20px 20px 0 0; padding: 24px 20px 32px; width: 100%; max-height: 70vh; overflow-y: auto; }
+.sheet-title { font-size: 18px; font-weight: 700; text-align: center; display: block; margin-bottom: 20px; }
+.form-item { margin-bottom: 16px; }
+.form-label { font-size: 14px; color: #666; display: block; margin-bottom: 6px; }
+.form-picker { padding: 10px 14px; background: #f5f5f5; border-radius: 8px; font-size: 14px; color: #333; }
+.form-hint { font-size: 13px; color: #ccc; padding: 10px 0; }
+.sheet-btns { display: flex; gap: 12px; margin-top: 24px; }
+.sheet-btn { flex: 1; padding: 12px 0; border-radius: 8px; font-size: 15px; text-align: center; }
+.sheet-btn.cancel { background: #f0f0f0; color: #666; }
+.sheet-btn.confirm { background: #6B1D5E; color: #fff; }

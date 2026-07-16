@@ -1,0 +1,54 @@
+<view class="page">
+    <view class="header">
+        <text class="header-title">预约挂号</text>
+    </view>
+
+    <view class="form-card">
+        <!-- 机构名称 -->
+        <view class="form-item">
+            <text class="form-label">就诊机构</text>
+            <text class="form-value">{{hospitalName}}</text>
+        </view>
+
+        <view class="divider"></view>
+
+        <!-- 预约类型 -->
+        <view class="form-item">
+            <text class="form-label">预约类型</text>
+            <picker mode="selector" range="{{bookingTypes}}" value="{{bookingTypeIndex}}" bindchange="onTypeChange">
+                <view class="picker">{{bookingTypes[bookingTypeIndex]}}  ▸</view>
+            </picker>
+        </view>
+
+        <view class="divider"></view>
+
+        <!-- 预约日期 -->
+        <view class="form-item">
+            <text class="form-label">预约日期</text>
+            <picker mode="date" start="{{today}}" bindchange="onDateChange">
+                <view class="picker">{{bookingDate || '请选择日期'}}  ▸</view>
+            </picker>
+        </view>
+    </view>
+
+    <view class="form-card">
+        <!-- 联系人 -->
+        <view class="form-item">
+            <text class="form-label">联系人姓名</text>
+            <input class="form-input" placeholder="请输入姓名" value="{{contactName}}" bindinput="onNameInput"/>
+        </view>
+
+        <view class="divider"></view>
+
+        <view class="form-item">
+            <text class="form-label">联系电话</text>
+            <input class="form-input" type="number" placeholder="请输入手机号" value="{{contactPhone}}" bindinput="onPhoneInput"/>
+        </view>
+    </view>
+
+    <view class="submit-wrap">
+        <view class="submit-btn {{submitting ? 'disabled' : ''}}" bindtap="onSubmit">
+            {{submitting ? '提交中...' : '提交预约'}}
+        </view>
+    </view>
+</view>

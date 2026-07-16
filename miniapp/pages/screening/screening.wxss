@@ -1,0 +1,29 @@
+.screening-info-card { background: #fff; border-radius: var(--radius); padding: 16px; margin-bottom: 20px; }
+.info-title { font-size: 17px; font-weight: 600; display: block; margin-bottom: 10px; }
+.info-list text { display: block; font-size: 14px; color: var(--text-secondary); line-height: 1.8; }
+.screening-main { flex: 1; display: flex; flex-direction: column; }
+.progress-bar-container { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.progress-bar { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--primary); border-radius: 4px; transition: width 0.3s; }
+.progress-text { font-size: 13px; color: var(--text-secondary); min-width: 40px; text-align: right; }
+.video-container { width: 100%; height: 400rpx; background: #000; border-radius: var(--radius); overflow: hidden; margin-bottom: 16px; position: relative; }
+.screening-video { width: 100%; height: 100%; }
+.video-placeholder { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; background: #2C3E50; }
+.video-placeholder-icon { font-size: 48px; margin-bottom: 8px; }
+.question-card { background: #fff; border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+.question-number { font-size: 13px; color: var(--primary); font-weight: 500; display: block; margin-bottom: 8px; }
+.question-text { font-size: 17px; font-weight: 600; line-height: 1.6; display: block; margin-bottom: 20px; }
+.question-options { display: flex; flex-direction: column; gap: 10px; }
+.question-option {
+    padding: 14px 16px; border: 2rpx solid var(--border); border-radius: var(--radius-sm);
+    display: flex; align-items: center; gap: 12px; font-size: 15px; transition: all 0.2s;
+}
+.question-option.selected { border-color: var(--primary); background: var(--primary-lighter); }
+.option-dot {
+    width: 24px; height: 24px; border-radius: 50%; border: 2rpx solid var(--border);
+    display: flex; align-items: center; justify-content: center; font-size: 14px;
+    color: var(--primary); flex-shrink: 0;
+}
+.question-option.selected .option-dot { background: var(--primary); color: #fff; border-color: var(--primary); }
+.question-nav { display: flex; gap: 12px; margin-top: auto; padding-top: 16px; }
+.question-nav .btn { flex: 1; }

@@ -1,0 +1,16 @@
+.page { background: #f5f0f5; min-height: 100vh; padding-bottom: 40px; }
+
+.header { background: linear-gradient(135deg, #6B1D5E 0%, #8B3A7B 100%); padding: 16px 20px; }
+.header-title { font-size: 20px; font-weight: 700; color: #fff; }
+
+.form-card { background: #fff; margin: 12px 16px; border-radius: 12px; padding: 0 16px; }
+.form-item { padding: 16px 0; }
+.form-label { font-size: 14px; color: #999; display: block; margin-bottom: 6px; }
+.form-value { font-size: 16px; color: #333; font-weight: 600; }
+.picker { font-size: 15px; color: #6B1D5E; }
+.form-input { font-size: 15px; color: #333; padding: 4px 0; width: 100%; }
+.divider { height: 1px; background: #f0f0f0; }
+
+.submit-wrap { padding: 24px 16px; }
+.submit-btn { background: linear-gradient(135deg, #6B1D5E, #8B3A7B); color: #fff; text-align: center; padding: 14px 0; border-radius: 24px; font-size: 16px; font-weight: 600; }
+.submit-btn.disabled { opacity: 0.5; }
