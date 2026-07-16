@@ -1,0 +1,127 @@
+<view class="page">
+    <!-- ===== 顶部头部 ===== -->
+    <view class="header">
+        <text class="header-title">诊疗服务</text>
+        <view class="header-bell">
+            <text class="bell-icon">🔔</text>
+            <view class="bell-badge">3</view>
+        </view>
+    </view>
+
+    <!-- ===== 紧凑型 ABCD 多选标签 ===== -->
+    <view class="grade-tags">
+        <!-- A级 -->
+        <view style="{{selectedGrades.indexOf('A') !== -1 ? 'background:#E74C3C!important;color:#fff!important;border-color:#E74C3C!important;display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:12px;' : 'background:#F2F2F2!important;color:#999!important;border-color:#E0E0E0!important;display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:12px;'}}" bindtap="onGradeTap" data-grade="A">
+            <text wx:if="{{selectedGrades.indexOf('A') !== -1}}" class="tag-check">✔</text>
+            <text class="tag-label">A级</text>
+            <text class="tag-desc">三甲</text>
+        </view>
+
+        <!-- B级 -->
+        <view style="{{selectedGrades.indexOf('B') !== -1 ? 'background:#F39C12!important;color:#fff!important;border-color:#F39C12!important;display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:12px;' : 'background:#F2F2F2!important;color:#999!important;border-color:#E0E0E0!important;display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:12px;'}}" bindtap="onGradeTap" data-grade="B">
+            <text wx:if="{{selectedGrades.indexOf('B') !== -1}}" class="tag-check">✔</text>
+            <text class="tag-label">B级</text>
+            <text class="tag-desc">二甲</text>
+        </view>
+
+        <!-- C级 -->
+        <view style="{{selectedGrades.indexOf('C') !== -1 ? 'background:#3498DB!important;color:#fff!important;border-color:#3498DB!important;display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:12px;' : 'background:#F2F2F2!important;color:#999!important;border-color:#E0E0E0!important;display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:12px;'}}" bindtap="onGradeTap" data-grade="C">
+            <text wx:if="{{selectedGrades.indexOf('C') !== -1}}" class="tag-check">✔</text>
+            <text class="tag-label">C级</text>
+            <text class="tag-desc">社区</text>
+        </view>
+
+        <!-- D级 -->
+        <view style="{{selectedGrades.indexOf('D') !== -1 ? 'background:#2ECC71!important;color:#fff!important;border-color:#2ECC71!important;display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:12px;' : 'background:#F2F2F2!important;color:#999!important;border-color:#E0E0E0!important;display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:12px;'}}" bindtap="onGradeTap" data-grade="D">
+            <text wx:if="{{selectedGrades.indexOf('D') !== -1}}" class="tag-check">✔</text>
+            <text class="tag-label">D级</text>
+            <text class="tag-desc">康复</text>
+        </view>
+    </view>
+
+    <!-- ===== 底部功能矩阵 2x3 ===== -->
+    <view class="func-grid">
+        <view class="func-item" bindtap="onSmartMatch">
+            <text class="func-icon">🎯</text>
+            <text class="func-label">智能精准匹配</text>
+        </view>
+        <view class="func-item" bindtap="onToggleView">
+            <text class="func-icon">{{viewMode === 'list' ? '🗺' : '📋'}}</text>
+            <text class="func-label">{{viewMode === 'list' ? '地图视图' : '列表视图'}}</text>
+        </view>
+        <view class="func-item" bindtap="onOneClickAppointment">
+            <text class="func-icon">📅</text>
+            <text class="func-label">一站式预约</text>
+        </view>
+        <view class="func-item" bindtap="onRelocate">
+            <text class="func-icon">📍</text>
+            <text class="func-label">重新定位</text>
+        </view>
+        <view class="func-item" bindtap="onExpertVideo">
+            <text class="func-icon">📹</text>
+            <text class="func-label">专家视频问诊</text>
+        </view>
+        <view class="func-item" bindtap="onToggleViewFromGrid" data-mode="list">
+            <text class="func-icon">📊</text>
+            <text class="func-label">列表浏览</text>
+        </view>
+    </view>
+
+    <!-- ===== 列表/地图视图 ===== -->
+    <view wx:if="{{loading}}" class="status-wrap">
+        <view class="loading-spinner"></view>
+        <text class="status-text">正在获取推荐机构...</text>
+    </view>
+    <view wx:elif="{{errorMsg}}" class="status-wrap">
+        <text class="error-text">{{errorMsg}}</text>
+        <view class="retry-btn" bindtap="onRetry">重新加载</view>
+    </view>
+
+    <!-- 列表视图 -->
+    <view wx:elif="{{viewMode === 'list'}}" class="list-section">
+        <view wx:if="{{groupedList.length === 0}}" class="status-wrap">
+            <text class="status-text">暂无该等级的推荐机构</text>
+        </view>
+        <view wx:for="{{groupedList}}" wx:key="city" class="region-group">
+            <text class="region-title">{{item.city}}</text>
+            <view wx:for="{{item.institutions}}" wx:key="id" wx:for-item="inst" class="hospital-card" bindtap="onCardTap" data-id="{{inst.id}}">
+                <view class="card-header">
+                    <view class="card-name-row">
+                        <text class="inst-name">{{inst.name}}</text>
+                        <text class="inst-grade grade-{{inst.grade}}">{{inst.grade}}级</text>
+                    </view>
+                    <text class="inst-grade-label">{{inst.gradeLabel}}</text>
+                </view>
+                <view class="card-scores">
+                    <text class="score-item">综合得分 <text class="score-val">{{inst.totalScore}}</text></text>
+                    <text class="score-item">距离 <text class="score-val">{{inst.distance}}km</text></text>
+                </view>
+                <view class="card-meta">
+                    <text class="meta-item">专长分 {{inst.specialtyScore}}</text>
+                    <text class="meta-item">等待约 {{inst.waitTime}}天</text>
+                    <text class="meta-item">评分 {{inst.userScore}}</text>
+                </view>
+                <text class="inst-info">📍 {{inst.address}}</text>
+            </view>
+        </view>
+    </view>
+
+    <!-- 地图视图 -->
+    <view wx:elif="{{viewMode === 'map'}}" class="map-section">
+        <map class="map-view" latitude="{{userLat}}" longitude="{{userLng}}" markers="{{markers}}" scale="10" show-location="{{true}}" />
+    </view>
+
+    <!-- ===== 付费弹窗 ===== -->
+    <view wx:if="{{showPaymentModal}}" class="modal-mask" bindtap="onClosePaymentModal">
+        <view class="modal-box" catchtap="">
+            <text class="modal-title">专家视频问诊</text>
+            <text class="modal-desc">一对一在线咨询服务</text>
+            <text class="modal-price">¥299<text class="price-unit">/次</text></text>
+            <text class="modal-note">由三甲医院主任医师提供 30 分钟视频问诊</text>
+            <view class="modal-btns">
+                <view class="modal-btn cancel" bindtap="onClosePaymentModal">取消</view>
+                <view class="modal-btn confirm" bindtap="onConfirmPayment">确认支付 ¥299</view>
+            </view>
+        </view>
+    </view>
+</view>

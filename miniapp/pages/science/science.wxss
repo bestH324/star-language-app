@@ -1,0 +1,12 @@
+.science-tabs { white-space: nowrap; margin-bottom: 16px; padding-bottom: 8px; }
+.science-tab {
+    display: inline-block; padding: 8px 16px; font-size: 14px;
+    color: var(--text-secondary); border-radius: 20px; margin-right: 8px;
+    background: #fff; border: 1rpx solid var(--border);
+}
+.science-tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.article-card { background: #fff; border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+.article-card:active { opacity: 0.7; }
+.article-title { font-size: 16px; font-weight: 600; display: block; margin-bottom: 8px; }
+.article-summary { font-size: 14px; color: var(--text-secondary); line-height: 1.5; display: block; margin-bottom: 8px; }
+.article-meta { font-size: 12px; color: var(--text-hint); display: block; }

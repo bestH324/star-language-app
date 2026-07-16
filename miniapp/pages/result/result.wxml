@@ -1,0 +1,10 @@
+<view class="page-content">
+    <view wx:if="{{record}}" class="result-container">
+        <view class="result-header {{record.riskLevel}}"><text class="risk-icon">{{riskIcon}}</text><text class="risk-level">{{record.riskText}}</text><text class="risk-score">筛查得分：{{record.totalScore}} / 60 分</text></view>
+        <view class="info-card"><text class="info-title">📋 基本信息</text><text class="info-line">筛查对象：{{record.childAvatar}} {{record.childName}}</text><text class="info-line">筛查时间：{{createTime}}</text><text class="info-line">答题数量：{{record.answerCount}} 题</text></view>
+        <view class="info-card"><text class="info-title">💡 专业建议</text><text wx:for="{{recommendations}}" wx:key="*this" class="info-line">• {{item}}</text></view>
+        <view class="info-card warn"><text class="info-title">⚠️ 重要提醒</text><text class="warn-text">本筛查结果仅为早期参考，不能替代专业医疗诊断。如对孩子的发育有任何疑虑，请务必咨询专业医生或前往正规医疗机构就诊。</text></view>
+        <button class="btn btn-primary btn-block" bindtap="goHistory">查看历史记录</button>
+        <button class="btn btn-outline btn-block" style="margin-top:10px" bindtap="goReferral">查看转诊机构</button>
+    </view>
+</view>

@@ -1,0 +1,30 @@
+<view class="page">
+    <view class="page-header">
+        <text class="page-title">我的预约</text>
+    </view>
+
+    <view wx:if="{{loading}}" class="status-wrap">
+        <view class="loading-spinner"></view>
+        <text class="status-text">加载中...</text>
+    </view>
+
+    <view wx:elif="{{records.length === 0}}" class="status-wrap">
+        <text class="empty-icon">📋</text>
+        <text class="status-text">暂无预约记录</text>
+    </view>
+
+    <view wx:else class="record-list">
+        <view wx:for="{{records}}" wx:key="id" class="record-card">
+            <view class="record-header">
+                <text class="record-hospital">{{item.hospital_name}}</text>
+                <text class="record-status {{getStatusClass(item.status)}}">{{item.status}}</text>
+            </view>
+            <view class="record-body">
+                <text class="record-info">👶 儿童：{{item.child_name || '未知'}}</text>
+                <text class="record-info">📋 类型：{{item.type}}</text>
+                <text class="record-info">📅 预约时间：{{item.appointment_time}}</text>
+                <text class="record-info">🕐 提交时间：{{item.create_time}}</text>
+            </view>
+        </view>
+    </view>
+</view>
