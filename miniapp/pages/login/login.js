@@ -81,5 +81,7 @@ Page({
         });
     },
 
-    goRegister() { wx.navigateTo({ url: '/pages/register/register' }); }
+    goRegister() { wx.navigateTo({ url: '/pages/register/register' }); },
+
+    goAdminLogin() { wx.navigateTo({ url: '/pages/admin-login/admin-login' }); }
 });

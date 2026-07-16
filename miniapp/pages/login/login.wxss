@@ -8,3 +8,5 @@
 .divider-text text { background: var(--bg-page); padding: 0 16px; position: relative; top: -10px; }
 .form-bottom-text { text-align: center; margin-top: 24px; font-size: 14px; color: var(--text-secondary); }
 .link { color: var(--primary); margin-left: 4px; }
+.admin-entry { margin-top: 12px; }
+.admin-link { color: var(--text-hint); font-size: 13px; }

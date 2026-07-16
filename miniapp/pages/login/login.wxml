@@ -34,4 +34,7 @@
         <text>还没有账号？</text>
         <text class="link" bindtap="goRegister">立即注册</text>
     </view>
+    <view class="form-bottom-text admin-entry">
+        <text class="link admin-link" bindtap="goAdminLogin">管理员登录</text>
+    </view>
 </view>
