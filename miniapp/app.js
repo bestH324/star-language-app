@@ -1,6 +1,7 @@
 // 星语 · 孤独症早期支持平台 — 小程序入口
 App({
     globalData: {
+        baseUrl: 'http://localhost:8081',
         isLoggedIn: false,
         isAdminLoggedIn: false,
         currentUser: null,
@@ -61,5 +62,24 @@ App({
         } catch (e) {
             wx.showToast({ title: '存储空间不足', icon: 'none' });
         }
+    },
+
+    request(config) {
+        const self = this;
+        return new Promise((resolve, reject) => {
+            const token = wx.getStorageSync('token') || '';
+            wx.request({
+                url: self.globalData.baseUrl + config.url,
+                method: config.method || 'GET',
+                data: config.data,
+                timeout: config.timeout || 10000,
+                header: {
+                    'Content-Type': 'application/json',
+                    'X-Token': token
+                },
+                success(res) { resolve(res); },
+                fail(err) { reject(err); }
+            });
+        });
     }
 });

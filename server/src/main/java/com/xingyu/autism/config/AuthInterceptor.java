@@ -63,6 +63,9 @@ public class AuthInterceptor implements HandlerInterceptor {
         if (uri.startsWith("/api/article/")) return true;
         if (uri.startsWith("/api/institution/")) return true;
         if (uri.equals("/api/resource/list")) return true;
+        // 转诊浏览（推荐、详情）公开；预约和支付需登录
+        if (uri.equals("/api/referral/recommend")) return true;
+        if (uri.startsWith("/api/referral/hospital/")) return true;
         return false;
     }
 
