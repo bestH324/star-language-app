@@ -105,9 +105,13 @@ public class AnswerService {
 
     /** 报告详情 */
     public Map<String, Object> report(long answerId) {
-        Map<String, Object> ans = jdbc.queryForMap("SELECT * FROM answers WHERE id=?", answerId);
-        Map<String, Object> child = jdbc.queryForMap(
+        List<Map<String, Object>> ansRows = jdbc.queryForList("SELECT * FROM answers WHERE id=?", answerId);
+        if (ansRows.isEmpty()) throw new BizException("筛查记录不存在");
+        Map<String, Object> ans = ansRows.get(0);
+        List<Map<String, Object>> childRows = jdbc.queryForList(
                 "SELECT id, name, gender, birth_date, avatar FROM children WHERE id=?", ans.get("child_id"));
+        if (childRows.isEmpty()) throw new BizException("儿童档案不存在");
+        Map<String, Object> child = childRows.get(0);
 
         int totalScore = ((Number) ans.get("total_score")).intValue();
         String riskLevel = (String) ans.get("risk_level");

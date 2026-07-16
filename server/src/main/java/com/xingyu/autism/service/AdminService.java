@@ -91,9 +91,13 @@ public class AdminService {
 
     /** 记录详情（管理员） */
     public Map<String, Object> recordDetail(long answerId) {
-        Map<String, Object> ans = jdbc.queryForMap("SELECT * FROM answers WHERE id=?", answerId);
-        Map<String, Object> child = jdbc.queryForMap(
+        List<Map<String, Object>> ansRows = jdbc.queryForList("SELECT * FROM answers WHERE id=?", answerId);
+        if (ansRows.isEmpty()) throw new BizException("筛查记录不存在");
+        Map<String, Object> ans = ansRows.get(0);
+        List<Map<String, Object>> childRows = jdbc.queryForList(
                 "SELECT c.*, u.phone AS user_phone FROM children c JOIN users u ON c.user_id=u.id WHERE c.id=?", ans.get("child_id"));
+        if (childRows.isEmpty()) throw new BizException("儿童档案不存在");
+        Map<String, Object> child = childRows.get(0);
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("id", ans.get("id"));
         result.put("child", child);

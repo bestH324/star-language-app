@@ -29,7 +29,9 @@ public class QuestionnaireService {
 
     /** 问卷详情 + 题目列表（含选项解析后的 JSON） */
     public Map<String, Object> detail(long qid) {
-        Map<String, Object> q = jdbc.queryForMap("SELECT * FROM questionnaires WHERE id=?", qid);
+        List<Map<String, Object>> qRows = jdbc.queryForList("SELECT * FROM questionnaires WHERE id=?", qid);
+        if (qRows.isEmpty()) throw new BizException("问卷不存在");
+        Map<String, Object> q = qRows.get(0);
         List<Map<String, Object>> questions = jdbc.queryForList(
                 "SELECT id, qid, video_url, content, options, sort FROM questions WHERE qid=? ORDER BY sort", qid);
         // 解析 options 字段为 JSON 对象

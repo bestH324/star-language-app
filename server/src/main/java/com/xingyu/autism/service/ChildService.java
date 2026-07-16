@@ -37,7 +37,9 @@ public class ChildService {
                 uid, req.getName(), req.getGender(), req.getBirthDate(),
                 req.getAvatar() == null ? "👶" : req.getAvatar());
         long id = jdbc.queryForObject("SELECT last_insert_rowid()", Long.class);
-        return jdbc.queryForMap("SELECT * FROM children WHERE id=?", id);
+        List<Map<String, Object>> rows = jdbc.queryForList("SELECT * FROM children WHERE id=?", id);
+        if (rows.isEmpty()) throw new BizException("儿童档案创建失败");
+        return rows.get(0);
     }
 
     /** 修改 */
@@ -48,7 +50,9 @@ public class ChildService {
         jdbc.update("UPDATE children SET name=?, gender=?, birth_date=?, avatar=? WHERE id=?",
                 req.getName(), req.getGender(), req.getBirthDate(),
                 req.getAvatar() == null ? "👶" : req.getAvatar(), id);
-        return jdbc.queryForMap("SELECT * FROM children WHERE id=?", id);
+        List<Map<String, Object>> rows = jdbc.queryForList("SELECT * FROM children WHERE id=?", id);
+        if (rows.isEmpty()) throw new BizException("儿童档案不存在");
+        return rows.get(0);
     }
 
     /** 删除（连带删除筛查记录，由外键 ON DELETE CASCADE 处理） */
@@ -60,7 +64,9 @@ public class ChildService {
 
     /** 详情 */
     public Map<String, Object> detail(long id) {
-        return jdbc.queryForMap("SELECT * FROM children WHERE id=?", id);
+        List<Map<String, Object>> rows = jdbc.queryForList("SELECT * FROM children WHERE id=?", id);
+        if (rows.isEmpty()) throw new BizException("儿童档案不存在");
+        return rows.get(0);
     }
 
     /** 校验年龄 1-5 岁（12-60 个月） */
