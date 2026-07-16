@@ -36,7 +36,7 @@ public class ChildService {
         jdbc.update("INSERT INTO children(user_id, name, gender, birth_date, avatar) VALUES(?,?,?,?,?)",
                 uid, req.getName(), req.getGender(), req.getBirthDate(),
                 req.getAvatar() == null ? "👶" : req.getAvatar());
-        long id = jdbc.queryForObject("SELECT last_insert_rowid()", Long.class);
+        long id = jdbc.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
         List<Map<String, Object>> rows = jdbc.queryForList("SELECT * FROM children WHERE id=?", id);
         if (rows.isEmpty()) throw new BizException("儿童档案创建失败");
         return rows.get(0);

@@ -8,16 +8,16 @@ server:
 spring:
   application:
     name: autism-screening-backend
-  # SQLite 数据源
+  # MySQL 数据源
   datasource:
-    driver-class-name: org.sqlite.JDBC
-    url: jdbc:sqlite:${DB_PATH:data/autism.db}
-    # SQLite 不需要用户名密码
-    username:
-    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/xingyu?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=UTF-8
+    username: root
+    password: ${DB_PASSWORD:root}
     hikari:
-      maximum-pool-size: 5
-      minimum-idle: 1
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
   # 启动时执行建表与种子数据
   sql:
     init:

@@ -1,13 +1,13 @@
 -- ============================================================
--- 种子数据（每次启动幂等执行，使用 INSERT OR IGNORE 避免重复）
+-- 种子数据（每次启动幂等执行，使用 INSERT IGNORE 避免重复）
 -- ============================================================
 
 -- 问卷
-INSERT OR IGNORE INTO questionnaires(id, title, description, total_questions) VALUES
+INSERT IGNORE INTO questionnaires(id, title, description, total_questions) VALUES
 (1, 'SACS 改编儿童社交沟通筛查量表', '基于 Social Attention and Communication Study 改编，共 20 题，涵盖社交互动、共同注意、沟通能力、行为模式、情绪调节。每题 0-3 分，总分 0-60 分。', 20);
 
 -- 题目（视频地址由后端静态资源服务提供）
-INSERT OR IGNORE INTO questions(id, qid, video_url, content, options, sort) VALUES
+INSERT IGNORE INTO questions(id, qid, video_url, content, options, sort) VALUES
 (1,1,'/api/video/q1.mp4','当您叫宝宝的名字时，他/她会转头看向您吗？','[{"value":0,"label":"经常会","score":0},{"value":1,"label":"有时会","score":1},{"value":2,"label":"很少会","score":2},{"value":3,"label":"从不会","score":3}]',1),
 (2,1,'/api/video/q2.mp4','宝宝会用手指指向他/她感兴趣的物品（如玩具、食物）给您看吗？','[{"value":0,"label":"经常这样做","score":0},{"value":1,"label":"有时这样做","score":1},{"value":2,"label":"很少这样做","score":2},{"value":3,"label":"从不这样做","score":3}]',2),
 (3,1,'/api/video/q3.mp4','宝宝会和您进行目光对视吗？（如玩耍时会看您的眼睛）','[{"value":0,"label":"经常对视","score":0},{"value":1,"label":"有时对视","score":1},{"value":2,"label":"很少对视","score":2},{"value":3,"label":"从不/回避对视","score":3}]',3),
@@ -30,7 +30,7 @@ INSERT OR IGNORE INTO questions(id, qid, video_url, content, options, sort) VALU
 (20,1,'/api/video/q20.mp4','整体来看，您对宝宝的社交沟通能力是否感到担忧？','[{"value":0,"label":"完全不担心","score":0},{"value":1,"label":"略微担心","score":1},{"value":2,"label":"比较担心","score":2},{"value":3,"label":"非常担心","score":3}]',20);
 
 -- 科普文章
-INSERT OR IGNORE INTO articles(id, category, title, summary, content, author, date) VALUES
+INSERT IGNORE INTO articles(id, category, title, summary, content, author, date) VALUES
 (1,'knowledge','什么是孤独症谱系障碍（ASD）？','孤独症谱系障碍是一种神经发育障碍，影响儿童的社交沟通和行为模式。早期识别和干预对改善预后至关重要。','孤独症谱系障碍（Autism Spectrum Disorder, ASD）是一组以社交沟通障碍、兴趣狭窄和重复刻板行为为核心特征的神经发育障碍。症状通常在生命早期出现，但可能在社交需求超出能力范围时才完全显现。
 
 ASD的"谱系"意味着症状表现和严重程度存在极大个体差异。有些儿童可能完全不说话，而有些则语言能力正常但社交困难。
@@ -69,7 +69,7 @@ ASD的"谱系"意味着症状表现和严重程度存在极大个体差异。有
 (8,'intervene','感觉统合与孤独症儿童','大多数孤独症儿童存在感觉处理差异，了解感觉统合训练可以帮助改善日常生活质量。','约90%的孤独症儿童存在感觉处理异常，包括感觉过敏和感觉迟钝。感觉统合策略：提供感觉"饮食"、使用触觉工具、设置冷静角、渐进性引入刺激。','南开大学儿童发育行为研究中心','2026-04-15');
 
 -- 转诊机构
-INSERT OR IGNORE INTO institutions(id, name, region, department, address, phone, description) VALUES
+INSERT IGNORE INTO institutions(id, name, region, department, address, phone, description) VALUES
 (1,'北京大学第六医院（北医六院）','北京','儿童心理卫生中心','北京市海淀区花园北路51号','010-82801936','国家级精神卫生专科医院，设有国内一流的儿童孤独症诊疗中心，提供全面评估和干预服务。'),
 (2,'首都儿科研究所附属儿童医院','北京','保健科/神经科','北京市朝阳区雅宝路2号','010-85695555','儿童专科医院，开展孤独症早期筛查、诊断和干预指导，设有发育行为儿科门诊。'),
 (3,'复旦大学附属儿科医院','上海','儿童保健科','上海市闵行区万源路399号','021-64931990','全国知名的儿童专科医院，设有发育行为儿科和儿童心理科，提供多学科联合诊疗。'),
@@ -84,7 +84,7 @@ INSERT OR IGNORE INTO institutions(id, name, region, department, address, phone,
 (12,'武汉儿童医院（武汉市妇幼保健院）','武汉','儿童保健科/康复医学科','武汉市江岸区香港路100号','027-82433350','中部地区大型儿童专科医院，设有儿童发育行为中心和早期干预基地。');
 
 -- 赋能资源
-INSERT OR IGNORE INTO resources(id, icon, title, description, url) VALUES
+INSERT IGNORE INTO resources(id, icon, title, description, url) VALUES
 (1,'📖','家长指南手册','为孤独症儿童家长编写的系统指南，涵盖从诊断到干预的全流程支持。','#'),
 (2,'🎬','家庭干预视频教程','系列教学视频，示范如何在家中开展有效的早期干预活动。','#'),
 (3,'💬','家长交流社区','与其他孤独症儿童家长分享经验、互相支持的线上社区。','#'),

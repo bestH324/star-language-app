@@ -43,7 +43,7 @@ public class UserService {
         if (rows.isEmpty()) {
             jdbc.update("INSERT INTO users(phone, code) VALUES(?,?)", phone, code);
         } else {
-            jdbc.update("UPDATE users SET code=?, update_time=datetime('now','localtime') WHERE phone=?", code, phone);
+            jdbc.update("UPDATE users SET code=?, update_time=NOW() WHERE phone=?", code, phone);
         }
         return code;
     }
@@ -66,10 +66,10 @@ public class UserService {
         long userId;
         if (!existingRows.isEmpty()) {
             userId = ((Number) existingRows.get(0).get("id")).longValue();
-            jdbc.update("UPDATE users SET password=?, code=NULL, update_time=datetime('now','localtime') WHERE phone=?", hashed, req.getPhone());
+            jdbc.update("UPDATE users SET password=?, code=NULL, update_time=NOW() WHERE phone=?", hashed, req.getPhone());
         } else {
             jdbc.update("INSERT INTO users(phone, password) VALUES(?,?)", req.getPhone(), hashed);
-            List<Map<String, Object>> idRows = jdbc.queryForList("SELECT last_insert_rowid() AS id");
+            List<Map<String, Object>> idRows = jdbc.queryForList("SELECT LAST_INSERT_ID() AS id");
             userId = ((Number) idRows.get(0).get("id")).longValue();
         }
         String token = tokenService.create(userId, TokenService.ROLE_USER);
@@ -176,7 +176,7 @@ public class UserService {
             params.add(avatar.trim());
         }
 
-        sql.append("update_time = datetime('now','localtime') WHERE id = ?");
+        sql.append("update_time = NOW() WHERE id = ?");
         params.add(userId);
 
         jdbc.update(sql.toString(), params.toArray());

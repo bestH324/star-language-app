@@ -100,7 +100,7 @@ public class AnswerService {
 
         jdbc.update("INSERT INTO answers(child_id, qid, answer_json, total_score, risk_level) VALUES(?,?,?,?,?)",
                 req.getChildId(), req.getQid(), answerJson, totalScore, riskLevel);
-        long answerId = jdbc.queryForObject("SELECT last_insert_rowid()", Long.class);
+        long answerId = jdbc.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
 
         return report(answerId);
     }
