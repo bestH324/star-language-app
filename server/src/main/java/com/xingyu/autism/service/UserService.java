@@ -79,8 +79,12 @@ public class UserService {
     /** 验证码登录 */
     public LoginResponse login(LoginRequest req) {
         verifyCode(req.getPhone(), req.getCode());
-        Map<String, Object> user = jdbc.queryForMap("SELECT id, phone, nickname, avatar FROM users WHERE phone=?", req.getPhone());
-        // 清除验证码
+        List<Map<String, Object>> rows = jdbc.queryForList(
+                "SELECT id, phone, nickname, avatar FROM users WHERE phone=?", req.getPhone());
+        if (rows.isEmpty()) {
+            throw new BizException("该手机号未注册");
+        }
+        Map<String, Object> user = rows.get(0);
         jdbc.update("UPDATE users SET code=NULL WHERE phone=?", req.getPhone());
         long userId = ((Number) user.get("id")).longValue();
         String token = tokenService.create(userId, TokenService.ROLE_USER);
@@ -115,15 +119,15 @@ public class UserService {
         // TODO 生产环境替换为真实调用：https://api.weixin.qq.com/sns/jscode2session
         // 此处演示：用 code 作为虚拟 openid
         String openid = "demo_" + (code == null ? "guest" : code.hashCode());
-        Map<String, Object> user;
-        Integer cnt = jdbc.queryForObject("SELECT COUNT(*) FROM users WHERE openid=?", Integer.class, openid);
-        if (cnt != null && cnt == 0) {
+        List<Map<String, Object>> rows = jdbc.queryForList(
+                "SELECT id, phone, nickname, avatar FROM users WHERE openid=?", openid);
+        if (rows.isEmpty()) {
             jdbc.update("INSERT INTO users(phone, nickname, openid) VALUES(?,?,?)",
                     "wx_" + openid.substring(0, Math.min(11, openid.length())), "微信用户", openid);
-            user = jdbc.queryForMap("SELECT id, phone, nickname, avatar FROM users WHERE openid=?", openid);
-        } else {
-            user = jdbc.queryForMap("SELECT id, phone, nickname, avatar FROM users WHERE openid=?", openid);
+            rows = jdbc.queryForList(
+                    "SELECT id, phone, nickname, avatar FROM users WHERE openid=?", openid);
         }
+        Map<String, Object> user = rows.get(0);
         long userId = ((Number) user.get("id")).longValue();
         String token = tokenService.create(userId, TokenService.ROLE_USER);
         return new LoginResponse(token, userId, (String) user.get("phone"),
@@ -143,7 +147,12 @@ public class UserService {
 
     /** 获取指定用户信息 */
     public Map<String, Object> profile(long userId) {
-        return jdbc.queryForMap("SELECT id, phone, nickname, avatar, create_time FROM users WHERE id=?", userId);
+        List<Map<String, Object>> rows = jdbc.queryForList(
+                "SELECT id, phone, nickname, avatar, create_time FROM users WHERE id=?", userId);
+        if (rows.isEmpty()) {
+            throw new BizException("用户不存在");
+        }
+        return rows.get(0);
     }
 
     /** 更新用户个人资料 */

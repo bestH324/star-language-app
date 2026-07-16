@@ -39,7 +39,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public Result<?> handleAll(Exception e, HttpServletRequest req) {
-        log.error("系统异常: {} ", req.getRequestURI(), e);
-        return Result.error(500, "服务异常：" + e.getMessage());
+        log.error("系统异常 [{}] {} - {}", e.getClass().getSimpleName(), req.getRequestURI(), e.getMessage(), e);
+        return Result.error(500, "服务异常(" + e.getClass().getSimpleName() + "：" + e.getMessage() + ")");
     }
 }
