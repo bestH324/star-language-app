@@ -107,8 +107,24 @@ CREATE TABLE IF NOT EXISTS resources (
   create_time DATETIME DEFAULT (datetime('now','localtime'))
 );
 
+-- 7. 预约记录表
+CREATE TABLE IF NOT EXISTS appointments (
+  id               INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id          INTEGER NOT NULL,
+  child_id         INTEGER NOT NULL,
+  hospital_id      INTEGER NOT NULL,
+  hospital_name    VARCHAR(200),
+  type             VARCHAR(50) NOT NULL,              -- 门诊 / 线下评估 / 康复体验课
+  appointment_time VARCHAR(50) NOT NULL,              -- 预约时间
+  status           VARCHAR(20) DEFAULT '待确认',       -- 待确认 / 已确认 / 已取消 / 已完成
+  create_time      DATETIME DEFAULT (datetime('now','localtime')),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (child_id) REFERENCES children(id) ON DELETE CASCADE
+);
+
 -- 索引
 CREATE INDEX IF NOT EXISTS idx_children_user   ON children(user_id);
 CREATE INDEX IF NOT EXISTS idx_questions_qid   ON questions(qid);
 CREATE INDEX IF NOT EXISTS idx_answers_child   ON answers(child_id);
 CREATE INDEX IF NOT EXISTS idx_answers_risk    ON answers(risk_level);
+CREATE INDEX IF NOT EXISTS idx_appointments_user ON appointments(user_id);

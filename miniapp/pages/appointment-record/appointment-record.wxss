@@ -1,0 +1,25 @@
+.page { background: #f5f0f5; min-height: 100vh; }
+
+.page-header { background: #6B1D5E; padding: 48px 20px 20px; }
+.page-title { font-size: 20px; font-weight: 700; color: #fff; }
+
+/* 状态 */
+.status-wrap { display: flex; flex-direction: column; align-items: center; padding: 80px 0; }
+.status-text { font-size: 14px; color: #999; margin-top: 12px; }
+.empty-icon { font-size: 48px; }
+.loading-spinner { width: 32px; height: 32px; border: 3px solid #e8d5e8; border-top-color: #6B1D5E; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* 列表 */
+.record-list { padding: 16px; }
+.record-card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+.record-header { display: flex; justify-content: space-between; align-items: center; }
+.record-hospital { font-size: 16px; font-weight: 600; flex: 1; }
+.record-status { font-size: 12px; padding: 3px 10px; border-radius: 12px; color: #fff; }
+.s-pending { background: #e8a838; }
+.s-confirmed { background: #3498db; }
+.s-cancelled { background: #999; }
+.s-done { background: #2ecc71; }
+
+.record-body { margin-top: 12px; }
+.record-info { font-size: 13px; color: #666; display: block; margin-top: 4px; }

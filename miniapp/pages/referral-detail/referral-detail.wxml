@@ -1,0 +1,118 @@
+<view class="page">
+    <!-- 加载中 -->
+    <view wx:if="{{loading}}" class="status-wrap">
+        <view class="loading-spinner"></view>
+        <text class="status-text">加载中...</text>
+    </view>
+
+    <block wx:elif="{{hospital}}">
+        <!-- 头部渐变背景 -->
+        <view class="detail-header">
+            <view class="header-back" bindtap="onBack">← 返回</view>
+            <text class="header-name">{{hospital.name}}</text>
+            <text class="header-grade grade-{{hospital.grade}}">{{hospital.grade}}级 · {{hospital.gradeLabel}}</text>
+        </view>
+
+        <!-- 机构简介 -->
+        <view class="section">
+            <text class="section-title">机构简介</text>
+            <text class="section-text">{{hospital.description}}</text>
+        </view>
+
+        <!-- 专长标签 -->
+        <view class="section">
+            <text class="section-title">专长领域</text>
+            <view class="tag-row">
+                <text class="tag tag-age">月龄：{{hospital.ageRangeExpertise || '全年龄段'}}</text>
+                <text class="tag tag-risk">风险：{{hospital.riskLevelExpertise === 'all' ? '全风险等级' : hospital.riskLevelExpertise === 'high' ? '高危' : hospital.riskLevelExpertise === 'medium' ? '中危' : '低危'}}</text>
+            </view>
+        </view>
+
+        <!-- 医师团队 -->
+        <view class="section">
+            <text class="section-title">医师团队</text>
+            <view wx:for="{{hospital.doctors}}" wx:key="name" wx:for-item="doc" class="doctor-item">
+                <view class="doctor-avatar">{{doc.name[0]}}</view>
+                <view class="doctor-info">
+                    <text class="doctor-name">{{doc.name}}</text>
+                    <text class="doctor-title">{{doc.title}}</text>
+                </view>
+            </view>
+        </view>
+
+        <!-- 评分网格 -->
+        <view class="section">
+            <text class="section-title">服务指标</text>
+            <view class="score-grid">
+                <view class="score-cell">
+                    <text class="score-num">{{hospital.rating}}</text>
+                    <text class="score-label">等级评分</text>
+                </view>
+                <view class="score-cell">
+                    <text class="score-num">{{hospital.userScore}}</text>
+                    <text class="score-label">用户评分</text>
+                </view>
+                <view class="score-cell">
+                    <text class="score-num">{{hospital.waitTime}}天</text>
+                    <text class="score-label">平均等待</text>
+                </view>
+                <view class="score-cell">
+                    <text class="score-num">{{hospital.specialtyScore}}</text>
+                    <text class="score-label">专长得分</text>
+                </view>
+            </view>
+        </view>
+
+        <!-- 联系方式 -->
+        <view class="section">
+            <text class="section-title">联系方式</text>
+            <text class="info-line">📍 {{hospital.address}}</text>
+            <text class="info-line info-phone" bindtap="onCallPhone">📞 {{hospital.phone}}</text>
+        </view>
+
+        <!-- 底部占位 -->
+        <view style="height: 80px;"></view>
+    </block>
+
+    <!-- 底部预约按钮 -->
+    <view wx:if="{{!loading && hospital}}" class="bottom-bar">
+        <view class="book-btn" bindtap="onBook">立即预约</view>
+    </view>
+
+    <!-- ===== 预约弹窗 ===== -->
+    <view wx:if="{{showBooking}}" class="modal-mask" bindtap="onCloseBooking">
+        <view class="booking-sheet" catchtap="">
+            <text class="sheet-title">预约挂号</text>
+
+            <!-- 选择儿童 -->
+            <view class="form-item">
+                <text class="form-label">选择儿童</text>
+                <picker wx:if="{{childList && childList.length > 0}}" mode="selector" range="{{childList}}" range-key="name" value="{{bookingChildIndex}}" bindchange="onChildChange">
+                    <view class="form-picker">{{childList[bookingChildIndex].name || '请选择'}}</view>
+                </picker>
+                <text wx:else class="form-hint">暂无儿童信息，请先添加</text>
+            </view>
+
+            <!-- 预约类型 -->
+            <view class="form-item">
+                <text class="form-label">预约类型</text>
+                <picker mode="selector" range="{{bookingTypes}}" value="0" bindchange="onBookingTypeChange">
+                    <view class="form-picker">{{bookingType}}</view>
+                </picker>
+            </view>
+
+            <!-- 预约时间 -->
+            <view class="form-item">
+                <text class="form-label">预约时间</text>
+                <picker mode="date" start="{{today}}" bindchange="onBookingTimeChange">
+                    <view class="form-picker">{{bookingTime || '请选择日期'}}</view>
+                </picker>
+            </view>
+
+            <view class="sheet-btns">
+                <view class="sheet-btn cancel" bindtap="onCloseBooking">取消</view>
+                <view class="sheet-btn confirm" bindtap="onSubmitBooking">提交预约</view>
+            </view>
+        </view>
+    </view>
+</view>

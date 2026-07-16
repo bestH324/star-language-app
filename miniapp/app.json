@@ -14,7 +14,9 @@
         "pages/empowerment/empowerment",
         "pages/about/about",
         "pages/admin-login/admin-login",
-        "pages/admin-dashboard/admin-dashboard"
+        "pages/admin-dashboard/admin-dashboard",
+        "pages/referral-detail/referral-detail",
+        "pages/appointment-record/appointment-record"
     ],
     "window": {
         "navigationBarBackgroundColor": "#6B1D5E",
@@ -60,6 +62,12 @@
             }
         ]
     },
+    "permission": {
+        "scope.userLocation": {
+            "desc": "用于为您推荐就近的转诊机构"
+        }
+    },
+    "requiredPrivateInfos": ["getLocation"],
     "style": "v2",
     "sitemapLocation": "sitemap.json"
 }
