@@ -11,7 +11,7 @@ spring:
   # SQLite 数据源
   datasource:
     driver-class-name: org.sqlite.JDBC
-    url: jdbc:sqlite:data/autism.db
+    url: jdbc:sqlite:${DB_PATH:data/autism.db}
     # SQLite 不需要用户名密码
     username:
     password:

@@ -156,12 +156,27 @@ public class AdminService {
     }
 
     // ============ 内部工具 ============
+
+    private static final Set<String> ALLOWED_TABLES = Set.of(
+            "users", "children", "answers", "admins", "questionnaires", "questions",
+            "articles", "institutions", "resources", "appointments");
+
     private long count(String table) {
-        return jdbc.queryForObject("SELECT COUNT(*) FROM " + table, Long.class);
+        if (!ALLOWED_TABLES.contains(table)) {
+            throw new BizException("非法表名: " + table);
+        }
+        List<Map<String, Object>> rows = jdbc.queryForList(
+                "SELECT COUNT(*) AS cnt FROM " + table);
+        return ((Number) rows.get(0).get("cnt")).longValue();
     }
 
     private long countWhere(String table, String where) {
-        return jdbc.queryForObject("SELECT COUNT(*) FROM " + table + " WHERE " + where, Long.class);
+        if (!ALLOWED_TABLES.contains(table)) {
+            throw new BizException("非法表名: " + table);
+        }
+        List<Map<String, Object>> rows = jdbc.queryForList(
+                "SELECT COUNT(*) AS cnt FROM " + table + " WHERE " + where);
+        return ((Number) rows.get(0).get("cnt")).longValue();
     }
 
     private List<Map<String, Object>> ageDistribution() {
