@@ -1,7 +1,17 @@
 const request = require('../../utils/request');
 
 Page({
-    data: { record: null, riskIcon: '', recommendations: [], createTime: '', loading: true },
+    data: {
+        record: null,
+        riskIcon: '',
+        riskLevelClass: '',
+        recommendations: [],
+        createTime: '',
+        keyMissCount: 0,
+        keyCount: 0,
+        riskThreshold: 0,
+        loading: true
+    },
 
     onLoad(options) {
         const recordId = options.recordId;
@@ -13,8 +23,11 @@ Page({
         request.get('/api/answer/report/' + recordId).then(data => {
             wx.hideLoading();
             const icons = { low: '✅', medium: '⚠️', high: '🔴' };
-            // flatten child fields to match template
             const child = data.child || {};
+            const keyMissCount = data.keyMissCount || 0;
+            const keyCount = data.keyCount || 0;
+            const riskThreshold = data.riskThreshold || 3;
+
             this.setData({
                 record: {
                     ...data,
@@ -23,8 +36,12 @@ Page({
                     answerCount: (data.answers || []).length
                 },
                 riskIcon: icons[data.riskLevel] || '❓',
+                riskLevelClass: data.riskLevel || 'low',
                 recommendations: data.recommendations || [],
                 createTime: (data.createTime || '').slice(0, 16).replace('T', ' '),
+                keyMissCount,
+                keyCount,
+                riskThreshold,
                 loading: false
             });
         }).catch(() => {

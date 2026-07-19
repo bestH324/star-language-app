@@ -1,4 +1,9 @@
 .screening-info-card { background: #fff; border-radius: var(--radius); padding: 16px; margin-bottom: 20px; }
+.version-tag { text-align: center; margin-bottom: 12px; }
+.version-tag text { display: inline-block; background: var(--primary-lighter); color: var(--primary); font-size: 13px; padding: 4px 12px; border-radius: 12px; }
+.empty-hint { text-align: center; padding: 40px 0; }
+.empty-hint .empty-icon { font-size: 48px; display: block; margin-bottom: 12px; }
+.empty-hint .empty-text { font-size: 15px; color: var(--text-secondary); display: block; margin-bottom: 20px; }
 .info-title { font-size: 17px; font-weight: 600; display: block; margin-bottom: 10px; }
 .info-list text { display: block; font-size: 14px; color: var(--text-secondary); line-height: 1.8; }
 .screening-main { flex: 1; display: flex; flex-direction: column; }

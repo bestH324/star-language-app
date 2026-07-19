@@ -18,6 +18,7 @@ Page({
                 totalScore: r.total_score,
                 riskLevel: r.risk_level,
                 riskText: r.risk_level === 'low' ? '低风险' : r.risk_level === 'medium' ? '中风险' : '高风险',
+                keyMissCount: r.key_miss_count || 0,
                 createTime: r.create_time,
                 time: (r.create_time || '').slice(0, 16).replace('T', ' ')
             }));

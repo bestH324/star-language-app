@@ -2,32 +2,106 @@
 -- 种子数据（每次启动幂等执行，使用 INSERT IGNORE 避免重复）
 -- ============================================================
 
--- 问卷
-INSERT IGNORE INTO questionnaires(id, title, description, total_questions) VALUES
-(1, 'SACS 改编儿童社交沟通筛查量表', '基于 Social Attention and Communication Study 改编，共 20 题，涵盖社交互动、共同注意、沟通能力、行为模式、情绪调节。每题 0-3 分，总分 0-60 分。', 20);
+-- ============================================================
+-- SACS 多版本问卷（按月龄自动匹配）
+-- ============================================================
 
--- 题目（视频地址由后端静态资源服务提供）
-INSERT IGNORE INTO questions(id, qid, video_url, content, options, sort) VALUES
-(1,1,'/api/video/q1.mp4','当您叫宝宝的名字时，他/她会转头看向您吗？','[{"value":0,"label":"经常会","score":0},{"value":1,"label":"有时会","score":1},{"value":2,"label":"很少会","score":2},{"value":3,"label":"从不会","score":3}]',1),
-(2,1,'/api/video/q2.mp4','宝宝会用手指指向他/她感兴趣的物品（如玩具、食物）给您看吗？','[{"value":0,"label":"经常这样做","score":0},{"value":1,"label":"有时这样做","score":1},{"value":2,"label":"很少这样做","score":2},{"value":3,"label":"从不这样做","score":3}]',2),
-(3,1,'/api/video/q3.mp4','宝宝会和您进行目光对视吗？（如玩耍时会看您的眼睛）','[{"value":0,"label":"经常对视","score":0},{"value":1,"label":"有时对视","score":1},{"value":2,"label":"很少对视","score":2},{"value":3,"label":"从不/回避对视","score":3}]',3),
-(4,1,'/api/video/q4.mp4','当您对宝宝微笑时，他/她会回应微笑吗？','[{"value":0,"label":"总是回应","score":0},{"value":1,"label":"有时回应","score":1},{"value":2,"label":"很少回应","score":2},{"value":3,"label":"从不回应","score":3}]',4),
-(5,1,'/api/video/q5.mp4','宝宝会模仿您的动作或表情吗？（如拍手、做鬼脸）','[{"value":0,"label":"经常模仿","score":0},{"value":1,"label":"有时模仿","score":1},{"value":2,"label":"很少模仿","score":2},{"value":3,"label":"从不模仿","score":3}]',5),
-(6,1,'/api/video/q6.mp4','宝宝会玩"假装"游戏吗？（如假装喂娃娃、假装打电话）','[{"value":0,"label":"经常玩","score":0},{"value":1,"label":"有时玩","score":1},{"value":2,"label":"很少玩","score":2},{"value":3,"label":"从不玩","score":3}]',6),
-(7,1,'/api/video/q7.mp4','宝宝会对其他小朋友表现出兴趣吗？（如看别的孩子玩）','[{"value":0,"label":"很感兴趣","score":0},{"value":1,"label":"有点兴趣","score":1},{"value":2,"label":"不太感兴趣","score":2},{"value":3,"label":"完全不感兴趣","score":3}]',7),
-(8,1,'/api/video/q8.mp4','宝宝会把自己喜欢的东西拿给您看吗？（不是为了求助）','[{"value":0,"label":"经常这样做","score":0},{"value":1,"label":"有时这样做","score":1},{"value":2,"label":"很少这样做","score":2},{"value":3,"label":"从不这样做","score":3}]',8),
-(9,1,'/api/video/q9.mp4','宝宝能听懂简单的指令吗？（如"把球给妈妈"）','[{"value":0,"label":"能听懂多个指令","score":0},{"value":1,"label":"能听懂一些","score":1},{"value":2,"label":"很少能听懂","score":2},{"value":3,"label":"完全听不懂","score":3}]',9),
-(10,1,'/api/video/q10.mp4','宝宝会发出不同的声音来表达需求吗？（如饿了、要抱抱）','[{"value":0,"label":"经常发出声音","score":0},{"value":1,"label":"有时发出声音","score":1},{"value":2,"label":"很少发出声音","score":2},{"value":3,"label":"几乎不发声","score":3}]',10),
-(11,1,'/api/video/q11.mp4','宝宝对声音的反应正常吗？（如突然的声音会转头看）','[{"value":0,"label":"反应正常","score":0},{"value":1,"label":"有时反应弱","score":1},{"value":2,"label":"经常反应弱","score":2},{"value":3,"label":"对声音无反应","score":3}]',11),
-(12,1,'/api/video/q12.mp4','宝宝会有重复的、刻板的行为吗？（如反复转圈、摆手、排列物品）','[{"value":0,"label":"没有","score":3},{"value":1,"label":"偶尔有","score":2},{"value":2,"label":"经常有","score":1},{"value":3,"label":"非常频繁","score":0}]',12),
-(13,1,'/api/video/q13.mp4','宝宝会对某些感官刺激异常敏感或迟钝吗？（如对声音、触觉、光线）','[{"value":0,"label":"没有异常","score":0},{"value":1,"label":"偶尔异常","score":1},{"value":2,"label":"经常异常","score":2},{"value":3,"label":"明显异常","score":3}]',13),
-(14,1,'/api/video/q14.mp4','宝宝有语言发育方面的问题吗？（相比同龄儿童说话明显少）','[{"value":0,"label":"语言发育正常","score":0},{"value":1,"label":"稍微落后","score":1},{"value":2,"label":"明显落后","score":2},{"value":3,"label":"几乎没有语言","score":3}]',14),
-(15,1,'/api/video/q15.mp4','宝宝喜欢按照固定的方式做事吗？（改变常规会哭闹）','[{"value":0,"label":"灵活适应变化","score":0},{"value":1,"label":"偶尔抗拒变化","score":1},{"value":2,"label":"经常抗拒变化","score":2},{"value":3,"label":"极度抗拒变化","score":3}]',15),
-(16,1,'/api/video/q16.mp4','宝宝玩玩具的方式是否正常？（如只转轮子而不是推小车）','[{"value":0,"label":"玩法正常","score":0},{"value":1,"label":"偶尔玩法异常","score":1},{"value":2,"label":"经常玩法异常","score":2},{"value":3,"label":"玩法明显异常","score":3}]',16),
-(17,1,'/api/video/q17.mp4','宝宝的情绪变化是否突然且难以安抚？','[{"value":0,"label":"情绪平稳","score":0},{"value":1,"label":"偶尔情绪波动","score":1},{"value":2,"label":"经常情绪波动","score":2},{"value":3,"label":"频繁且难以安抚","score":3}]',17),
-(18,1,'/api/video/q18.mp4','宝宝的大运动发育是否正常？（如坐、爬、走的时间）','[{"value":0,"label":"发育正常","score":0},{"value":1,"label":"稍微落后","score":1},{"value":2,"label":"明显落后","score":2},{"value":3,"label":"严重落后","score":3}]',18),
-(19,1,'/api/video/q19.mp4','宝宝是否会主动寻求您的安慰？（如摔倒后找您抱）','[{"value":0,"label":"经常主动寻求","score":0},{"value":1,"label":"有时寻求","score":1},{"value":2,"label":"很少寻求","score":2},{"value":3,"label":"从不寻求安慰","score":3}]',19),
-(20,1,'/api/video/q20.mp4','整体来看，您对宝宝的社交沟通能力是否感到担忧？','[{"value":0,"label":"完全不担心","score":0},{"value":1,"label":"略微担心","score":1},{"value":2,"label":"比较担心","score":2},{"value":3,"label":"非常担心","score":3}]',20);
+-- 版本1: 12个月评估（11-15个月）
+INSERT IGNORE INTO questionnaires(id, title, description, total_questions, min_age_months, max_age_months, key_count, risk_threshold) VALUES
+(1, 'SACS 12个月评估', '适用于11-15个月婴幼儿的社交注意与沟通筛查量表，共11项。5个关键项目：目光接触、指向、手势、模仿、呼名反应。关键项目≥3项非典型即为高风险。', 11, 11, 15, 5, 3);
+
+-- 版本2: 18个月评估（16-21个月）
+INSERT IGNORE INTO questionnaires(id, title, description, total_questions, min_age_months, max_age_months, key_count, risk_threshold) VALUES
+(2, 'SACS 18个月评估', '适用于16-21个月婴幼儿的社交注意与沟通筛查量表，共14项。5个关键项目：目光接触、指向、手势、展示、假装游戏。关键项目≥3项非典型即为高风险。', 14, 16, 21, 5, 3);
+
+-- 版本3: 24个月评估（22-30个月）
+INSERT IGNORE INTO questionnaires(id, title, description, total_questions, min_age_months, max_age_months, key_count, risk_threshold) VALUES
+(3, 'SACS 24个月评估', '适用于22-30个月幼儿的社交注意与沟通筛查量表，共16项。5个关键项目：目光接触、指向、使用手势、展示、假装游戏。关键项目≥3项非典型即为高风险。', 16, 22, 30, 5, 3);
+
+-- 版本4: 学前评估（31-60个月）
+INSERT IGNORE INTO questionnaires(id, title, description, total_questions, min_age_months, max_age_months, key_count, risk_threshold) VALUES
+(4, 'SACS 学前评估', '适用于31-60个月学龄前儿童的社交注意与沟通筛查量表，共20项。8个关键项目：指向、目光接触、展示、假装游戏、互惠性社会互动、遵循两个无关指令、怪异或异常的言语、感官行为与兴趣。关键项目≥3项非典型即为高风险。', 20, 31, 60, 8, 3);
+
+-- ============================================================
+-- 版本1 题目：12个月评估（qid=1，11题，ID 1-11）
+-- ============================================================
+INSERT IGNORE INTO questions(id, qid, video_url, content, options, sort, is_key) VALUES
+(1,1,'/api/video/q1.mp4','当您叫宝宝的名字时，他/她会转头看向您吗？','[{"value":0,"label":"经常会","score":0},{"value":1,"label":"有时会","score":1},{"value":2,"label":"很少会","score":2},{"value":3,"label":"从不会","score":3}]',1,TRUE),
+(2,1,'/api/video/q2.mp4','宝宝会用手指指向他/她感兴趣的物品（如玩具、食物）吗？','[{"value":0,"label":"经常这样做","score":0},{"value":1,"label":"有时这样做","score":1},{"value":2,"label":"很少这样做","score":2},{"value":3,"label":"从不这样做","score":3}]',2,TRUE),
+(3,1,'/api/video/q3.mp4','宝宝会使用简单手势表达需求吗？（如挥手再见、伸手要抱）','[{"value":0,"label":"经常使用","score":0},{"value":1,"label":"有时使用","score":1},{"value":2,"label":"很少使用","score":2},{"value":3,"label":"从不使用","score":3}]',3,TRUE),
+(4,1,'/api/video/q4.mp4','宝宝会模仿您的简单动作或表情吗？（如拍手、做鬼脸）','[{"value":0,"label":"经常模仿","score":0},{"value":1,"label":"有时模仿","score":1},{"value":2,"label":"很少模仿","score":2},{"value":3,"label":"从不模仿","score":3}]',4,TRUE),
+(5,1,'/api/video/q5.mp4','宝宝会和您进行目光对视吗？（如喂奶、玩耍时会看您的眼睛）','[{"value":0,"label":"经常对视","score":0},{"value":1,"label":"有时对视","score":1},{"value":2,"label":"很少对视","score":2},{"value":3,"label":"从不/回避对视","score":3}]',5,TRUE),
+(6,1,'/api/video/q6.mp4','当您对宝宝微笑时，他/她会回应微笑吗？','[{"value":0,"label":"总是回应","score":0},{"value":1,"label":"有时回应","score":1},{"value":2,"label":"很少回应","score":2},{"value":3,"label":"从不回应","score":3}]',6,FALSE),
+(7,1,'/api/video/q7.mp4','宝宝会发出不同的声音（如咿呀学语）来表达情绪或需求吗？','[{"value":0,"label":"经常发声","score":0},{"value":1,"label":"有时发声","score":1},{"value":2,"label":"很少发声","score":2},{"value":3,"label":"几乎不发声","score":3}]',7,FALSE),
+(8,1,'/api/video/q8.mp4','宝宝对突然的声音有正常反应吗？（如门铃声会转头看）','[{"value":0,"label":"反应正常","score":0},{"value":1,"label":"有时反应弱","score":1},{"value":2,"label":"经常反应弱","score":2},{"value":3,"label":"对声音无反应","score":3}]',8,FALSE),
+(9,1,'/api/video/q9.mp4','宝宝会关注其他小朋友吗？（如盯着看其他孩子玩耍）','[{"value":0,"label":"很感兴趣","score":0},{"value":1,"label":"有点兴趣","score":1},{"value":2,"label":"不太感兴趣","score":2},{"value":3,"label":"完全不感兴趣","score":3}]',9,FALSE),
+(10,1,'/api/video/q10.mp4','宝宝在不安或摔倒时会寻求您的安慰吗？','[{"value":0,"label":"经常主动寻求","score":0},{"value":1,"label":"有时寻求","score":1},{"value":2,"label":"很少寻求","score":2},{"value":3,"label":"从不寻求安慰","score":3}]',10,FALSE),
+(11,1,'/api/video/q11.mp4','整体来看，您对宝宝目前的社交沟通发育是否感到担忧？','[{"value":0,"label":"完全不担心","score":0},{"value":1,"label":"略微担心","score":1},{"value":2,"label":"比较担心","score":2},{"value":3,"label":"非常担心","score":3}]',11,FALSE);
+
+-- ============================================================
+-- 版本2 题目：18个月评估（qid=2，14题，ID 12-25）
+-- ============================================================
+INSERT IGNORE INTO questions(id, qid, video_url, content, options, sort, is_key) VALUES
+(12,2,'/api/video/q12.mp4','宝宝和您有良好的目光对视吗？（如玩耍、互动时会看您的眼睛）','[{"value":0,"label":"经常对视","score":0},{"value":1,"label":"有时对视","score":1},{"value":2,"label":"很少对视","score":2},{"value":3,"label":"从不/回避对视","score":3}]',1,TRUE),
+(13,2,'/api/video/q13.mp4','宝宝会用手指指向他/她感兴趣的物品，并看向您与您分享吗？','[{"value":0,"label":"经常这样做","score":0},{"value":1,"label":"有时这样做","score":1},{"value":2,"label":"很少这样做","score":2},{"value":3,"label":"从不这样做","score":3}]',2,TRUE),
+(14,2,'/api/video/q14.mp4','宝宝会使用多种手势来表达需求吗？（如点头、摇头、指物、挥手）','[{"value":0,"label":"经常使用多种手势","score":0},{"value":1,"label":"使用一些手势","score":1},{"value":2,"label":"很少使用手势","score":2},{"value":3,"label":"从不使用手势","score":3}]',3,TRUE),
+(15,2,'/api/video/q15.mp4','宝宝会主动把自己喜欢的物品拿给您看吗？（不是为了求助，而是分享）','[{"value":0,"label":"经常这样做","score":0},{"value":1,"label":"有时这样做","score":1},{"value":2,"label":"很少这样做","score":2},{"value":3,"label":"从不这样做","score":3}]',4,TRUE),
+(16,2,'/api/video/q16.mp4','宝宝会玩简单的假装游戏吗？（如假装喂娃娃、假装打电话、推小汽车）','[{"value":0,"label":"经常玩","score":0},{"value":1,"label":"有时玩","score":1},{"value":2,"label":"很少玩","score":2},{"value":3,"label":"从不玩","score":3}]',5,TRUE),
+(17,2,'/api/video/q17.mp4','当您叫宝宝的名字时，他/她会转头看向您吗？','[{"value":0,"label":"经常会","score":0},{"value":1,"label":"有时会","score":1},{"value":2,"label":"很少会","score":2},{"value":3,"label":"从不会","score":3}]',6,FALSE),
+(18,2,'/api/video/q18.mp4','宝宝会模仿您的动作或声音吗？（如拍桌子、发有趣的声音）','[{"value":0,"label":"经常模仿","score":0},{"value":1,"label":"有时模仿","score":1},{"value":2,"label":"很少模仿","score":2},{"value":3,"label":"从不模仿","score":3}]',7,FALSE),
+(19,2,'/api/video/q19.mp4','宝宝对其他小朋友表现出兴趣吗？（如看他们玩、靠近他们）','[{"value":0,"label":"很感兴趣","score":0},{"value":1,"label":"有点兴趣","score":1},{"value":2,"label":"不太感兴趣","score":2},{"value":3,"label":"完全不感兴趣","score":3}]',8,FALSE),
+(20,2,'/api/video/q20.mp4','宝宝会说有意义的单词吗？（如"妈妈""狗狗"等）','[{"value":0,"label":"会说多个词","score":0},{"value":1,"label":"会说少量词","score":1},{"value":2,"label":"几乎不说词","score":2},{"value":3,"label":"完全不说词","score":3}]',9,FALSE),
+(21,2,'/api/video/q21.mp4','宝宝能听懂简单指令吗？（如"把球给妈妈""来这边"）','[{"value":0,"label":"能听懂多个","score":0},{"value":1,"label":"能听懂一些","score":1},{"value":2,"label":"很少能听懂","score":2},{"value":3,"label":"完全听不懂","score":3}]',10,FALSE),
+(22,2,'/api/video/q22.mp4','宝宝会主动发起与您的互动游戏吗？（如躲猫猫、拍手游戏）','[{"value":0,"label":"经常主动发起","score":0},{"value":1,"label":"有时发起","score":1},{"value":2,"label":"很少发起","score":2},{"value":3,"label":"从不发起","score":3}]',11,FALSE),
+(23,2,'/api/video/q23.mp4','宝宝的情绪反应是否与情境相称？（如摔倒会哭、得到玩具会笑）','[{"value":0,"label":"总是相称","score":0},{"value":1,"label":"基本相称","score":1},{"value":2,"label":"经常不恰当","score":2},{"value":3,"label":"完全不恰当","score":3}]',12,FALSE),
+(24,2,'/api/video/q24.mp4','宝宝对声音、触觉等感官刺激有异常反应吗？（如对某些声音过度敏感或迟钝）','[{"value":0,"label":"没有异常","score":0},{"value":1,"label":"偶尔异常","score":1},{"value":2,"label":"经常异常","score":2},{"value":3,"label":"明显异常","score":3}]',13,FALSE),
+(25,2,'/api/video/q25.mp4','整体来看，您对宝宝目前的社交沟通发育是否感到担忧？','[{"value":0,"label":"完全不担心","score":0},{"value":1,"label":"略微担心","score":1},{"value":2,"label":"比较担心","score":2},{"value":3,"label":"非常担心","score":3}]',14,FALSE);
+
+-- ============================================================
+-- 版本3 题目：24个月评估（qid=3，16题，ID 26-41）
+-- ============================================================
+INSERT IGNORE INTO questions(id, qid, video_url, content, options, sort, is_key) VALUES
+(26,3,'/api/video/q26.mp4','孩子在与人交流时会有适当的眼神接触吗？','[{"value":0,"label":"经常有","score":0},{"value":1,"label":"有时有","score":1},{"value":2,"label":"很少有","score":2},{"value":3,"label":"完全没有","score":3}]',1,TRUE),
+(27,3,'/api/video/q27.mp4','孩子会用手指指向远处的物品，并回头看向您确认您也在看吗？','[{"value":0,"label":"经常这样做","score":0},{"value":1,"label":"有时这样做","score":1},{"value":2,"label":"很少这样做","score":2},{"value":3,"label":"从不这样做","score":3}]',2,TRUE),
+(28,3,'/api/video/q28.mp4','孩子能协调使用眼神、手势和声音来与您沟通吗？','[{"value":0,"label":"协调得很好","score":0},{"value":1,"label":"基本能协调","score":1},{"value":2,"label":"很少协调使用","score":2},{"value":3,"label":"不能协调使用","score":3}]',3,TRUE),
+(29,3,'/api/video/q29.mp4','孩子会主动拿玩具或物品给您看，并观察您的反应吗？','[{"value":0,"label":"经常这样做","score":0},{"value":1,"label":"有时这样做","score":1},{"value":2,"label":"很少这样做","score":2},{"value":3,"label":"从不这样做","score":3}]',4,TRUE),
+(30,3,'/api/video/q30.mp4','孩子会进行简单的假装游戏吗？（如假装煮饭、照顾娃娃、开汽车）','[{"value":0,"label":"经常玩","score":0},{"value":1,"label":"有时玩","score":1},{"value":2,"label":"很少玩","score":2},{"value":3,"label":"从不玩","score":3}]',5,TRUE),
+(31,3,'/api/video/q31.mp4','叫孩子名字时，他/她能正常回应吗？','[{"value":0,"label":"总是回应","score":0},{"value":1,"label":"经常回应","score":1},{"value":2,"label":"偶尔回应","score":2},{"value":3,"label":"从不回应","score":3}]',6,FALSE),
+(32,3,'/api/video/q32.mp4','孩子会模仿他人的行为和语言吗？','[{"value":0,"label":"经常模仿","score":0},{"value":1,"label":"有时模仿","score":1},{"value":2,"label":"很少模仿","score":2},{"value":3,"label":"从不模仿","score":3}]',7,FALSE),
+(33,3,'/api/video/q33.mp4','孩子对其他小朋友表现出兴趣并尝试互动吗？','[{"value":0,"label":"很感兴趣并互动","score":0},{"value":1,"label":"有兴趣但少互动","score":1},{"value":2,"label":"不太感兴趣","score":2},{"value":3,"label":"完全不感兴趣","score":3}]',8,FALSE),
+(34,3,'/api/video/q34.mp4','孩子能理解简单的指令和问题吗？（如"把鞋子拿过来""要喝水吗"）','[{"value":0,"label":"理解很好","score":0},{"value":1,"label":"基本能理解","score":1},{"value":2,"label":"理解困难","score":2},{"value":3,"label":"完全不理解","score":3}]',9,FALSE),
+(35,3,'/api/video/q35.mp4','孩子能用词语或短语来表达需求吗？','[{"value":0,"label":"能用短语表达","score":0},{"value":1,"label":"能用单词表达","score":1},{"value":2,"label":"很少用语言表达","score":2},{"value":3,"label":"完全不用语言","score":3}]',10,FALSE),
+(36,3,'/api/video/q36.mp4','孩子会主动与您进行来回的互动游戏吗？（如轮流推球、躲猫猫）','[{"value":0,"label":"经常主动互动","score":0},{"value":1,"label":"有时互动","score":1},{"value":2,"label":"很少互动","score":2},{"value":3,"label":"从不互动","score":3}]',11,FALSE),
+(37,3,'/api/video/q37.mp4','孩子能跟随您的手指方向看向您所指的物品吗？','[{"value":0,"label":"总是能跟随","score":0},{"value":1,"label":"经常能跟随","score":1},{"value":2,"label":"偶尔能跟随","score":2},{"value":3,"label":"从不跟随","score":3}]',12,FALSE),
+(38,3,'/api/video/q38.mp4','孩子玩玩具的方式是否正常？（如会用正确的方式玩，而非只转轮子或排列）','[{"value":0,"label":"玩法正常","score":0},{"value":1,"label":"偶尔玩法异常","score":1},{"value":2,"label":"经常玩法异常","score":2},{"value":3,"label":"玩法明显异常","score":3}]',13,FALSE),
+(39,3,'/api/video/q39.mp4','孩子有重复刻板的行为吗？（如反复转圈、摆手、排列物品、晃动身体）','[{"value":0,"label":"没有","score":0},{"value":1,"label":"偶尔有","score":1},{"value":2,"label":"经常有","score":2},{"value":3,"label":"非常频繁","score":3}]',14,FALSE),
+(40,3,'/api/video/q40.mp4','孩子的情绪变化是否突然且难以安抚？','[{"value":0,"label":"情绪平稳","score":0},{"value":1,"label":"偶尔情绪波动","score":1},{"value":2,"label":"经常情绪波动","score":2},{"value":3,"label":"频繁且难以安抚","score":3}]',15,FALSE),
+(41,3,'/api/video/q41.mp4','整体来看，您对孩子目前的社交沟通发育是否感到担忧？','[{"value":0,"label":"完全不担心","score":0},{"value":1,"label":"略微担心","score":1},{"value":2,"label":"比较担心","score":2},{"value":3,"label":"非常担心","score":3}]',16,FALSE);
+
+-- ============================================================
+-- 版本4 题目：学前评估（qid=4，20题，ID 42-61）
+-- ============================================================
+INSERT IGNORE INTO questions(id, qid, video_url, content, options, sort, is_key) VALUES
+(42,4,'/api/video/q42.mp4','孩子会用手指指向感兴趣的物品或事件，并看向您以分享注意吗？','[{"value":0,"label":"经常这样做","score":0},{"value":1,"label":"有时这样做","score":1},{"value":2,"label":"很少这样做","score":2},{"value":3,"label":"从不这样做","score":3}]',1,TRUE),
+(43,4,'/api/video/q43.mp4','孩子与人交流时能保持适当的眼神接触吗？','[{"value":0,"label":"经常保持","score":0},{"value":1,"label":"有时保持","score":1},{"value":2,"label":"很少保持","score":2},{"value":3,"label":"从不/回避对视","score":3}]',2,TRUE),
+(44,4,'/api/video/q44.mp4','孩子会主动向您展示他/她完成的作品或有趣的发现吗？','[{"value":0,"label":"经常展示","score":0},{"value":1,"label":"有时展示","score":1},{"value":2,"label":"很少展示","score":2},{"value":3,"label":"从不展示","score":3}]',3,TRUE),
+(45,4,'/api/video/q45.mp4','孩子会进行假装游戏并邀请他人参与吗？（如角色扮演、过家家）','[{"value":0,"label":"经常玩且邀请他人","score":0},{"value":1,"label":"自己玩假装游戏","score":1},{"value":2,"label":"很少玩假装游戏","score":2},{"value":3,"label":"从不玩假装游戏","score":3}]',4,TRUE),
+(46,4,'/api/video/q46.mp4','孩子能与同伴进行来回的社交互动吗？（如轮流说话、轮流玩游戏）','[{"value":0,"label":"互动流畅","score":0},{"value":1,"label":"基本能互动","score":1},{"value":2,"label":"互动有困难","score":2},{"value":3,"label":"无法互动","score":3}]',5,TRUE),
+(47,4,'/api/video/q47.mp4','孩子能同时执行两个不相关的指令吗？（如"先把玩具收好，然后去洗手"）','[{"value":0,"label":"能轻松完成","score":0},{"value":1,"label":"需要提醒完成","score":1},{"value":2,"label":"只能完成一个","score":2},{"value":3,"label":"完全不能完成","score":3}]',6,TRUE),
+(48,4,'/api/video/q48.mp4','孩子有重复、刻板或异常的语言吗？（如反复说同一句话、模仿广告语、自创奇怪词语）','[{"value":0,"label":"语言正常","score":0},{"value":1,"label":"偶尔异常","score":1},{"value":2,"label":"经常异常","score":2},{"value":3,"label":"明显异常","score":3}]',7,TRUE),
+(49,4,'/api/video/q49.mp4','孩子对感官刺激有异常强烈或迟钝的反应吗？（如对声音过度敏感、对疼痛不敏感、迷恋旋转物品）','[{"value":0,"label":"没有异常","score":0},{"value":1,"label":"偶尔异常","score":1},{"value":2,"label":"经常异常","score":2},{"value":3,"label":"明显异常","score":3}]',8,TRUE),
+(50,4,'/api/video/q50.mp4','当您叫孩子的名字时，他/她会回应吗？','[{"value":0,"label":"总是回应","score":0},{"value":1,"label":"经常回应","score":1},{"value":2,"label":"偶尔回应","score":2},{"value":3,"label":"从不回应","score":3}]',9,FALSE),
+(51,4,'/api/video/q51.mp4','孩子会模仿他人的动作、表情或语言吗？','[{"value":0,"label":"经常模仿","score":0},{"value":1,"label":"有时模仿","score":1},{"value":2,"label":"很少模仿","score":2},{"value":3,"label":"从不模仿","score":3}]',10,FALSE),
+(52,4,'/api/video/q52.mp4','孩子对其他小朋友表现出兴趣并愿意一起玩吗？','[{"value":0,"label":"很感兴趣","score":0},{"value":1,"label":"有点兴趣","score":1},{"value":2,"label":"不太感兴趣","score":2},{"value":3,"label":"完全不感兴趣","score":3}]',11,FALSE),
+(53,4,'/api/video/q53.mp4','孩子能理解日常对话和简单故事吗？','[{"value":0,"label":"理解良好","score":0},{"value":1,"label":"基本理解","score":1},{"value":2,"label":"理解困难","score":2},{"value":3,"label":"完全不理解","score":3}]',12,FALSE),
+(54,4,'/api/video/q54.mp4','孩子能识别并回应他人的情绪吗？（如看到别人哭会关心）','[{"value":0,"label":"能识别并回应","score":0},{"value":1,"label":"有时能识别","score":1},{"value":2,"label":"很少识别","score":2},{"value":3,"label":"完全不识别","score":3}]',13,FALSE),
+(55,4,'/api/video/q55.mp4','孩子有语言发育方面的问题吗？（相比同龄儿童说话明显少或不清楚）','[{"value":0,"label":"语言发育正常","score":0},{"value":1,"label":"稍微落后","score":1},{"value":2,"label":"明显落后","score":2},{"value":3,"label":"几乎没有语言","score":3}]',14,FALSE),
+(56,4,'/api/video/q56.mp4','孩子喜欢按照固定的方式做事吗？（改变常规会引发强烈情绪反应）','[{"value":0,"label":"灵活适应变化","score":0},{"value":1,"label":"偶尔抗拒变化","score":1},{"value":2,"label":"经常抗拒变化","score":2},{"value":3,"label":"极度抗拒变化","score":3}]',15,FALSE),
+(57,4,'/api/video/q57.mp4','孩子玩玩具的方式是否与同龄儿童相似？（而非只转轮子、排列或沉迷于部分零件）','[{"value":0,"label":"玩法正常","score":0},{"value":1,"label":"偶尔玩法异常","score":1},{"value":2,"label":"经常玩法异常","score":2},{"value":3,"label":"玩法明显异常","score":3}]',16,FALSE),
+(58,4,'/api/video/q58.mp4','孩子的情绪变化是否突然、激烈且难以安抚？','[{"value":0,"label":"情绪平稳","score":0},{"value":1,"label":"偶尔情绪波动","score":1},{"value":2,"label":"经常情绪波动","score":2},{"value":3,"label":"频繁且难以安抚","score":3}]',17,FALSE),
+(59,4,'/api/video/q59.mp4','孩子的大运动发育是否正常？（如跑、跳、上下楼梯）','[{"value":0,"label":"发育正常","score":0},{"value":1,"label":"稍微落后","score":1},{"value":2,"label":"明显落后","score":2},{"value":3,"label":"严重落后","score":3}]',18,FALSE),
+(60,4,'/api/video/q60.mp4','孩子在不安或受伤时会主动寻求您的安慰吗？','[{"value":0,"label":"经常主动寻求","score":0},{"value":1,"label":"有时寻求","score":1},{"value":2,"label":"很少寻求","score":2},{"value":3,"label":"从不寻求安慰","score":3}]',19,FALSE),
+(61,4,'/api/video/q61.mp4','整体来看，您对孩子目前的社交沟通发育是否感到担忧？','[{"value":0,"label":"完全不担心","score":0},{"value":1,"label":"略微担心","score":1},{"value":2,"label":"比较担心","score":2},{"value":3,"label":"非常担心","score":3}]',20,FALSE);
 
 -- 科普文章
 INSERT IGNORE INTO articles(id, category, title, summary, content, author, date) VALUES

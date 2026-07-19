@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 /**
- * 答卷与报告服务：提交、评分、风险判定、报告查询、历史记录
+ * 答卷与报告服务（支持多版本问卷的差异化风险判定）
  */
 @Service
 public class AnswerService {
@@ -23,7 +23,7 @@ public class AnswerService {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    /** 提交答卷（服务端按题库重新计分，防止篡改） */
+    /** 提交答卷（服务端按题库重新计分，按关键项目进行风险判定） */
     @Transactional
     public Map<String, Object> submit(AnswerSubmitRequest req) {
         long uid = AuthContext.currentUserId();
@@ -35,16 +35,31 @@ public class AnswerService {
         int owner = ((Number) ownerRows.get(0).get("user_id")).intValue();
         if (owner != uid) throw new BizException(403, "无权为他人儿童提交筛查");
 
-        // 拉取该问卷所有题目
+        // 加载问卷元数据
+        List<Map<String, Object>> qRows = jdbc.queryForList(
+                "SELECT id, total_questions, key_count, risk_threshold FROM questionnaires WHERE id=?", req.getQid());
+        if (qRows.isEmpty()) throw new BizException("问卷不存在");
+        Map<String, Object> questionnaire = qRows.get(0);
+        int keyCount = ((Number) questionnaire.get("key_count")).intValue();
+        int riskThreshold = ((Number) questionnaire.get("risk_threshold")).intValue();
+
+        // 拉取该问卷所有题目（含关键项目标记）
         List<Map<String, Object>> questions = jdbc.queryForList(
-                "SELECT id, options FROM questions WHERE qid=? ORDER BY sort", req.getQid());
+                "SELECT id, options, is_key FROM questions WHERE qid=? ORDER BY sort", req.getQid());
         if (questions.isEmpty()) throw new BizException("问卷题目不存在");
         Map<Long, List<Map<String, Object>>> optionMap = new HashMap<>();
+        Map<Long, Boolean> keyMap = new HashMap<>();
         Set<Long> questionIds = new HashSet<>();
         for (Map<String, Object> q : questions) {
             Long qid = ((Number) q.get("id")).longValue();
             questionIds.add(qid);
             optionMap.put(qid, parseOptions((String) q.get("options")));
+            Object isKeyObj = q.get("is_key");
+            boolean isKey = isKeyObj != null && (
+                (isKeyObj instanceof Boolean && (Boolean) isKeyObj) ||
+                (isKeyObj instanceof Number && ((Number) isKeyObj).intValue() == 1)
+            );
+            keyMap.put(qid, isKey);
         }
 
         // 校验是否全部作答
@@ -57,9 +72,10 @@ public class AnswerService {
             throw new BizException("请回答所有题目后再提交");
         }
 
-        // 服务端计算得分
+        // 服务端计算得分 + 统计关键项目非典型数
         List<Map<String, Object>> answerDetail = new ArrayList<>();
         int totalScore = 0;
+        int keyMissCount = 0;
         for (Map<String, Object> q : questions) {
             Long qid = ((Number) q.get("id")).longValue();
             int selectedValue = answerValueMap.get(qid);
@@ -75,20 +91,32 @@ public class AnswerService {
                 }
             }
             totalScore += score;
+            // 关键项目且得分≥2视为非典型
+            if (Boolean.TRUE.equals(keyMap.get(qid)) && score >= 2) {
+                keyMissCount++;
+            }
             Map<String, Object> item = new LinkedHashMap<>();
             item.put("questionId", qid);
             item.put("value", selectedValue);
             item.put("label", label);
             item.put("score", score);
+            item.put("isKey", keyMap.get(qid));
             answerDetail.add(item);
         }
 
-        // 风险判定 0-60：低≤15 中16-35 高≥36
+        // 风险判定：关键项目非典型数 ≥ 阈值 → 高风险
         String riskLevel;
         String riskText;
-        if (totalScore <= 15) { riskLevel = "low"; riskText = "低风险"; }
-        else if (totalScore <= 35) { riskLevel = "medium"; riskText = "中风险"; }
-        else { riskLevel = "high"; riskText = "高风险"; }
+        if (keyMissCount >= riskThreshold) {
+            riskLevel = "high";
+            riskText = "高风险";
+        } else if (keyMissCount >= (riskThreshold + 1) / 2) {
+            riskLevel = "medium";
+            riskText = "中风险";
+        } else {
+            riskLevel = "low";
+            riskText = "低风险";
+        }
 
         // 序列化答案 JSON
         String answerJson;
@@ -98,8 +126,8 @@ public class AnswerService {
             throw new BizException("答案序列化失败");
         }
 
-        jdbc.update("INSERT INTO answers(child_id, qid, answer_json, total_score, risk_level) VALUES(?,?,?,?,?)",
-                req.getChildId(), req.getQid(), answerJson, totalScore, riskLevel);
+        jdbc.update("INSERT INTO answers(child_id, qid, answer_json, total_score, risk_level, key_miss_count) VALUES(?,?,?,?,?,?)",
+                req.getChildId(), req.getQid(), answerJson, totalScore, riskLevel, keyMissCount);
         long answerId = jdbc.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
 
         return report(answerId);
@@ -115,8 +143,26 @@ public class AnswerService {
         if (childRows.isEmpty()) throw new BizException("儿童档案不存在");
         Map<String, Object> child = childRows.get(0);
 
+        // 加载问卷元数据
+        long qid = ((Number) ans.get("qid")).longValue();
+        List<Map<String, Object>> qRows = jdbc.queryForList(
+                "SELECT total_questions, key_count, risk_threshold FROM questionnaires WHERE id=?", qid);
+        int totalQuestions = 20;
+        int keyCount = 0;
+        int riskThreshold = 3;
+        if (!qRows.isEmpty()) {
+            Map<String, Object> q = qRows.get(0);
+            totalQuestions = ((Number) q.get("total_questions")).intValue();
+            keyCount = ((Number) q.get("key_count")).intValue();
+            riskThreshold = ((Number) q.get("risk_threshold")).intValue();
+        }
+
         int totalScore = ((Number) ans.get("total_score")).intValue();
         String riskLevel = (String) ans.get("risk_level");
+        int keyMissCount = ans.get("key_miss_count") != null
+                ? ((Number) ans.get("key_miss_count")).intValue() : 0;
+        int maxScore = totalQuestions * 3;
+
         String riskText;
         if ("low".equals(riskLevel)) riskText = "低风险";
         else if ("medium".equals(riskLevel)) riskText = "中风险";
@@ -126,9 +172,12 @@ public class AnswerService {
         result.put("id", ans.get("id"));
         result.put("child", child);
         result.put("totalScore", totalScore);
-        result.put("maxScore", 60);
+        result.put("maxScore", maxScore);
         result.put("riskLevel", riskLevel);
         result.put("riskText", riskText);
+        result.put("keyMissCount", keyMissCount);
+        result.put("keyCount", keyCount);
+        result.put("riskThreshold", riskThreshold);
         result.put("createTime", ans.get("create_time"));
         result.put("answers", parseOptions((String) ans.get("answer_json")));
         result.put("recommendations", getRecommendations(riskLevel));
@@ -139,7 +188,7 @@ public class AnswerService {
     public List<Map<String, Object>> myHistory() {
         long uid = AuthContext.currentUserId();
         return jdbc.queryForList(
-                "SELECT a.id, a.child_id, a.total_score, a.risk_level, a.create_time, " +
+                "SELECT a.id, a.child_id, a.total_score, a.risk_level, a.key_miss_count, a.create_time, " +
                         " c.name AS child_name, c.avatar AS child_avatar " +
                         " FROM answers a JOIN children c ON a.child_id=c.id " +
                         " WHERE c.user_id=? ORDER BY a.create_time DESC", uid);

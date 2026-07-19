@@ -1,9 +1,43 @@
 <view class="page-content">
     <view wx:if="{{record}}" class="result-container">
-        <view class="result-header {{record.riskLevel}}"><text class="risk-icon">{{riskIcon}}</text><text class="risk-level">{{record.riskText}}</text><text class="risk-score">筛查得分：{{record.totalScore}} / 60 分</text></view>
-        <view class="info-card"><text class="info-title">📋 基本信息</text><text class="info-line">筛查对象：{{record.childAvatar}} {{record.childName}}</text><text class="info-line">筛查时间：{{createTime}}</text><text class="info-line">答题数量：{{record.answerCount}} 题</text></view>
-        <view class="info-card"><text class="info-title">💡 专业建议</text><text wx:for="{{recommendations}}" wx:key="*this" class="info-line">• {{item}}</text></view>
-        <view class="info-card warn"><text class="info-title">⚠️ 重要提醒</text><text class="warn-text">本筛查结果仅为早期参考，不能替代专业医疗诊断。如对孩子的发育有任何疑虑，请务必咨询专业医生或前往正规医疗机构就诊。</text></view>
+        <view class="result-header {{riskLevelClass}}">
+            <text class="risk-icon">{{riskIcon}}</text>
+            <text class="risk-level">{{record.riskText}}</text>
+            <text class="risk-score">总分：{{record.totalScore}} / {{record.maxScore}} 分</text>
+        </view>
+
+        <!-- 风险判定依据 -->
+        <view class="info-card risk-detail-card">
+            <text class="info-title">📊 风险判定依据</text>
+            <view class="risk-detail-row">
+                <text class="risk-detail-label">关键项目</text>
+                <text class="risk-detail-value">{{keyMissCount}} / {{keyCount}} 项非典型</text>
+            </view>
+            <view class="risk-detail-row">
+                <text class="risk-detail-label">判定标准</text>
+                <text class="risk-detail-value">≥ {{riskThreshold}} 项非典型 → 高风险</text>
+            </view>
+            <view class="risk-detail-divider"></view>
+            <text class="risk-detail-note">"非典型"指关键项目的回答为"很少"或"从不"，提示该领域发育与典型儿童存在差异。</text>
+        </view>
+
+        <view class="info-card">
+            <text class="info-title">📋 基本信息</text>
+            <text class="info-line">筛查对象：{{record.childAvatar}} {{record.childName}}</text>
+            <text class="info-line">筛查时间：{{createTime}}</text>
+            <text class="info-line">答题数量：{{record.answerCount}} 题</text>
+        </view>
+
+        <view class="info-card">
+            <text class="info-title">💡 专业建议</text>
+            <text wx:for="{{recommendations}}" wx:key="*this" class="info-line">• {{item}}</text>
+        </view>
+
+        <view class="info-card warn">
+            <text class="info-title">⚠️ 重要提醒</text>
+            <text class="warn-text">本筛查结果仅为早期参考，不能替代专业医疗诊断。如对孩子的发育有任何疑虑，请务必咨询专业医生或前往正规医疗机构就诊。</text>
+        </view>
+
         <button class="btn btn-primary btn-block" bindtap="goHistory">查看历史记录</button>
         <button class="btn btn-outline btn-block" style="margin-top:10px" bindtap="goReferral">查看转诊机构</button>
     </view>

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 问卷与题目接口
+ * 问卷与题目接口（支持按月龄自动匹配多版本问卷）
  */
 @RestController
 @RequestMapping("/api/questionnaire")
@@ -34,5 +34,11 @@ public class QuestionnaireController {
     @GetMapping("/default")
     public Result<Map<String, Object>> defaultQuestionnaire() {
         return Result.success(questionnaireService.defaultQuestionnaire());
+    }
+
+    /** 根据儿童月龄自动匹配问卷版本 */
+    @GetMapping("/match")
+    public Result<Map<String, Object>> match(@RequestParam long childId) {
+        return Result.success(questionnaireService.matchByChildId(childId));
     }
 }

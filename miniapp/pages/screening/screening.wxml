@@ -6,30 +6,44 @@
             <text class="info-title">📋 筛查须知</text>
             <view class="info-list">
                 <text>• 本筛查采用SACS改编量表，适用于 <text style="font-weight:bold">1-5岁</text> 儿童</text>
-                <text>• 共 <text style="font-weight:bold">20道题</text>，每道题前有一段示范视频</text>
+                <text>• 系统将根据宝宝月龄 <text style="font-weight:bold">自动匹配</text> 适合的问卷版本</text>
                 <text>• 请仔细观看视频后，根据 <text style="font-weight:bold">宝宝日常表现</text> 作答</text>
-                <text>• 预计用时 <text style="font-weight:bold">10-15分钟</text></text>
+                <text>• 预计用时 <text style="font-weight:bold">5-15分钟</text></text>
             </view>
         </view>
 
-        <view class="form-group">
-            <text class="form-label">选择筛查宝宝</text>
-            <picker mode="selector" range="{{childList}}" range-key="label" value="{{pickerValue}}" bindchange="onSelectChild">
-                <view class="form-input" style="line-height:48px">{{selectedChildLabel || '-- 请选择宝宝 --'}}</view>
-            </picker>
+        <!-- 无儿童提示 -->
+        <view wx:if="{{noChildren}}" class="empty-hint">
+            <text class="empty-icon">📝</text>
+            <text class="empty-text">请先创建儿童档案</text>
+            <button class="btn btn-primary" bindtap="goAddChild">添加宝宝</button>
         </view>
 
-        <button class="btn btn-primary btn-block" bindtap="startScreening">开始筛查</button>
+        <view wx:if="{{!noChildren}}">
+            <view class="form-group">
+                <text class="form-label">选择筛查宝宝</text>
+                <picker mode="selector" range="{{childList}}" range-key="label" value="{{pickerValue}}" bindchange="onSelectChild">
+                    <view class="form-input" style="line-height:48px">{{selectedChildLabel || '-- 请选择宝宝 --'}}</view>
+                </picker>
+            </view>
+
+            <button class="btn btn-primary btn-block" bindtap="startScreening">开始筛查</button>
+        </view>
     </view>
 
     <!-- 筛查中 -->
     <view wx:if="{{started}}" class="screening-main">
+        <!-- 版本信息 -->
+        <view class="version-tag">
+            <text>{{questionnaireTitle}} · 月龄 {{matchedAgeMonths}} 个月</text>
+        </view>
+
         <!-- 进度条 -->
         <view class="progress-bar-container">
             <view class="progress-bar">
                 <view class="progress-fill" style="width: {{progressPercent}}%"></view>
             </view>
-            <text class="progress-text">{{answeredCount}}/20</text>
+            <text class="progress-text">{{answeredCount}}/{{questions.length}}</text>
         </view>
 
         <!-- 视频区域 -->
@@ -51,7 +65,7 @@
 
         <!-- 题目 -->
         <view class="question-card">
-            <text class="question-number">第 {{currentIdx + 1}} 题</text>
+            <text class="question-number">第 {{currentIdx + 1}} / {{questions.length}} 题</text>
             <text class="question-text">{{questionText}}</text>
             <view class="question-options">
                 <view
@@ -71,7 +85,7 @@
         <!-- 导航按钮 -->
         <view class="question-nav">
             <button class="btn btn-outline" bindtap="prevQuestion" disabled="{{currentIdx === 0}}">上一题</button>
-            <button wx:if="{{currentIdx < 19}}" class="btn btn-primary" bindtap="nextQuestion">下一题</button>
+            <button wx:if="{{currentIdx < questions.length - 1}}" class="btn btn-primary" bindtap="nextQuestion">下一题</button>
             <button wx:else class="btn btn-primary btn-block" bindtap="submitScreening" disabled="{{!allAnswered}}">
                 {{allAnswered ? '提交筛查' : '请回答所有题目后再提交'}}
             </button>

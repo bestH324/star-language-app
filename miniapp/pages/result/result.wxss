@@ -5,3 +5,9 @@
 .info-title { font-size: 16px; font-weight: 600; display: block; margin-bottom: 10px; }
 .info-line { display: block; font-size: 14px; color: var(--text-secondary); line-height: 1.8; }
 .warn { background: var(--primary-lighter); } .warn-text { display: block; font-size: 13px; color: var(--primary-dark); line-height: 1.6; }
+.risk-detail-card { border-left: 4rpx solid var(--primary); }
+.risk-detail-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; }
+.risk-detail-label { font-size: 14px; color: var(--text-secondary); }
+.risk-detail-value { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.risk-detail-divider { height: 1rpx; background: var(--border); margin: 8px 0; }
+.risk-detail-note { font-size: 12px; color: var(--text-light); line-height: 1.6; display: block; }

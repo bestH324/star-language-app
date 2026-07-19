@@ -34,6 +34,10 @@ CREATE TABLE IF NOT EXISTS questionnaires (
   title            VARCHAR(100) NOT NULL,
   description      TEXT,
   total_questions  INT DEFAULT 20,
+  min_age_months   INT COMMENT '适用月龄下限',
+  max_age_months   INT COMMENT '适用月龄上限',
+  key_count        INT COMMENT '关键项目数量',
+  risk_threshold   INT COMMENT '风险判定阈值（关键项目非典型数≥此值→高风险）',
   create_time      DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -45,18 +49,20 @@ CREATE TABLE IF NOT EXISTS questions (
   content     TEXT NOT NULL,                      -- 题干
   options     TEXT NOT NULL,                      -- 选项 JSON：[{value,label,score}]
   sort        INT NOT NULL,                       -- 排序
+  is_key      BOOLEAN DEFAULT FALSE,              -- 是否为关键项目
   FOREIGN KEY (qid) REFERENCES questionnaires(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 5. 答卷表（含报告）
 CREATE TABLE IF NOT EXISTS answers (
-  id           INT PRIMARY KEY AUTO_INCREMENT,
-  child_id     INT NOT NULL,                      -- 筛查儿童
-  qid          INT NOT NULL,                      -- 问卷 id
-  answer_json  TEXT NOT NULL,                     -- 答案 JSON：[{questionId,value,score}]
-  total_score  INT NOT NULL,                      -- 总得分
-  risk_level   VARCHAR(10) NOT NULL,              -- low / medium / high
-  create_time  DATETIME DEFAULT CURRENT_TIMESTAMP,
+  id             INT PRIMARY KEY AUTO_INCREMENT,
+  child_id       INT NOT NULL,                      -- 筛查儿童
+  qid            INT NOT NULL,                      -- 问卷 id
+  answer_json    TEXT NOT NULL,                     -- 答案 JSON：[{questionId,value,score}]
+  total_score    INT NOT NULL,                      -- 总得分
+  risk_level     VARCHAR(10) NOT NULL,              -- low / medium / high
+  key_miss_count INT DEFAULT 0,                     -- 关键项目非典型数量
+  create_time    DATETIME DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_answers_risk (risk_level),
   FOREIGN KEY (child_id) REFERENCES children(id) ON DELETE CASCADE,
   FOREIGN KEY (qid) REFERENCES questionnaires(id) ON DELETE CASCADE
@@ -122,3 +128,14 @@ CREATE TABLE IF NOT EXISTS appointments (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (child_id) REFERENCES children(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- 旧库迁移说明（新库无需关注，CREATE TABLE 已包含所有字段）
+-- 如果已有旧数据库，请手动执行以下 ALTER TABLE：
+--   ALTER TABLE questionnaires ADD COLUMN min_age_months INT;
+--   ALTER TABLE questionnaires ADD COLUMN max_age_months INT;
+--   ALTER TABLE questionnaires ADD COLUMN key_count INT;
+--   ALTER TABLE questionnaires ADD COLUMN risk_threshold INT;
+--   ALTER TABLE questions ADD COLUMN is_key BOOLEAN DEFAULT FALSE;
+--   ALTER TABLE answers ADD COLUMN key_miss_count INT DEFAULT 0;
+-- ============================================================

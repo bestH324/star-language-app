@@ -7,7 +7,12 @@ Page({
         childList: [],
         selectedChildId: '',
         selectedChildLabel: '',
+        pickerValue: -1,
         questionnaireId: null,
+        questionnaireTitle: '',
+        matchedAgeMonths: 0,
+        keyCount: 0,
+        riskThreshold: 0,
         questions: [],
         currentIdx: 0,
         currentOptions: [],
@@ -20,7 +25,8 @@ Page({
         allAnswered: false,
         answers: {},
         totalScore: 0,
-        loading: true
+        loading: true,
+        noChildren: false
     },
 
     onShow() {
@@ -53,6 +59,7 @@ Page({
                 pickerValue: selectedIdx,
                 selectedChildId: selectedId,
                 selectedChildLabel: selectedLabel,
+                noChildren: children.length === 0,
                 loading: false
             });
         }).catch(() => {
@@ -76,19 +83,23 @@ Page({
             wx.showToast({ title: '请先选择筛查宝宝', icon: 'none' });
             return;
         }
-        wx.showLoading({ title: '加载题目...' });
-        request.get('/api/questionnaire/default').then(questionnaire => {
+        wx.showLoading({ title: '匹配问卷...' });
+        request.get('/api/questionnaire/match?childId=' + this.data.selectedChildId).then(questionnaire => {
             wx.hideLoading();
-            // normalize field names
             const questions = (questionnaire.questions || []).map(q => ({
                 id: q.id,
                 videoUrl: q.video_url || '',
                 content: q.content,
-                options: q.options
+                options: q.options,
+                isKey: q.is_key
             }));
 
             this.setData({
                 questionnaireId: questionnaire.id,
+                questionnaireTitle: questionnaire.title || '',
+                matchedAgeMonths: questionnaire.matchedAgeMonths || 0,
+                keyCount: questionnaire.key_count || 0,
+                riskThreshold: questionnaire.risk_threshold || 3,
                 questions,
                 started: true,
                 currentIdx: 0,
@@ -196,6 +207,10 @@ Page({
         const y = Math.floor(m / 12);
         const rm = m % 12;
         return rm > 0 ? y + '岁' + rm + '个月' : y + '岁';
+    },
+
+    goAddChild() {
+        wx.navigateTo({ url: '/pages/child-manage/child-manage' });
     },
 
     onVideoError() {
