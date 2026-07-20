@@ -41,6 +41,6 @@
         </view>
     </view>
 
-    <button class="btn btn-outline btn-block" style="margin-top:12px" bindtap="exportData">📥 导出数据 (CSV)</button>
+    <button class="btn btn-outline btn-block" style="margin-top:12px" bindtap="exportData">📥 导出数据 (Excel表格)</button>
     <button class="btn btn-outline btn-block" style="margin-top:8px" bindtap="doLogout">退出后台</button>
 </view>

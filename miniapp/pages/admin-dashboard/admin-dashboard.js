@@ -70,19 +70,34 @@ Page({
         app.saveToStorage();
         wx.redirectTo({ url: '/pages/index/index' });
     },
-    exportData() {
+    async exportData() {
         const t = this.data.tab;
-        let csv = '﻿';
-        if (t === 'users') {
-            csv += '手机号,注册时间\n';
-            this.data.users.forEach(u => { csv += (u.phone||'')+','+fmt(u.createTime)+'\n'; });
-        } else if (t === 'children') {
-            csv += '昵称,性别,出生日期,年龄,筛查次数\n';
-            this.data.children.forEach(c => { csv += c.name+','+(c.gender==='male'?'男':'女')+','+(c.birthDate||'')+','+age(c.birthDate)+','+(c.screeningCount||0)+'\n'; });
-        } else {
-            csv += '儿童,风险等级,得分,筛查时间\n';
-            this.data.records.forEach(r => { csv += (r.childName||'')+','+(r.riskText||'')+','+(r.totalScore||0)+','+fmt(r.createTime)+'\n'; });
+        wx.showLoading({ title: '正在生成表格...' });
+        try {
+            const filePath = await app.downloadFile('/api/admin/export-excel?type=' + t);
+            wx.hideLoading();
+            // 用微信内置文档预览打开 xlsx，用户可点击右上角分享/保存
+            wx.openDocument({
+                filePath,
+                fileType: 'xlsx',
+                showMenu: true,
+                success() {
+                    wx.showToast({ title: '导出成功，可分享或保存', icon: 'success' });
+                },
+                fail(err) {
+                    console.error('openDocument 失败:', err);
+                    // 降级：提示用户文件已下载到临时目录
+                    wx.showModal({
+                        title: '文件已生成',
+                        content: '表格文件已生成。请在聊天中转发给"文件传输助手"即可保存到电脑。',
+                        showCancel: false
+                    });
+                }
+            });
+        } catch (e) {
+            wx.hideLoading();
+            console.error('导出失败:', e);
+            wx.showToast({ title: '导出失败，请检查网络', icon: 'none' });
         }
-        wx.setClipboardData({ data: csv, success: () => { wx.showToast({ title: 'CSV已复制到剪贴板', icon: 'success' }); } });
     }
 });

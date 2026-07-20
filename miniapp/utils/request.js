@@ -42,4 +42,35 @@ function post(url, data) { return request('POST', url, data || {}); }
 function put(url, data) { return request('PUT', url, data || {}); }
 function del(url) { return request('DELETE', url); }
 
-module.exports = { get, post, put, del, BASE_URL };
+/**
+ * 下载文件到临时路径，带 token 鉴权
+ * @param {string} url   API 相对路径（如 /api/admin/export-excel）
+ * @returns {Promise<string>}  返回临时文件路径
+ */
+function downloadFile(url) {
+  return new Promise((resolve, reject) => {
+    const token = wx.getStorageSync('token') || '';
+    wx.downloadFile({
+      url: BASE_URL + url,
+      header: { 'X-Token': token },
+      success(res) {
+        if (res.statusCode === 200) {
+          resolve(res.tempFilePath);
+        } else if (res.statusCode === 401) {
+          wx.removeStorageSync('token');
+          wx.showToast({ title: '登录已过期', icon: 'none' });
+          reject(new Error('unauthorized'));
+        } else {
+          wx.showToast({ title: '下载失败(' + res.statusCode + ')', icon: 'none' });
+          reject(new Error('download failed'));
+        }
+      },
+      fail(err) {
+        wx.showToast({ title: '网络异常，请检查连接', icon: 'none' });
+        reject(err);
+      }
+    });
+  });
+}
+
+module.exports = { get, post, put, del, downloadFile, BASE_URL };

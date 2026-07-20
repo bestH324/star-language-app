@@ -81,5 +81,33 @@ App({
                 fail(err) { reject(err); }
             });
         });
+    },
+
+    /** 下载文件（带鉴权），返回临时文件路径 */
+    downloadFile(url) {
+        const self = this;
+        return new Promise((resolve, reject) => {
+            const token = wx.getStorageSync('token') || '';
+            wx.downloadFile({
+                url: self.globalData.baseUrl + url,
+                header: { 'X-Token': token },
+                success(res) {
+                    if (res.statusCode === 200) {
+                        resolve(res.tempFilePath);
+                    } else if (res.statusCode === 401) {
+                        wx.removeStorageSync('token');
+                        wx.showToast({ title: '登录已过期', icon: 'none' });
+                        reject(new Error('unauthorized'));
+                    } else {
+                        wx.showToast({ title: '文件下载失败(' + res.statusCode + ')', icon: 'none' });
+                        reject(new Error('download failed'));
+                    }
+                },
+                fail(err) {
+                    wx.showToast({ title: '网络异常，请检查连接', icon: 'none' });
+                    reject(err);
+                }
+            });
+        });
     }
 });
