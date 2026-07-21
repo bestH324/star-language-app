@@ -34,7 +34,38 @@ public class DataInitializer {
                 log.info("已创建默认管理员账号: admin / admin123");
             }
 
-            // 2. 视频目录
+            // 2. 数据库迁移（幂等 ALTER TABLE，忽略重复列错误）
+            String[] migrations = {
+                "ALTER TABLE users ADD COLUMN gender VARCHAR(10) DEFAULT NULL",
+                "ALTER TABLE users ADD COLUMN birth_date DATE DEFAULT NULL",
+                "ALTER TABLE users ADD COLUMN education VARCHAR(50) DEFAULT NULL",
+                "ALTER TABLE users ADD COLUMN income VARCHAR(50) DEFAULT NULL",
+                "ALTER TABLE users ADD COLUMN relationship VARCHAR(50) DEFAULT NULL",
+                "ALTER TABLE users ADD COLUMN single_parent TINYINT(1) DEFAULT 0",
+                "ALTER TABLE questions ADD COLUMN is_key TINYINT(1) DEFAULT 0",
+                "ALTER TABLE questionnaires ADD COLUMN min_age_months INT DEFAULT 0",
+                "ALTER TABLE questionnaires ADD COLUMN max_age_months INT DEFAULT 240",
+                "CREATE TABLE IF NOT EXISTS caregivers (" +
+                    " id INT PRIMARY KEY AUTO_INCREMENT," +
+                    " child_id INT NOT NULL UNIQUE," +
+                    " name VARCHAR(50), gender VARCHAR(10), age INT," +
+                    " relationship VARCHAR(20), is_single_parent VARCHAR(4)," +
+                    " education VARCHAR(30), income VARCHAR(30)," +
+                    " create_time DATETIME DEFAULT CURRENT_TIMESTAMP," +
+                    " update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP," +
+                    " FOREIGN KEY (child_id) REFERENCES children(id) ON DELETE CASCADE" +
+                    ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+            };
+            for (String sql : migrations) {
+                try {
+                    jdbc.execute(sql);
+                    log.info("迁移成功: {}", sql.substring(0, Math.min(50, sql.length())));
+                } catch (Exception e) {
+                    log.info("迁移跳过: {}", e.getMessage().replace("\n", " "));
+                }
+            }
+
+            // 3. 视频目录
             String videoDir = env.getProperty("autism.video-dir", "data/videos");
             try {
                 Path vp = Paths.get(videoDir);

@@ -12,6 +12,12 @@ CREATE TABLE IF NOT EXISTS users (
   nickname    VARCHAR(50),                        -- 昵称（微信登录使用）
   openid      VARCHAR(64),                        -- 微信 openid
   avatar      VARCHAR(255),                       -- 头像 URL
+  gender      VARCHAR(10),                        -- 家长性别（male/female）
+  birth_date  DATE,                               -- 家长出生日期（用于计算年龄）
+  education   VARCHAR(50),                        -- 教育程度
+  income      VARCHAR(50),                        -- 家庭收入
+  relationship VARCHAR(50),                       -- 与儿童关系
+  single_parent TINYINT(1) DEFAULT 0,             -- 是否单亲
   create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
   update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -34,6 +40,8 @@ CREATE TABLE IF NOT EXISTS questionnaires (
   title            VARCHAR(100) NOT NULL,
   description      TEXT,
   total_questions  INT DEFAULT 20,
+  min_age_months   INT DEFAULT 0,                 -- 适用最小月龄
+  max_age_months   INT DEFAULT 240,               -- 适用最大月龄
   create_time      DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -45,6 +53,7 @@ CREATE TABLE IF NOT EXISTS questions (
   content     TEXT NOT NULL,                      -- 题干
   options     TEXT NOT NULL,                      -- 选项 JSON：[{value,label,score}]
   sort        INT NOT NULL,                       -- 排序
+  is_key      TINYINT(1) DEFAULT 0,              -- 是否关键题目（1=是 0=否）
   FOREIGN KEY (qid) REFERENCES questionnaires(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -121,4 +130,20 @@ CREATE TABLE IF NOT EXISTS appointments (
   create_time      DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (child_id) REFERENCES children(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 8. 照护者信息表（儿童 1:1 照护者，用于 Excel 导出人口学统计）
+CREATE TABLE IF NOT EXISTS caregivers (
+    id              INT PRIMARY KEY AUTO_INCREMENT,
+    child_id        INT NOT NULL UNIQUE,
+    name            VARCHAR(50),
+    gender          VARCHAR(10),
+    age             INT,
+    relationship    VARCHAR(20),
+    is_single_parent VARCHAR(4),
+    education       VARCHAR(30),
+    income          VARCHAR(30),
+    create_time     DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time     DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (child_id) REFERENCES children(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -50,6 +50,12 @@
             <artifactId>spring-security-crypto</artifactId>
         </dependency>
         <!-- JSON 处理（Spring Boot 已自带 Jackson） -->
+        <!-- Apache POI Excel 导出 -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.2.5</version>
+        </dependency>
         <!-- 测试 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -8,6 +8,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
@@ -122,6 +125,7 @@ public class AdminService {
                             .append(csv(u.get("child_count"))).append(',')
                             .append(csv(u.get("screening_count"))).append('\n');
                 }
+                break;
             }
             case "children" -> {
                 sb.append("ID,昵称,性别,出生日期,所属用户手机,筛查次数\n");
@@ -133,24 +137,34 @@ public class AdminService {
                             .append(csv(c.get("user_phone"))).append(',')
                             .append(csv(c.get("screening_count"))).append('\n');
                 }
+                break;
             }
             case "records" -> {
-                sb.append("ID,儿童,所属用户手机,风险等级,得分,筛查时间\n");
-                for (Map<String, Object> r : recordsList()) {
-                    String risk = switch ((String) r.get("risk_level")) {
-                        case "low" -> "低风险";
-                        case "medium" -> "中风险";
-                        default -> "高风险";
-                    };
-                    sb.append(csv(r.get("id"))).append(',')
-                            .append(csv(r.get("child_name"))).append(',')
-                            .append(csv(r.get("user_phone"))).append(',')
-                            .append(risk).append(',')
+                sb.append("筛查儿童姓名,性别,出生年月日,评估时间,所用筛查量表,评估风险等级,总分," +
+                        "家长姓名,家长性别,家长年龄,照顾者关系,是否单亲,教育程度,家庭收入,量表条目详情\n");
+                for (Map<String, Object> r : fetchRecordsForExport()) {
+                    sb.append(csv(r.get("child_name"))).append(',')
+                            .append(genderLabel(r.get("child_gender"))).append(',')
+                            .append(csv(r.get("child_birth_date"))).append(',')
+                            .append(csv(r.get("create_time"))).append(',')
+                            .append(csv(r.get("questionnaire_title"))).append(',')
+                            .append(riskLabel(r.get("risk_level"))).append(',')
                             .append(csv(r.get("total_score"))).append(',')
-                            .append(csv(r.get("create_time"))).append('\n');
+                            .append(csv(parentName(r))).append(',')
+                            .append(genderLabel(r.get("parent_gender"))).append(',')
+                            .append(calcAge(r.get("parent_birth_date"))).append(',')
+                            .append(csv(r.get("relationship"))).append(',')
+                            .append(singleParentLabel(r.get("single_parent"))).append(',')
+                            .append(csv(r.get("education"))).append(',')
+                            .append(csv(r.get("income"))).append(',')
+                            .append(csv(formatAnswerDetail((String) r.get("answer_json")))).append('\n');
                 }
+                break;
             }
-            default -> throw new BizException("不支持的导出类型: " + type);
+            default -> {
+                sb.append("错误信息\n");
+                sb.append("不支持的导出类型: ").append(csv(type)).append('\n');
+            }
         }
         return sb.toString();
     }
@@ -212,5 +226,115 @@ public class AdminService {
 
     private String csv(Object v) {
         return v == null ? "" : v.toString().replace(",", " ");
+    }
+
+    // ============ 导出辅助方法 ============
+
+    private final ObjectMapper mapper = new ObjectMapper();
+
+    /** 筛查记录导出专用查询：JOIN 三张表，含家长人口学信息（自动降级） */
+    private List<Map<String, Object>> fetchRecordsForExport() {
+        // 尝试完整查询（含 users 人口学字段）
+        try {
+            return jdbc.queryForList(
+                    "SELECT a.id, a.total_score, a.risk_level, a.create_time, a.answer_json, " +
+                            " c.name AS child_name, c.gender AS child_gender, c.birth_date AS child_birth_date, " +
+                            " q.title AS questionnaire_title, " +
+                            " u.nickname AS parent_nickname, u.phone AS parent_phone, " +
+                            " u.gender AS parent_gender, u.birth_date AS parent_birth_date, " +
+                            " u.education, u.income, u.relationship, u.single_parent " +
+                            " FROM answers a " +
+                            " JOIN children c ON a.child_id = c.id " +
+                            " JOIN users u ON c.user_id = u.id " +
+                            " LEFT JOIN questionnaires q ON a.qid = q.id " +
+                            " ORDER BY a.create_time DESC");
+        } catch (Exception e) {
+            // 降级：users 表缺少人口学字段时使用简化查询
+            return jdbc.queryForList(
+                    "SELECT a.id, a.total_score, a.risk_level, a.create_time, a.answer_json, " +
+                            " c.name AS child_name, c.gender AS child_gender, c.birth_date AS child_birth_date, " +
+                            " q.title AS questionnaire_title, " +
+                            " u.nickname AS parent_nickname, u.phone AS parent_phone " +
+                            " FROM answers a " +
+                            " JOIN children c ON a.child_id = c.id " +
+                            " JOIN users u ON c.user_id = u.id " +
+                            " LEFT JOIN questionnaires q ON a.qid = q.id " +
+                            " ORDER BY a.create_time DESC");
+        }
+    }
+
+    /** 家长姓名：昵称优先，无昵称显示脱敏手机号 */
+    private String parentName(Map<String, Object> row) {
+        String nickname = (String) row.get("parent_nickname");
+        if (nickname != null && !nickname.isBlank()) return nickname;
+        String phone = (String) row.get("parent_phone");
+        if (phone == null) return "";
+        return phone.length() >= 7 ? phone.substring(0, 3) + "****" + phone.substring(phone.length() - 4) : phone;
+    }
+
+    /** 风险等级中文 */
+    private String riskLabel(Object level) {
+        if (level == null) return "";
+        return switch ((String) level) {
+            case "low" -> "低风险";
+            case "medium" -> "中风险";
+            case "high" -> "高风险";
+            default -> (String) level;
+        };
+    }
+
+    /** 性别中文 */
+    private String genderLabel(Object g) {
+        if (g == null) return "";
+        return "male".equals(g) ? "男" : "女";
+    }
+
+    /** 计算年龄（从出生日期） */
+    private String calcAge(Object birthDate) {
+        if (birthDate == null) return "";
+        try {
+            String bd = birthDate.toString();
+            if (bd.length() >= 10) bd = bd.substring(0, 10);
+            long months = Period.between(LocalDate.parse(bd), LocalDate.now()).toTotalMonths();
+            if (months < 12) return months + "个月";
+            int years = (int) (months / 12);
+            int rm = (int) (months % 12);
+            return rm > 0 ? years + "岁" + rm + "个月" : years + "岁";
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    /** 是否单亲中文 */
+    private String singleParentLabel(Object v) {
+        if (v == null) return "";
+        return toInt(v) == 1 ? "是" : "否";
+    }
+
+    /** 安全转换 MySQL TINYINT(1) → int（Boolean 或 Number 均可） */
+    private int toInt(Object val) {
+        if (val == null) return 0;
+        if (val instanceof Boolean b) return b ? 1 : 0;
+        if (val instanceof Number n) return n.intValue();
+        return 0;
+    }
+
+    /** 解析 answer_json 为 "Q1:经常会, Q2:有时, ..." 格式 */
+    private String formatAnswerDetail(String answerJson) {
+        if (answerJson == null || answerJson.isBlank()) return "";
+        try {
+            List<Map<String, Object>> items = mapper.readValue(answerJson, new TypeReference<>() {});
+            StringBuilder sb = new StringBuilder();
+            int idx = 1;
+            for (Map<String, Object> item : items) {
+                if (idx > 1) sb.append("; ");
+                String label = (String) item.get("label");
+                sb.append("Q").append(idx).append(":").append(label != null ? label : "-");
+                idx++;
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            return "";
+        }
     }
 }

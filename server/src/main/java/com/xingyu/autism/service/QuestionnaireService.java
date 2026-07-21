@@ -33,10 +33,11 @@ public class QuestionnaireService {
         if (qRows.isEmpty()) throw new BizException("问卷不存在");
         Map<String, Object> q = qRows.get(0);
         List<Map<String, Object>> questions = jdbc.queryForList(
-                "SELECT id, qid, video_url, content, options, sort FROM questions WHERE qid=? ORDER BY sort", qid);
-        // 解析 options 字段为 JSON 对象
+                "SELECT id, qid, video_url, content, options, sort, is_key FROM questions WHERE qid=? ORDER BY sort", qid);
+        // 解析 options 字段为 JSON 对象，is_key 安全转 int
         for (Map<String, Object> row : questions) {
             row.put("options", parseOptions((String) row.get("options")));
+            row.put("is_key", toInt(row.get("is_key")));
         }
         Map<String, Object> result = new HashMap<>(q);
         result.put("questions", questions);
@@ -54,5 +55,13 @@ public class QuestionnaireService {
         } catch (Exception e) {
             throw new BizException("题目选项解析失败: " + e.getMessage());
         }
+    }
+
+    /** 安全转换 MySQL TINYINT(1) → int（Boolean 或 Number 均可） */
+    private int toInt(Object val) {
+        if (val == null) return 0;
+        if (val instanceof Boolean b) return b ? 1 : 0;
+        if (val instanceof Number n) return n.intValue();
+        return 0;
     }
 }

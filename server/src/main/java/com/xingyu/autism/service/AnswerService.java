@@ -37,7 +37,7 @@ public class AnswerService {
 
         // 拉取该问卷所有题目
         List<Map<String, Object>> questions = jdbc.queryForList(
-                "SELECT id, options FROM questions WHERE qid=? ORDER BY sort", req.getQid());
+                "SELECT id, options, is_key FROM questions WHERE qid=? ORDER BY sort", req.getQid());
         if (questions.isEmpty()) throw new BizException("问卷题目不存在");
         Map<Long, List<Map<String, Object>>> optionMap = new HashMap<>();
         Set<Long> questionIds = new HashSet<>();
@@ -80,6 +80,7 @@ public class AnswerService {
             item.put("value", selectedValue);
             item.put("label", label);
             item.put("score", score);
+            item.put("isKey", toInt(q.get("is_key")));
             answerDetail.add(item);
         }
 
@@ -184,5 +185,13 @@ public class AnswerService {
         } catch (Exception e) {
             throw new BizException("JSON 解析失败: " + e.getMessage());
         }
+    }
+
+    /** 安全转换 MySQL TINYINT(1) → int（Boolean 或 Number 均可） */
+    private int toInt(Object val) {
+        if (val == null) return 0;
+        if (val instanceof Boolean b) return b ? 1 : 0;
+        if (val instanceof Number n) return n.intValue();
+        return 0;
     }
 }

@@ -70,34 +70,26 @@ Page({
         app.saveToStorage();
         wx.redirectTo({ url: '/pages/index/index' });
     },
-    async exportData() {
+    exportData() {
         const t = this.data.tab;
-        wx.showLoading({ title: '正在生成表格...' });
-        try {
-            const filePath = await app.downloadFile('/api/admin/export-excel?type=' + t);
-            wx.hideLoading();
-            // 用微信内置文档预览打开 xlsx，用户可点击右上角分享/保存
-            wx.openDocument({
-                filePath,
-                fileType: 'xlsx',
-                showMenu: true,
-                success() {
-                    wx.showToast({ title: '导出成功，可分享或保存', icon: 'success' });
-                },
-                fail(err) {
-                    console.error('openDocument 失败:', err);
-                    // 降级：提示用户文件已下载到临时目录
-                    wx.showModal({
-                        title: '文件已生成',
-                        content: '表格文件已生成。请在聊天中转发给"文件传输助手"即可保存到电脑。',
-                        showCancel: false
+        const app = getApp();
+        const url = app.globalData.baseUrl + '/api/admin/export-csv?type=' + t;
+
+        wx.showModal({
+            title: '导出 CSV',
+            content: '请在电脑浏览器中打开以下地址下载：\n\n' + url,
+            confirmText: '复制地址',
+            cancelText: '关闭',
+            success(res) {
+                if (res.confirm) {
+                    wx.setClipboardData({
+                        data: url,
+                        success() {
+                            wx.showToast({ title: '地址已复制，请在浏览器中打开', icon: 'none', duration: 2000 });
+                        }
                     });
                 }
-            });
-        } catch (e) {
-            wx.hideLoading();
-            console.error('导出失败:', e);
-            wx.showToast({ title: '导出失败，请检查网络', icon: 'none' });
-        }
+            }
+        });
     }
 });
