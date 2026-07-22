@@ -7,6 +7,7 @@ Page({
         childList: [],
         selectedChildId: '',
         selectedChildLabel: '',
+        questionnaireInfo: null,
         questionnaireId: null,
         questions: [],
         currentIdx: 0,
@@ -20,11 +21,24 @@ Page({
         allAnswered: false,
         answers: {},
         totalScore: 0,
+        totalQuestions: 20,
         loading: true
     },
 
     onShow() {
-        this._loadChildren();
+        if (!this.data.started) {
+            // 隐私页回调通过 globalData 同步传参（绕过 setData 异步问题）
+            const pending = app.globalData.screening;
+            if (pending && pending.consentedChildId) {
+                const cid = pending.consentedChildId;
+                pending.consentedChildId = null;
+                // 直接启动筛查，不重载儿童列表
+                this.setData({ selectedChildId: cid });
+                this._doStartScreening(cid);
+                return;
+            }
+            this._loadChildren();
+        }
     },
 
     _loadChildren() {
@@ -44,9 +58,9 @@ Page({
                     selectedIdx = idx;
                     selectedId = children[idx].id;
                     selectedLabel = childList[idx].label;
-                    app.globalData.screening.childId = null;
                 }
             }
+            app.globalData.screening.childId = null;
 
             this.setData({
                 childList,
@@ -55,6 +69,7 @@ Page({
                 selectedChildLabel: selectedLabel,
                 loading: false
             });
+            if (selectedId) this._loadQuestionnaireInfo(selectedId);
         }).catch(() => {
             this.setData({ loading: false });
         });
@@ -68,28 +83,58 @@ Page({
                 selectedChildId: item.value,
                 selectedChildLabel: item.label
             });
+            this._loadQuestionnaireInfo(item.value);
         }
     },
 
-    startScreening() {
-        if (!this.data.selectedChildId) {
+    _loadQuestionnaireInfo(childId) {
+        request.get('/api/questionnaire/match?childId=' + childId).then(info => {
+            this.setData({ questionnaireInfo: info });
+        }).catch(() => {});
+    },
+
+    startScreening(childId) {
+        // 兼容两种调用：WXML按钮(bindtap传事件对象) / 隐私页回调(传数字childId)
+        const cid = (typeof childId === 'number' || typeof childId === 'string') ? childId : this.data.selectedChildId;
+        if (!cid || typeof cid !== 'number' && isNaN(Number(cid))) {
             wx.showToast({ title: '请先选择筛查宝宝', icon: 'none' });
             return;
         }
+        // 确保 selectedChildId 已设置（从隐私页回调时可能未设）
+        if (childId && (typeof childId === 'number' || typeof childId === 'string')) {
+            this.setData({ selectedChildId: Number(cid) });
+        }
+        // 检查是否已签署知情同意书
+        request.get('/api/user/profile').then(profile => {
+            if (profile.agreed_privacy === 1) {
+                this._doStartScreening(cid);
+            } else {
+                wx.navigateTo({ url: '/pages/privacy-agreement/privacy-agreement?childId=' + cid });
+            }
+        }).catch(() => {
+            wx.showToast({ title: '网络异常，请重试', icon: 'none' });
+        });
+    },
+
+    _doStartScreening(childId) {
+        const cid = Number(childId || this.data.selectedChildId);
         wx.showLoading({ title: '加载题目...' });
-        request.get('/api/questionnaire/default').then(questionnaire => {
+        request.get('/api/questionnaire/match?childId=' + cid).then(questionnaire => {
             wx.hideLoading();
-            // normalize field names
             const questions = (questionnaire.questions || []).map(q => ({
                 id: q.id,
                 videoUrl: q.video_url || '',
                 content: q.content,
-                options: q.options
+                options: q.options,
+                isReverse: q.is_reverse
             }));
+            const totalQuestions = questions.length;
 
             this.setData({
+                questionnaireInfo: questionnaire,
                 questionnaireId: questionnaire.id,
                 questions,
+                totalQuestions,
                 started: true,
                 currentIdx: 0,
                 answers: {},
@@ -121,11 +166,12 @@ Page({
     },
 
     selectAnswer(e) {
-        const { value, score } = e.currentTarget.dataset;
+        const value = e.currentTarget.dataset.value;
         const questions = this.data.questions;
         const q = questions[this.data.currentIdx];
         const prev = this.data.answers[q.id];
         const prevScore = prev ? prev.score : 0;
+        const score = q.isReverse ? (value === 1 ? 0 : 1) : value;
 
         const answers = { ...this.data.answers, [q.id]: { value, score } };
         const totalScore = this.data.totalScore + score - prevScore;

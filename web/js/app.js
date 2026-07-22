@@ -613,7 +613,7 @@ function loadQuestion(index) {
 
     optionsContainer.innerHTML = question.options.map(opt => `
         <div class="question-option ${savedAnswer && savedAnswer.value === opt.value ? 'selected' : ''}"
-             onclick="selectAnswer(${question.id}, ${opt.value}, ${opt.score})">
+             onclick="selectAnswer(${question.id}, ${opt.value}, ${question.isReverse})">
             <div class="option-dot">${savedAnswer && savedAnswer.value === opt.value ? '✓' : ''}</div>
             ${opt.label}
         </div>
@@ -623,8 +623,9 @@ function loadQuestion(index) {
     updateNavButtons();
 }
 
-function selectAnswer(questionId, value, score) {
-    // 记录答案
+function selectAnswer(questionId, value, isReverse) {
+    // 记录答案（服务端评分规则：反选题 经常如此=0分/极少如此=1分，普通题按value计分）
+    const score = isReverse ? (value === 1 ? 0 : 1) : value;
     const prevScore = AppState.screening.answers[questionId]?.score || 0;
     AppState.screening.answers[questionId] = { value, score };
     AppState.screening.totalScore += (score - prevScore);
@@ -721,13 +722,13 @@ function submitScreening() {
     const totalScore = AppState.screening.totalScore;
     let riskLevel, riskText, riskIcon, riskColorClass;
 
-    // 风险等级判定 (0-60分)
-    if (totalScore <= 15) {
+    // 风险等级判定 (0-20分)
+    if (totalScore <= 5) {
         riskLevel = 'low';
         riskText = '低风险';
         riskIcon = '✅';
         riskColorClass = 'risk-low';
-    } else if (totalScore <= 35) {
+    } else if (totalScore <= 11) {
         riskLevel = 'medium';
         riskText = '中风险';
         riskIcon = '⚠️';
@@ -775,7 +776,7 @@ function renderScreeningResult(record) {
         <div class="result-header ${record.riskLevel === 'low' ? 'risk-low' : record.riskLevel === 'medium' ? 'risk-medium' : 'risk-high'}">
             <div class="result-risk-icon">${record.riskLevel === 'low' ? '✅' : record.riskLevel === 'medium' ? '⚠️' : '🔴'}</div>
             <div class="result-risk-level">${record.riskText}</div>
-            <div class="result-score">筛查得分：${record.totalScore} / ${SCREENING_QUESTIONS.length * 3} 分</div>
+            <div class="result-score">筛查得分：${record.totalScore} / ${SCREENING_QUESTIONS.length} 分</div>
         </div>
 
         <div class="result-detail-card">

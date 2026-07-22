@@ -20,6 +20,12 @@ public class ChildRequest {
 
     private String avatar;
 
+    private Boolean isPremature;
+
+    private Integer prematureWeeks;
+
+    private String city;
+
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
     public String getGender() { return gender; }
@@ -28,4 +34,10 @@ public class ChildRequest {
     public void setBirthDate(String birthDate) { this.birthDate = birthDate; }
     public String getAvatar() { return avatar; }
     public void setAvatar(String avatar) { this.avatar = avatar; }
+    public Boolean getIsPremature() { return isPremature; }
+    public void setIsPremature(Boolean isPremature) { this.isPremature = isPremature; }
+    public Integer getPrematureWeeks() { return prematureWeeks; }
+    public void setPrematureWeeks(Integer prematureWeeks) { this.prematureWeeks = prematureWeeks; }
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
 }

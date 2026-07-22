@@ -1,3 +1,6 @@
+.risk-disclaimer { background: #FFF5F5; border: 2rpx solid #FFCDD2; border-radius: 8rpx; padding: 12rpx 20rpx; margin-bottom: 16px; }
+.risk-disclaimer text { color: #D32F2F; font-size: 24rpx; line-height: 1.6; }
+
 .screening-info-card { background: #fff; border-radius: var(--radius); padding: 16px; margin-bottom: 20px; }
 .info-title { font-size: 17px; font-weight: 600; display: block; margin-bottom: 10px; }
 .info-list text { display: block; font-size: 14px; color: var(--text-secondary); line-height: 1.8; }

@@ -5,7 +5,7 @@ Page({
     data: {
         list: [], showForm: false, editingId: null, today: '',
         avatars: ['👶', '👦', '👧', '🧒', '🐻', '🐰'],
-        form: { name: '', gender: '', birth: '', avatar: '👶' }
+        form: { name: '', gender: '', birth: '', avatar: '👶', isPremature: false, prematureWeeks: '', city: '' }
     },
 
     onShow() {
@@ -23,6 +23,9 @@ Page({
                 gender: c.gender,
                 birthDate: c.birth_date,
                 avatar: c.avatar || '👶',
+                isPremature: c.is_premature === 1,
+                prematureWeeks: c.premature_weeks || 0,
+                city: c.city || '',
                 ageText: this._age(c.birth_date),
                 birthFmt: this._fmt(c.birth_date)
             }));
@@ -31,7 +34,7 @@ Page({
     },
 
     showForm() {
-        this.setData({ showForm: true, editingId: null, form: { name: '', gender: '', birth: '', avatar: '👶' } });
+        this.setData({ showForm: true, editingId: null, form: { name: '', gender: '', birth: '', avatar: '👶', isPremature: false, prematureWeeks: '', city: '' } });
     },
 
     cancelForm() { this.setData({ showForm: false }); },
@@ -39,6 +42,9 @@ Page({
     onFName(e) { this.setData({ 'form.name': e.detail.value }); },
     onGender(e) { this.setData({ 'form.gender': e.currentTarget.dataset.g }); },
     onDate(e) { this.setData({ 'form.birth': e.detail.value }); },
+    onPremature(e) { this.setData({ 'form.isPremature': e.currentTarget.dataset.v }); },
+    onPrematureWeeks(e) { this.setData({ 'form.prematureWeeks': e.detail.value }); },
+    onCity(e) { this.setData({ 'form.city': e.detail.value }); },
     onAvatar(e) { this.setData({ 'form.avatar': e.currentTarget.dataset.a }); },
 
     editChild(e) {
@@ -47,7 +53,7 @@ Page({
         if (!c) return;
         this.setData({
             showForm: true, editingId: id,
-            form: { name: c.name, gender: c.gender, birth: c.birthDate, avatar: c.avatar || '👶' }
+            form: { name: c.name, gender: c.gender, birth: c.birthDate, avatar: c.avatar || '👶', isPremature: c.isPremature || false, prematureWeeks: c.prematureWeeks || '', city: c.city || '' }
         });
     },
 
@@ -67,10 +73,11 @@ Page({
     },
 
     saveChild() {
-        const { name, gender, birth, avatar } = this.data.form;
+        const { name, gender, birth, avatar, isPremature, prematureWeeks, city } = this.data.form;
         if (!name) { wx.showToast({ title: '请输入宝宝昵称', icon: 'none' }); return; }
         if (!gender) { wx.showToast({ title: '请选择性别', icon: 'none' }); return; }
         if (!birth) { wx.showToast({ title: '请选择出生日期', icon: 'none' }); return; }
+        if (isPremature && !prematureWeeks) { wx.showToast({ title: '请填写早产周数', icon: 'none' }); return; }
         const m = (new Date() - new Date(birth)) / (1000 * 60 * 60 * 24 * 30.44);
         if (m < 12 || m > 60) {
             wx.showToast({ title: '本筛查适用于1-5岁（12-60个月）的儿童', icon: 'none', duration: 2500 });
@@ -78,7 +85,7 @@ Page({
         }
 
         wx.showLoading({ title: '保存中...' });
-        const payload = { name, gender, birthDate: birth, avatar };
+        const payload = { name, gender, birthDate: birth, avatar, isPremature, prematureWeeks: isPremature ? Number(prematureWeeks) : 0, city: city || '' };
 
         if (this.data.editingId) {
             request.put('/api/child/update/' + this.data.editingId, payload).then(() => {

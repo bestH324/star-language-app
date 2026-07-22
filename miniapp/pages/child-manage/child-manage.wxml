@@ -21,6 +21,18 @@
         <view class="form-group"><text class="form-label">出生日期</text>
             <picker mode="date" end="{{today}}" bindchange="onDate"><view class="form-input picker-like">{{form.birth || '请选择出生日期'}}</view></picker>
         </view>
+        <view class="form-group"><text class="form-label">是否早产</text>
+            <view class="gender-row">
+                <view class="gender-btn {{form.isPremature===true?'selected':''}}" bindtap="onPremature" data-v="{{true}}">是</view>
+                <view class="gender-btn {{form.isPremature===false?'selected':''}}" bindtap="onPremature" data-v="{{false}}">否</view>
+            </view>
+        </view>
+        <view wx:if="{{form.isPremature===true}}" class="form-group"><text class="form-label">早产周数</text>
+            <input class="form-input" type="number" placeholder="请输入早产周数" value="{{form.prematureWeeks}}" bindinput="onPrematureWeeks" />
+        </view>
+        <view class="form-group"><text class="form-label">居住地市</text>
+            <input class="form-input" placeholder="请输入居住地市" value="{{form.city}}" bindinput="onCity" />
+        </view>
         <view class="form-group"><text class="form-label">头像</text>
             <view class="avatar-row"><text wx:for="{{avatars}}" wx:key="*this" class="avatar-opt {{form.avatar===item?'selected':''}}" bindtap="onAvatar" data-a="{{item}}">{{item}}</text></view>
         </view>

@@ -1,0 +1,11 @@
+.page-content { padding: 20px; }
+.agreement-scroll { height: 600rpx; background: #fff; border-radius: 12rpx; padding: 24rpx; margin-bottom: 20px; }
+.agreement-title { font-size: 34rpx; font-weight: 700; color: #333; text-align: center; display: block; margin-bottom: 20px; }
+.agreement-text { font-size: 28rpx; color: #555; line-height: 1.8; }
+.checkbox-group { background: #fff; border-radius: 12rpx; padding: 20rpx 24rpx; margin-bottom: 24px; }
+.checkbox-item { display: flex; align-items: flex-start; padding: 16rpx 0; gap: 12rpx; }
+.checkbox-item+.checkbox-item { border-top: 1rpx solid #f0f0f0; }
+.checkbox-label { font-size: 28rpx; color: #333; line-height: 1.6; flex: 1; }
+.checkbox-label .required { color: #D32F2F; }
+.agreement-btns { display: flex; gap: 16px; }
+.agreement-btns .btn { flex: 1; }

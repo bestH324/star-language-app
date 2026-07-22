@@ -68,6 +68,15 @@ public class UserController {
         return Result.success();
     }
 
+    /** 保存知情同意状态 */
+    @PostMapping("/agree-privacy")
+    public Result<Map<String, Object>> agreePrivacy(@RequestBody Map<String, Object> body) {
+        long uid = AuthContext.currentUserId();
+        Boolean agreedResearch = (Boolean) body.getOrDefault("agreedResearch", false);
+        userService.agreePrivacy(uid, agreedResearch);
+        return Result.success(userService.profile(uid));
+    }
+
     /** 获取当前用户信息 */
     @GetMapping("/profile")
     public Result<Map<String, Object>> profile() {

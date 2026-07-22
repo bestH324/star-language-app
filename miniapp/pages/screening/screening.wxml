@@ -1,12 +1,19 @@
 <!-- 筛查问卷页 -->
 <view class="page-content">
+    <!-- 风险提示（常驻） -->
+    <view class="risk-disclaimer">
+        <text>温馨提示：本工具为婴幼儿孤独症风险线上初筛评估，仅用于发育风险参考，非医疗诊断结果，不能替代医院专科检查。</text>
+    </view>
+
     <!-- 筛查前选择儿童 -->
     <view wx:if="{{!started}}">
         <view class="screening-info-card">
             <text class="info-title">📋 筛查须知</text>
             <view class="info-list">
-                <text>• 本筛查采用SACS改编量表，适用于 <text style="font-weight:bold">1-5岁</text> 儿童</text>
-                <text>• 共 <text style="font-weight:bold">20道题</text>，每道题前有一段示范视频</text>
+                <text wx:if="{{questionnaireInfo}}">• 本筛查采用SACS改编量表，适用于 <text style="font-weight:bold">{{questionnaireInfo.minAgeMonths}}-{{questionnaireInfo.maxAgeMonths}}个月</text> 儿童</text>
+                <text wx:else>• 本筛查采用SACS改编量表，适用于 <text style="font-weight:bold">1-5岁</text> 儿童</text>
+                <text wx:if="{{questionnaireInfo}}">• 共 <text style="font-weight:bold">{{questionnaireInfo.totalQuestions}}道题</text>，每道题前有一段示范视频</text>
+                <text wx:else>• 共 <text style="font-weight:bold">20道题</text>，每道题前有一段示范视频</text>
                 <text>• 请仔细观看视频后，根据 <text style="font-weight:bold">宝宝日常表现</text> 作答</text>
                 <text>• 预计用时 <text style="font-weight:bold">10-15分钟</text></text>
             </view>
@@ -29,7 +36,7 @@
             <view class="progress-bar">
                 <view class="progress-fill" style="width: {{progressPercent}}%"></view>
             </view>
-            <text class="progress-text">{{answeredCount}}/20</text>
+            <text class="progress-text">{{answeredCount}}/{{totalQuestions}}</text>
         </view>
 
         <!-- 视频区域 -->
@@ -60,7 +67,6 @@
                     class="question-option {{selectedAnswer === item.value ? 'selected' : ''}}"
                     bindtap="selectAnswer"
                     data-value="{{item.value}}"
-                    data-score="{{item.score}}"
                 >
                     <view class="option-dot">{{selectedAnswer === item.value ? '✓' : ''}}</view>
                     {{item.label}}
@@ -71,7 +77,7 @@
         <!-- 导航按钮 -->
         <view class="question-nav">
             <button class="btn btn-outline" bindtap="prevQuestion" disabled="{{currentIdx === 0}}">上一题</button>
-            <button wx:if="{{currentIdx < 19}}" class="btn btn-primary" bindtap="nextQuestion">下一题</button>
+            <button wx:if="{{currentIdx < totalQuestions - 1}}" class="btn btn-primary" bindtap="nextQuestion">下一题</button>
             <button wx:else class="btn btn-primary btn-block" bindtap="submitScreening" disabled="{{!allAnswered}}">
                 {{allAnswered ? '提交筛查' : '请回答所有题目后再提交'}}
             </button>

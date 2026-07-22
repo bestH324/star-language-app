@@ -24,6 +24,23 @@ App({
     onLaunch() {
         // 从本地存储恢复数据
         this.loadFromStorage();
+        // 请求微信订阅消息权限（筛查提醒、复测提醒等）
+        this.requestSubscribeMessage();
+    },
+
+    requestSubscribeMessage() {
+        // 模板 ID 需在微信公众平台申请后替换
+        const tmplIds = [];
+        if (tmplIds.length === 0) return;
+        wx.requestSubscribeMessage({
+            tmplIds: tmplIds,
+            success(res) {
+                console.log('订阅消息授权结果:', res);
+            },
+            fail(err) {
+                console.log('订阅消息授权失败:', err);
+            }
+        });
     },
 
     loadFromStorage() {

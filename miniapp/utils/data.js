@@ -10,220 +10,200 @@ const SCREENING_QUESTIONS = [
         videoUrl: 'assets/videos/q1.mp4',
         content: '当您叫宝宝的名字时，他/她会转头看向您吗？',
         options: [
-            { value: 0, label: '经常会', score: 0 },
-            { value: 1, label: '有时会', score: 1 },
-            { value: 2, label: '很少会', score: 2 },
-            { value: 3, label: '从不会', score: 3 }
-        ]
+            { value: 1, label: '经常如此' },
+            { value: 0, label: '极少如此' }
+        ],
+        isReverse: false
     },
     {
         id: 2,
         videoUrl: 'assets/videos/q2.mp4',
         content: '宝宝会用手指指向他/她感兴趣的物品（如玩具、食物）给您看吗？',
         options: [
-            { value: 0, label: '经常这样做', score: 0 },
-            { value: 1, label: '有时这样做', score: 1 },
-            { value: 2, label: '很少这样做', score: 2 },
-            { value: 3, label: '从不这样做', score: 3 }
-        ]
+            { value: 1, label: '经常如此' },
+            { value: 0, label: '极少如此' }
+        ],
+        isReverse: false
     },
     {
         id: 3,
         videoUrl: 'assets/videos/q3.mp4',
         content: '宝宝会和您进行目光对视吗？（如玩耍时会看您的眼睛）',
         options: [
-            { value: 0, label: '经常对视', score: 0 },
-            { value: 1, label: '有时对视', score: 1 },
-            { value: 2, label: '很少对视', score: 2 },
-            { value: 3, label: '从不/回避对视', score: 3 }
-        ]
+            { value: 1, label: '经常如此' },
+            { value: 0, label: '极少如此' }
+        ],
+        isReverse: false
     },
     {
         id: 4,
         videoUrl: 'assets/videos/q4.mp4',
         content: '当您对宝宝微笑时，他/她会回应微笑吗？',
         options: [
-            { value: 0, label: '总是回应', score: 0 },
-            { value: 1, label: '有时回应', score: 1 },
-            { value: 2, label: '很少回应', score: 2 },
-            { value: 3, label: '从不回应', score: 3 }
-        ]
+            { value: 1, label: '经常如此' },
+            { value: 0, label: '极少如此' }
+        ],
+        isReverse: false
     },
     {
         id: 5,
         videoUrl: 'assets/videos/q5.mp4',
         content: '宝宝会模仿您的动作或表情吗？（如拍手、做鬼脸）',
         options: [
-            { value: 0, label: '经常模仿', score: 0 },
-            { value: 1, label: '有时模仿', score: 1 },
-            { value: 2, label: '很少模仿', score: 2 },
-            { value: 3, label: '从不模仿', score: 3 }
-        ]
+            { value: 1, label: '经常如此' },
+            { value: 0, label: '极少如此' }
+        ],
+        isReverse: false
     },
     {
         id: 6,
         videoUrl: 'assets/videos/q6.mp4',
         content: '宝宝会玩"假装"游戏吗？（如假装喂娃娃、假装打电话）',
         options: [
-            { value: 0, label: '经常玩', score: 0 },
-            { value: 1, label: '有时玩', score: 1 },
-            { value: 2, label: '很少玩', score: 2 },
-            { value: 3, label: '从不玩', score: 3 }
-        ]
+            { value: 1, label: '经常如此' },
+            { value: 0, label: '极少如此' }
+        ],
+        isReverse: false
     },
     {
         id: 7,
         videoUrl: 'assets/videos/q7.mp4',
         content: '宝宝会对其他小朋友表现出兴趣吗？（如看别的孩子玩）',
         options: [
-            { value: 0, label: '很感兴趣', score: 0 },
-            { value: 1, label: '有点兴趣', score: 1 },
-            { value: 2, label: '不太感兴趣', score: 2 },
-            { value: 3, label: '完全不感兴趣', score: 3 }
-        ]
+            { value: 1, label: '经常如此' },
+            { value: 0, label: '极少如此' }
+        ],
+        isReverse: false
     },
     {
         id: 8,
         videoUrl: 'assets/videos/q8.mp4',
         content: '宝宝会把自己喜欢的东西拿给您看吗？（不是为了求助）',
         options: [
-            { value: 0, label: '经常这样做', score: 0 },
-            { value: 1, label: '有时这样做', score: 1 },
-            { value: 2, label: '很少这样做', score: 2 },
-            { value: 3, label: '从不这样做', score: 3 }
-        ]
+            { value: 1, label: '经常如此' },
+            { value: 0, label: '极少如此' }
+        ],
+        isReverse: false
     },
     {
         id: 9,
         videoUrl: 'assets/videos/q9.mp4',
         content: '宝宝能听懂简单的指令吗？（如"把球给妈妈"）',
         options: [
-            { value: 0, label: '能听懂多个指令', score: 0 },
-            { value: 1, label: '能听懂一些', score: 1 },
-            { value: 2, label: '很少能听懂', score: 2 },
-            { value: 3, label: '完全听不懂', score: 3 }
-        ]
+            { value: 1, label: '经常如此' },
+            { value: 0, label: '极少如此' }
+        ],
+        isReverse: false
     },
     {
         id: 10,
         videoUrl: 'assets/videos/q10.mp4',
         content: '宝宝会发出不同的声音来表达需求吗？（如饿了、要抱抱）',
         options: [
-            { value: 0, label: '经常发出声音', score: 0 },
-            { value: 1, label: '有时发出声音', score: 1 },
-            { value: 2, label: '很少发出声音', score: 2 },
-            { value: 3, label: '几乎不发声', score: 3 }
-        ]
+            { value: 1, label: '经常如此' },
+            { value: 0, label: '极少如此' }
+        ],
+        isReverse: false
     },
     {
         id: 11,
         videoUrl: 'assets/videos/q11.mp4',
         content: '宝宝对声音的反应正常吗？（如突然的声音会转头看）',
         options: [
-            { value: 0, label: '反应正常', score: 0 },
-            { value: 1, label: '有时反应弱', score: 1 },
-            { value: 2, label: '经常反应弱', score: 2 },
-            { value: 3, label: '对声音无反应', score: 3 }
-        ]
+            { value: 1, label: '经常如此' },
+            { value: 0, label: '极少如此' }
+        ],
+        isReverse: false
     },
     {
         id: 12,
         videoUrl: 'assets/videos/q12.mp4',
         content: '宝宝会有重复的、刻板的行为吗？（如反复转圈、摆手、排列物品）',
         options: [
-            { value: 0, label: '没有', score: 3 },
-            { value: 1, label: '偶尔有', score: 2 },
-            { value: 2, label: '经常有', score: 1 },
-            { value: 3, label: '非常频繁', score: 0 }
-        ]
+            { value: 1, label: '经常如此' },
+            { value: 0, label: '极少如此' }
+        ],
+        isReverse: true
     },
     {
         id: 13,
         videoUrl: 'assets/videos/q13.mp4',
         content: '宝宝会对某些感官刺激异常敏感或迟钝吗？（如对声音、触觉、光线）',
         options: [
-            { value: 0, label: '没有异常', score: 0 },
-            { value: 1, label: '偶尔异常', score: 1 },
-            { value: 2, label: '经常异常', score: 2 },
-            { value: 3, label: '明显异常', score: 3 }
-        ]
+            { value: 1, label: '经常如此' },
+            { value: 0, label: '极少如此' }
+        ],
+        isReverse: true
     },
     {
         id: 14,
         videoUrl: 'assets/videos/q14.mp4',
         content: '宝宝有语言发育方面的问题吗？（相比同龄儿童说话明显少）',
         options: [
-            { value: 0, label: '语言发育正常', score: 0 },
-            { value: 1, label: '稍微落后', score: 1 },
-            { value: 2, label: '明显落后', score: 2 },
-            { value: 3, label: '几乎没有语言', score: 3 }
-        ]
+            { value: 1, label: '经常如此' },
+            { value: 0, label: '极少如此' }
+        ],
+        isReverse: true
     },
     {
         id: 15,
         videoUrl: 'assets/videos/q15.mp4',
         content: '宝宝喜欢按照固定的方式做事吗？（改变常规会哭闹）',
         options: [
-            { value: 0, label: '灵活适应变化', score: 0 },
-            { value: 1, label: '偶尔抗拒变化', score: 1 },
-            { value: 2, label: '经常抗拒变化', score: 2 },
-            { value: 3, label: '极度抗拒变化', score: 3 }
-        ]
+            { value: 1, label: '经常如此' },
+            { value: 0, label: '极少如此' }
+        ],
+        isReverse: true
     },
     {
         id: 16,
         videoUrl: 'assets/videos/q16.mp4',
         content: '宝宝玩玩具的方式是否正常？（如只转轮子而不是推小车）',
         options: [
-            { value: 0, label: '玩法正常', score: 0 },
-            { value: 1, label: '偶尔玩法异常', score: 1 },
-            { value: 2, label: '经常玩法异常', score: 2 },
-            { value: 3, label: '玩法明显异常', score: 3 }
-        ]
+            { value: 1, label: '经常如此' },
+            { value: 0, label: '极少如此' }
+        ],
+        isReverse: true
     },
     {
         id: 17,
         videoUrl: 'assets/videos/q17.mp4',
         content: '宝宝的情绪变化是否突然且难以安抚？',
         options: [
-            { value: 0, label: '情绪平稳', score: 0 },
-            { value: 1, label: '偶尔情绪波动', score: 1 },
-            { value: 2, label: '经常情绪波动', score: 2 },
-            { value: 3, label: '频繁且难以安抚', score: 3 }
-        ]
+            { value: 1, label: '经常如此' },
+            { value: 0, label: '极少如此' }
+        ],
+        isReverse: false
     },
     {
         id: 18,
         videoUrl: 'assets/videos/q18.mp4',
         content: '宝宝的大运动发育是否正常？（如坐、爬、走的时间）',
         options: [
-            { value: 0, label: '发育正常', score: 0 },
-            { value: 1, label: '稍微落后', score: 1 },
-            { value: 2, label: '明显落后', score: 2 },
-            { value: 3, label: '严重落后', score: 3 }
-        ]
+            { value: 1, label: '经常如此' },
+            { value: 0, label: '极少如此' }
+        ],
+        isReverse: false
     },
     {
         id: 19,
         videoUrl: 'assets/videos/q19.mp4',
         content: '宝宝是否会主动寻求您的安慰？（如摔倒后找您抱）',
         options: [
-            { value: 0, label: '经常主动寻求', score: 0 },
-            { value: 1, label: '有时寻求', score: 1 },
-            { value: 2, label: '很少寻求', score: 2 },
-            { value: 3, label: '从不寻求安慰', score: 3 }
-        ]
+            { value: 1, label: '经常如此' },
+            { value: 0, label: '极少如此' }
+        ],
+        isReverse: false
     },
     {
         id: 20,
         videoUrl: 'assets/videos/q20.mp4',
         content: '整体来看，您对宝宝的社交沟通能力是否感到担忧？',
         options: [
-            { value: 0, label: '完全不担心', score: 0 },
-            { value: 1, label: '略微担心', score: 1 },
-            { value: 2, label: '比较担心', score: 2 },
-            { value: 3, label: '非常担心', score: 3 }
-        ]
+            { value: 1, label: '经常如此' },
+            { value: 0, label: '极少如此' }
+        ],
+        isReverse: false
     }
 ];
 

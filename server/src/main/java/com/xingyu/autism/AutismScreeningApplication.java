@@ -2,6 +2,7 @@ package com.xingyu.autism;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,6 +12,7 @@ import java.nio.file.Paths;
  * 星语 · 孤独症早期支持平台 — 后端服务启动入口
  */
 @SpringBootApplication
+@EnableScheduling
 public class AutismScreeningApplication {
 
     public static void main(String[] args) {

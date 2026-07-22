@@ -1,0 +1,46 @@
+<view class="page-content">
+    <scroll-view scroll-y class="agreement-scroll">
+        <text class="agreement-title">知情同意与信息保密承诺书</text>
+        <text class="agreement-text">您好，本小程序提供婴幼儿孤独症线上风险初筛服务，您填写的监护人信息、儿童身份、月龄、全部问卷作答记录、筛查风险结果均属于未成年人医疗健康敏感信息，平台严格履行保密义务，请您完整阅读以下全部条款：
+
+1. 信息收集与使用范围
+我们仅收集完成筛查必需信息，所有数据仅用于本次儿童发育风险评估、平台复测提醒、优化筛查工具；绝不用于商业广告、营销推广、产品推销。
+
+2. 严格信息保密承诺
+未经您本人单独、明确书面勾选授权，我们不会将您及孩子的任何信息、筛查数据发送、共享、出售、转交至任何幼儿园、医院、康复机构、第三方企业、其他家庭及无关自然人；所有数据仅在本平台内部加密存储。
+
+3. 数据安全与留存规则
+全部信息存储于中国大陆境内加密服务器，实行分级权限管控，仅专职筛查运维人员脱敏查看，所有内部工作人员均签署终身保密责任书；筛查数据自提交之日起留存3年，到期自动不可逆删除。您可随时在线申请注销账号、一键清空本人及儿童全部筛查记录，撤回信息使用授权。
+
+4. 监护人权利与责任
+您有权随时查询、更正、删除孩子所有筛查信息；您保证为儿童法定监护人，填写内容真实有效，妥善保管登录账号，因自身账号泄露、私自转发他人筛查报告造成隐私泄露，由您自行承担相关责任。
+
+5. 筛查重要免责提示
+本小程序仅为线上初筛工具，筛查结果分为低风险、临界观察、高风险三档，不作为孤独症临床诊断依据；判定为高风险的儿童，请前往正规医院发育行为科完成专业诊断评估，平台不提供医疗诊断、诊疗服务。
+
+6. 科研数据使用（独立授权，自愿勾选）
+本平台有可能在将来对匿名筛查数据开展孤独症早期筛查相关学术研究。科研使用完全自愿，不勾选不影响您正常完成筛查。
+若您同意：我们将对您孩子的筛查数据做全脱敏处理，删除姓名、手机号、住址等一切可识别身份信息，仅使用无标识汇总统计数据用于课题分析、论文发表，全程不会泄露任何个人隐私；您后续可随时撤回科研授权，平台同步删除对应脱敏数据。
+
+7. 违约责任
+若平台违规泄露、售卖儿童隐私信息，将承担全部民事赔偿责任并配合监管部门调查；监护人恶意盗取、批量转发平台内其他家庭隐私数据，平台有权封禁账号并追究法律责任。</text>
+    </scroll-view>
+
+    <view class="checkbox-group">
+        <checkbox-group bindchange="onCheckPrivacy">
+            <label class="checkbox-item">
+                <checkbox value="privacy" checked="{{agreedPrivacy}}" color="#6B1D5E" />
+                <text class="checkbox-label"><text class="required">*</text>我已完整阅读并同意以上《知情同意与信息保密承诺书》全部条款，自愿使用本小程序完成儿童孤独症线上筛查。（必选）</text>
+            </label>
+            <label class="checkbox-item">
+                <checkbox value="research" checked="{{agreedResearch}}" color="#6B1D5E" />
+                <text class="checkbox-label">我自愿授权平台将本次脱敏后的筛查数据用于孤独症相关学术科研研究（不勾选不影响正常筛查）</text>
+            </label>
+        </checkbox-group>
+    </view>
+
+    <view class="agreement-btns">
+        <button class="btn btn-outline" bindtap="onReject">拒绝</button>
+        <button class="btn btn-primary" bindtap="onConfirm" disabled="{{!canConfirm}}">确认同意</button>
+    </view>
+</view>

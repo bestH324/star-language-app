@@ -18,19 +18,25 @@ CREATE TABLE IF NOT EXISTS users (
   income      VARCHAR(50),                        -- 家庭收入
   relationship VARCHAR(50),                       -- 与儿童关系
   single_parent TINYINT(1) DEFAULT 0,             -- 是否单亲
+  agreed_privacy     TINYINT(1) DEFAULT 0,         -- 是否同意隐私条款
+  agreed_research    TINYINT(1) DEFAULT 0,         -- 是否同意科研使用
+  privacy_agreed_at  DATETIME,                     -- 同意时间
   create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
   update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 2. 儿童表
 CREATE TABLE IF NOT EXISTS children (
-  id          INT PRIMARY KEY AUTO_INCREMENT,
-  user_id     INT NOT NULL,                       -- 所属用户
-  name        VARCHAR(50) NOT NULL,               -- 昵称
-  gender      VARCHAR(10) NOT NULL,               -- male / female
-  birth_date  DATE NOT NULL,                      -- 出生日期
-  avatar      VARCHAR(20),                        -- 头像 emoji
-  create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+  id               INT PRIMARY KEY AUTO_INCREMENT,
+  user_id          INT NOT NULL,                       -- 所属用户
+  name             VARCHAR(50) NOT NULL,               -- 昵称
+  gender           VARCHAR(10) NOT NULL,               -- male / female
+  birth_date       DATE NOT NULL,                      -- 出生日期
+  avatar           VARCHAR(20),                        -- 头像 emoji
+  is_premature     TINYINT(1) DEFAULT 0,               -- 是否早产
+  premature_weeks  INT DEFAULT 0,                      -- 早产周数
+  city             VARCHAR(50),                        -- 居住地市
+  create_time      DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -51,9 +57,10 @@ CREATE TABLE IF NOT EXISTS questions (
   qid         INT NOT NULL,                       -- 所属问卷 id
   video_url   VARCHAR(255),                       -- 讲解视频地址
   content     TEXT NOT NULL,                      -- 题干
-  options     TEXT NOT NULL,                      -- 选项 JSON：[{value,label,score}]
+  options     TEXT NOT NULL,                      -- 选项 JSON：[{value,label}]
   sort        INT NOT NULL,                       -- 排序
   is_key      TINYINT(1) DEFAULT 0,              -- 是否关键题目（1=是 0=否）
+  is_reverse  TINYINT(1) DEFAULT 0,              -- 是否反选计分（1=是 0=否）
   FOREIGN KEY (qid) REFERENCES questionnaires(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -145,5 +152,21 @@ CREATE TABLE IF NOT EXISTS caregivers (
     income          VARCHAR(30),
     create_time     DATETIME DEFAULT CURRENT_TIMESTAMP,
     update_time     DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (child_id) REFERENCES children(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 9. 筛查提醒表
+CREATE TABLE IF NOT EXISTS reminders (
+    id              INT PRIMARY KEY AUTO_INCREMENT,
+    user_id         INT NOT NULL,
+    child_id        INT NOT NULL,
+    reminder_type   VARCHAR(30) NOT NULL,
+    scheduled_days  INT NOT NULL,
+    trigger_reason  VARCHAR(100),
+    status          VARCHAR(20) DEFAULT 'pending',
+    sent_at         DATETIME,
+    cancelled_at    DATETIME,
+    create_time     DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (child_id) REFERENCES children(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

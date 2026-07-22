@@ -25,7 +25,7 @@ public class ChildService {
     public List<Map<String, Object>> list() {
         long uid = AuthContext.currentUserId();
         return jdbc.queryForList(
-                "SELECT id, user_id, name, gender, birth_date, avatar, create_time FROM children WHERE user_id=? ORDER BY create_time DESC",
+                "SELECT id, user_id, name, gender, birth_date, avatar, is_premature, premature_weeks, city, create_time FROM children WHERE user_id=? ORDER BY create_time DESC",
                 uid);
     }
 
@@ -33,9 +33,12 @@ public class ChildService {
     public Map<String, Object> add(ChildRequest req) {
         validateAge(req.getBirthDate());
         long uid = AuthContext.currentUserId();
-        jdbc.update("INSERT INTO children(user_id, name, gender, birth_date, avatar) VALUES(?,?,?,?,?)",
+        jdbc.update("INSERT INTO children(user_id, name, gender, birth_date, avatar, is_premature, premature_weeks, city) VALUES(?,?,?,?,?,?,?,?)",
                 uid, req.getName(), req.getGender(), req.getBirthDate(),
-                req.getAvatar() == null ? "👶" : req.getAvatar());
+                req.getAvatar() == null ? "👶" : req.getAvatar(),
+                req.getIsPremature() != null && req.getIsPremature() ? 1 : 0,
+                req.getPrematureWeeks() == null ? 0 : req.getPrematureWeeks(),
+                req.getCity());
         long id = jdbc.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
         List<Map<String, Object>> rows = jdbc.queryForList("SELECT * FROM children WHERE id=?", id);
         if (rows.isEmpty()) throw new BizException("儿童档案创建失败");
@@ -47,9 +50,12 @@ public class ChildService {
         validateAge(req.getBirthDate());
         long uid = AuthContext.currentUserId();
         checkOwnership(id, uid);
-        jdbc.update("UPDATE children SET name=?, gender=?, birth_date=?, avatar=? WHERE id=?",
+        jdbc.update("UPDATE children SET name=?, gender=?, birth_date=?, avatar=?, is_premature=?, premature_weeks=?, city=? WHERE id=?",
                 req.getName(), req.getGender(), req.getBirthDate(),
-                req.getAvatar() == null ? "👶" : req.getAvatar(), id);
+                req.getAvatar() == null ? "👶" : req.getAvatar(),
+                req.getIsPremature() != null && req.getIsPremature() ? 1 : 0,
+                req.getPrematureWeeks() == null ? 0 : req.getPrematureWeeks(),
+                req.getCity(), id);
         List<Map<String, Object>> rows = jdbc.queryForList("SELECT * FROM children WHERE id=?", id);
         if (rows.isEmpty()) throw new BizException("儿童档案不存在");
         return rows.get(0);

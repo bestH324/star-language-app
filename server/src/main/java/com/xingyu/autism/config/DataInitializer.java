@@ -43,8 +43,15 @@ public class DataInitializer {
                 "ALTER TABLE users ADD COLUMN relationship VARCHAR(50) DEFAULT NULL",
                 "ALTER TABLE users ADD COLUMN single_parent TINYINT(1) DEFAULT 0",
                 "ALTER TABLE questions ADD COLUMN is_key TINYINT(1) DEFAULT 0",
+                "ALTER TABLE questions ADD COLUMN is_reverse TINYINT(1) DEFAULT 0",
                 "ALTER TABLE questionnaires ADD COLUMN min_age_months INT DEFAULT 0",
                 "ALTER TABLE questionnaires ADD COLUMN max_age_months INT DEFAULT 240",
+                "ALTER TABLE users ADD COLUMN agreed_privacy TINYINT(1) DEFAULT 0",
+                "ALTER TABLE users ADD COLUMN agreed_research TINYINT(1) DEFAULT 0",
+                "ALTER TABLE users ADD COLUMN privacy_agreed_at DATETIME",
+                "ALTER TABLE children ADD COLUMN is_premature TINYINT(1) DEFAULT 0",
+                "ALTER TABLE children ADD COLUMN premature_weeks INT DEFAULT 0",
+                "ALTER TABLE children ADD COLUMN city VARCHAR(50)",
                 "CREATE TABLE IF NOT EXISTS caregivers (" +
                     " id INT PRIMARY KEY AUTO_INCREMENT," +
                     " child_id INT NOT NULL UNIQUE," +
@@ -53,6 +60,18 @@ public class DataInitializer {
                     " education VARCHAR(30), income VARCHAR(30)," +
                     " create_time DATETIME DEFAULT CURRENT_TIMESTAMP," +
                     " update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP," +
+                    " FOREIGN KEY (child_id) REFERENCES children(id) ON DELETE CASCADE" +
+                    ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
+                "CREATE TABLE IF NOT EXISTS reminders (" +
+                    " id INT PRIMARY KEY AUTO_INCREMENT," +
+                    " user_id INT NOT NULL, child_id INT NOT NULL," +
+                    " reminder_type VARCHAR(30) NOT NULL," +
+                    " scheduled_days INT NOT NULL," +
+                    " trigger_reason VARCHAR(100)," +
+                    " status VARCHAR(20) DEFAULT 'pending'," +
+                    " sent_at DATETIME, cancelled_at DATETIME," +
+                    " create_time DATETIME DEFAULT CURRENT_TIMESTAMP," +
+                    " FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE," +
                     " FOREIGN KEY (child_id) REFERENCES children(id) ON DELETE CASCADE" +
                     ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
             };

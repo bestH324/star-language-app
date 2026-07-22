@@ -1,7 +1,11 @@
 .result-header { text-align: center; padding: 30px 20px; border-radius: var(--radius); color: #fff; margin-bottom: 16px; }
 .result-header.low { background: var(--risk-low); } .result-header.medium { background: var(--risk-medium); } .result-header.high { background: var(--risk-high); }
 .risk-icon { font-size: 48px; display: block; } .risk-level { font-size: 28px; font-weight: 700; display: block; margin: 10px 0; } .risk-score { font-size: 16px; opacity: 0.9; display: block; }
-.info-card { background: #fff; border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
-.info-title { font-size: 16px; font-weight: 600; display: block; margin-bottom: 10px; }
-.info-line { display: block; font-size: 14px; color: var(--text-secondary); line-height: 1.8; }
-.warn { background: var(--primary-lighter); } .warn-text { display: block; font-size: 13px; color: var(--primary-dark); line-height: 1.6; }
+.risk-message-card { border-radius: var(--radius); padding: 16px; margin-bottom: 16px; border-left: 6rpx solid; }
+.risk-message-card.high { background: #FFF5F5; border-color: #D32F2F; }
+.risk-message-card.medium { background: #FFF8E1; border-color: #F57C00; }
+.risk-message-card.low { background: #F1F8E9; border-color: #388E3C; }
+.risk-message-text { font-size: 28rpx; line-height: 1.7; }
+.risk-message-card.high .risk-message-text { color: #C62828; }
+.risk-message-card.medium .risk-message-text { color: #E65100; }
+.risk-message-card.low .risk-message-text { color: #2E7D32; }

@@ -1,6 +1,7 @@
 {
     "pages": [
         "pages/splash/splash",
+        "pages/privacy-agreement/privacy-agreement",
         "pages/index/index",
         "pages/screening/screening",
         "pages/science/science",

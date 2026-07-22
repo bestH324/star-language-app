@@ -32,6 +32,9 @@ public class UserService {
     @Autowired
     private TokenService tokenService;
 
+    @Autowired
+    private ReminderService reminderService;
+
     @Value("${autism.demo-code:123456}")
     private String demoCode;
 
@@ -73,6 +76,13 @@ public class UserService {
             userId = ((Number) idRows.get(0).get("id")).longValue();
         }
         String token = tokenService.create(userId, TokenService.ROLE_USER);
+        // 为新注册用户的所有儿童创建未筛查提醒
+        List<Map<String, Object>> children = jdbc.queryForList(
+                "SELECT id FROM children WHERE user_id=?", userId);
+        for (Map<String, Object> c : children) {
+            long childId = ((Number) c.get("id")).longValue();
+            reminderService.createFirstScreeningReminders(userId, childId);
+        }
         return new LoginResponse(token, userId, req.getPhone(), null, null);
     }
 
@@ -148,11 +158,17 @@ public class UserService {
     /** 获取指定用户信息 */
     public Map<String, Object> profile(long userId) {
         List<Map<String, Object>> rows = jdbc.queryForList(
-                "SELECT id, phone, nickname, avatar, create_time FROM users WHERE id=?", userId);
+                "SELECT id, phone, nickname, avatar, agreed_privacy, agreed_research, create_time FROM users WHERE id=?", userId);
         if (rows.isEmpty()) {
             throw new BizException("用户不存在");
         }
         return rows.get(0);
+    }
+
+    /** 保存知情同意状态 */
+    public void agreePrivacy(long userId, boolean agreedResearch) {
+        jdbc.update("UPDATE users SET agreed_privacy=1, agreed_research=?, privacy_agreed_at=NOW() WHERE id=?",
+                agreedResearch ? 1 : 0, userId);
     }
 
     /** 更新用户个人资料 */
