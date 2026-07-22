@@ -1,0 +1,25 @@
+.reminder-list { display: flex; flex-direction: column; gap: 10px; }
+
+.reminder-card {
+    display: flex; gap: 12px; padding: 14px; border-radius: var(--radius);
+    background: #fff; border-left: 6rpx solid var(--border); align-items: flex-start;
+}
+.reminder-card.pending { border-left-color: #FFA000; }
+.reminder-card.sent { border-left-color: #388E3C; }
+
+.reminder-icon-wrap {
+    width: 40px; height: 40px; border-radius: 50%; background: var(--bg-page);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.reminder-icon { font-size: 20px; }
+
+.reminder-body { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.reminder-header { display: flex; justify-content: space-between; align-items: center; }
+.reminder-title { font-size: 15px; font-weight: 600; }
+.reminder-status { font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+.reminder-status.pending { background: #FFF3E0; color: #E65100; }
+.reminder-status.sent { background: #E8F5E9; color: #2E7D32; }
+
+.reminder-child { font-size: 13px; color: var(--primary); }
+.reminder-reason { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+.reminder-time { font-size: 11px; color: var(--text-hint); }

@@ -30,3 +30,5 @@
 .question-option.selected .option-dot { background: var(--primary); color: #fff; border-color: var(--primary); }
 .question-nav { display: flex; gap: 12px; margin-top: auto; padding-top: 16px; }
 .question-nav .btn { flex: 1; }
+.corrected-age-hint { margin-top: 12px; padding: 10px 14px; background: #FFF8E1; border-radius: 8rpx; border-left: 4rpx solid #FFA000; }
+.corrected-age-hint text { font-size: 13px; color: #E65100; line-height: 1.6; }

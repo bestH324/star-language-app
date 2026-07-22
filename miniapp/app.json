@@ -17,7 +17,8 @@
         "pages/admin-login/admin-login",
         "pages/admin-dashboard/admin-dashboard",
         "pages/referral-detail/referral-detail",
-        "pages/appointment-record/appointment-record"
+        "pages/appointment-record/appointment-record",
+        "pages/reminders/reminders"
     ],
     "window": {
         "navigationBarBackgroundColor": "#6B1D5E",

@@ -111,9 +111,34 @@ public class ReminderService {
     }
 
     private void sendReminder(long userId, String type, String reason) {
-        // TODO 接入微信订阅消息推送
-        // 当前为演示版本，仅记录日志
-        log.info("[提醒推送] userId={} type={} reason={}", userId, type, reason);
+        // TODO 接入微信订阅消息推送（需在微信公众平台申请模板后接入）
+        // 消息格式参考（微信订阅消息模板字段）：
+        //   - firstScreening:     thing1=筛查提醒  thing2=宝宝姓名  thing3=已注册X天未筛查
+        //   - highRiskFollowup:  thing1=就诊提醒  thing2=宝宝姓名  thing3=高风险，建议就医
+        //   - retest:            thing1=复测提醒  thing2=宝宝姓名  thing3=月龄达标可复测
+
+        String title;
+        String content;
+        switch (type) {
+            case "first_screening":
+                title = "🔔 筛查提醒";
+                content = "您的宝宝尚未完成首次筛查，建议尽早完成评估。原因：" + reason;
+                break;
+            case "high_risk_followup":
+                title = "⚠️ 就医提醒";
+                content = "您的宝宝此前筛查结果为高风险，建议尽快前往正规医院发育行为科进行专业评估。原因：" + reason;
+                break;
+            case "retest":
+                title = "📋 复测提醒";
+                content = "您的宝宝月龄已达到下一阶段量表适用范围，建议进行再次筛查。原因：" + reason;
+                break;
+            default:
+                title = "星语提醒";
+                content = reason;
+        }
+
+        // 当前为演示版本，仅记录日志。接入微信订阅消息后替换此处实现。
+        log.info("[提醒推送] userId={} type={} title={} content={}", userId, type, title, content);
     }
 
     private void cancelExisting(long userId, long childId, String type) {

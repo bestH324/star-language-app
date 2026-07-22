@@ -35,6 +35,7 @@ public class ReferralService {
     public List<HospitalRecommendDto> recommend(double userLat, double userLng, Long childId, String gradeFilter) {
         String childAgeRange = resolveAgeRange(childId);
         String riskLevel = resolveRiskLevel(childId);
+        String childCity = resolveChildCity(childId);
 
         List<Hospital> hospitals = mockHospitalDataService.getAllHospitals();
         if (hospitals.isEmpty()) return Collections.emptyList();
@@ -61,13 +62,24 @@ public class ReferralService {
             double dist = distances[i];
             double dynamicSpec = calcDynamicSpecialtyScore(childAgeRange, riskLevel, h);
 
+            // 城市匹配加分：与儿童居住地同城 +5 分，同省 +2 分
+            double cityBonus = 0;
+            if (childCity != null && !childCity.isBlank()) {
+                String hCity = h.getCity();
+                if (hCity != null) {
+                    if (hCity.equals(childCity) || hCity.contains(childCity) || childCity.contains(hCity)) {
+                        cityBonus = 5;
+                    }
+                }
+            }
+
             double distScore   = (maxDist - dist) / (maxDist - minDist + 0.001) * 30;
             double specScore   = (dynamicSpec / 10.0) * 25;
             double waitScore   = (1.0 - (double) h.getWaitTime() / (maxWait + 0.001)) * 20;
             double ratingScore = (h.getRating() / 5.0) * 15;
             double userScoreV  = (h.getUserScore() / 5.0) * 10;
 
-            double total = distScore + specScore + waitScore + ratingScore + userScoreV;
+            double total = distScore + specScore + waitScore + ratingScore + userScoreV + cityBonus;
             entries.add(new ScoreEntry(h, dist, dynamicSpec, total));
         }
 
@@ -199,6 +211,20 @@ public class ReferralService {
             return "medium";
         } catch (Exception e) {
             return "medium";
+        }
+    }
+
+    /** 查询儿童居住地市，用于转诊推荐的城市匹配 */
+    private String resolveChildCity(Long childId) {
+        if (childId == null) return null;
+        try {
+            List<Map<String, Object>> rows = jdbc.queryForList(
+                    "SELECT city FROM children WHERE id = ?", childId);
+            if (rows.isEmpty()) return null;
+            Object raw = rows.get(0).get("city");
+            return raw == null ? null : raw.toString().trim();
+        } catch (Exception e) {
+            return null;
         }
     }
 

@@ -1,0 +1,29 @@
+<view class="page-content">
+    <view wx:if="{{loading}}" class="empty-state">
+        <text class="empty-icon">⏳</text>
+        <text>加载中...</text>
+    </view>
+
+    <view wx:elif="{{reminders.length === 0}}" class="empty-state">
+        <text class="empty-icon">📭</text>
+        <text>暂无消息提醒</text>
+        <text style="font-size:13px;color:var(--text-hint);margin-top:8px;">完成筛查后，系统将自动为您生成提醒</text>
+    </view>
+
+    <view wx:else class="reminder-list">
+        <view wx:for="{{reminders}}" wx:key="id" class="reminder-card {{item.status}}">
+            <view class="reminder-icon-wrap">
+                <text class="reminder-icon">{{item.icon}}</text>
+            </view>
+            <view class="reminder-body">
+                <view class="reminder-header">
+                    <text class="reminder-title">{{item.title}}</text>
+                    <text class="reminder-status {{item.status}}">{{item.statusText}}</text>
+                </view>
+                <text class="reminder-child">{{item.childAvatar}} {{item.childName}}</text>
+                <text class="reminder-reason">{{item.reason}}</text>
+                <text class="reminder-time">{{item.createTime}}</text>
+            </view>
+        </view>
+    </view>
+</view>

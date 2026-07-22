@@ -17,18 +17,32 @@ Page({
 
     _render() {
         request.get('/api/child/list').then(children => {
-            const list = (children || []).map(c => ({
-                id: c.id,
-                name: c.name,
-                gender: c.gender,
-                birthDate: c.birth_date,
-                avatar: c.avatar || '👶',
-                isPremature: c.is_premature === 1,
-                prematureWeeks: c.premature_weeks || 0,
-                city: c.city || '',
-                ageText: this._age(c.birth_date),
-                birthFmt: this._fmt(c.birth_date)
-            }));
+            const list = (children || []).map(c => {
+                const isPremature = c.is_premature === 1;
+                const prematureWeeks = c.premature_weeks || 0;
+                const birthDate = c.birth_date;
+                const actualMonths = this._calcMonths(birthDate);
+                // 矫正月龄：早产且实际月龄 < 24 时生效
+                const correctedMonths = (isPremature && actualMonths < 24)
+                    ? Math.max(0, actualMonths - Math.floor(prematureWeeks / 4))
+                    : actualMonths;
+                const isCorrected = correctedMonths !== actualMonths;
+
+                return {
+                    id: c.id,
+                    name: c.name,
+                    gender: c.gender,
+                    birthDate,
+                    avatar: c.avatar || '👶',
+                    isPremature,
+                    prematureWeeks,
+                    city: c.city || '',
+                    ageText: this._monthsToAgeText(actualMonths),
+                    correctedAgeText: isCorrected ? this._monthsToAgeText(correctedMonths) : '',
+                    isCorrected,
+                    birthFmt: this._fmt(birthDate)
+                };
+            });
             this.setData({ list });
         }).catch(() => {});
     },
@@ -99,6 +113,8 @@ Page({
                 wx.hideLoading();
                 this.setData({ showForm: false });
                 this._render();
+                // 新增宝宝后请求订阅消息授权，以便接收后续筛查提醒
+                app.requestSubscribeMessage(['firstScreening']);
                 wx.showModal({
                     title: '添加成功',
                     content: '宝宝信息已添加，是否立即开始筛查？',
@@ -122,13 +138,20 @@ Page({
         wx.switchTab({ url: '/pages/screening/screening' });
     },
 
-    _age(b) {
-        if (!b) return '';
-        const m = Math.floor((new Date() - new Date(b)) / (1000 * 60 * 60 * 24 * 30.44));
+    _calcMonths(b) {
+        if (!b) return 0;
+        return Math.floor((new Date() - new Date(b)) / (1000 * 60 * 60 * 24 * 30.44));
+    },
+
+    _monthsToAgeText(m) {
         if (m < 12) return m + '个月';
         const y = Math.floor(m / 12);
         const rm = m % 12;
         return rm > 0 ? y + '岁' + rm + '个月' : y + '岁';
+    },
+
+    _age(b) {
+        return this._monthsToAgeText(this._calcMonths(b));
     },
 
     _fmt(d) {

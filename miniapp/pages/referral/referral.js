@@ -44,6 +44,12 @@ Page({
         if (selectedGrades.length > 0 && selectedGrades.length < 4) {
             params += `&gradeFilter=${selectedGrades.join(',')}`;
         }
+        // 传入childId以启用城市匹配优先排序
+        const screening = app.globalData.screening || {};
+        const childId = screening.childId || screening.lastChildId;
+        if (childId) {
+            params += `&childId=${childId}`;
+        }
         app.request({
             url: `/api/referral/recommend?${params}`,
             method: 'GET',

@@ -92,4 +92,19 @@ public class UserController {
         userService.updateProfile(uid, nickname, avatar);
         return Result.success(userService.profile(uid));
     }
+
+    /** 注销账号：永久删除用户及其关联的全部数据 */
+    @DeleteMapping("/account")
+    public Result<Map<String, Object>> deleteAccount() {
+        long uid = AuthContext.currentUserId();
+        userService.deleteAccount(uid);
+        return Result.success(Map.of("deleted", true, "message", "账号已注销，全部数据已清除"));
+    }
+
+    /** 获取当前用户的提醒消息列表 */
+    @GetMapping("/reminders")
+    public Result<List<Map<String, Object>>> reminders() {
+        long uid = AuthContext.currentUserId();
+        return Result.success(userService.getReminders(uid));
+    }
 }

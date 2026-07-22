@@ -67,14 +67,15 @@ Page({
         wx.navigateTo({ url: '/pages/history/history' });
     },
 
+    goReminders() {
+        if (!this.data.isLoggedIn) { wx.navigateTo({ url: '/pages/login/login' }); return; }
+        wx.navigateTo({ url: '/pages/reminders/reminders' });
+    },
+
     goAbout() { wx.navigateTo({ url: '/pages/about/about' }); },
 
     showPrivacy() {
-        wx.showModal({
-            title: '隐私政策',
-            content: '本平台重视您的隐私保护：\n1. 信息收集：我们仅收集为提供筛查服务所必需的信息。\n2. 信息使用：收集的信息仅用于提供筛查评估和生成报告。\n3. 信息共享：未经您的明确同意，我们不会将您的信息分享给第三方。',
-            showCancel: false, confirmText: '我知道了', confirmColor: '#6B1D5E'
-        });
+        wx.navigateTo({ url: '/pages/privacy-agreement/privacy-agreement?readonly=1' });
     },
 
     doLogout() {
@@ -88,6 +89,48 @@ Page({
                     this.setData({ isLoggedIn: false, avatar: '👤', nickname: '未登录', phoneText: '点击登录' });
                 }
             }
+        });
+    },
+
+    doDeleteAccount() {
+        wx.showModal({
+            title: '⚠️ 注销账号',
+            content: '注销后将永久删除您的账号、所有宝宝档案及全部筛查记录，数据不可恢复。\n\n确定要继续吗？',
+            confirmText: '确认注销',
+            confirmColor: '#D32F2F',
+            success: (res) => {
+                if (!res.confirm) return;
+                // 二次确认
+                wx.showModal({
+                    title: '⚠️ 最后确认',
+                    content: '此操作不可撤销！\n\n请输入"确认注销"以继续：',
+                    editable: true,
+                    placeholderText: '请输入"确认注销"',
+                    confirmText: '确认',
+                    confirmColor: '#D32F2F',
+                    success: (res2) => {
+                        if (res2.confirm && res2.content === '确认注销') {
+                            this._executeDeleteAccount();
+                        } else if (res2.confirm) {
+                            wx.showToast({ title: '输入不一致，已取消', icon: 'none' });
+                        }
+                    }
+                });
+            }
+        });
+    },
+
+    _executeDeleteAccount() {
+        wx.showLoading({ title: '注销中...' });
+        request.del('/api/user/account').then(() => {
+            wx.hideLoading();
+            wx.removeStorageSync('token');
+            this.setData({ isLoggedIn: false, avatar: '👤', nickname: '未登录', phoneText: '点击登录' });
+            wx.showToast({ title: '账号已注销', icon: 'success' });
+            setTimeout(() => wx.switchTab({ url: '/pages/index/index' }), 800);
+        }).catch(() => {
+            wx.hideLoading();
+            wx.showToast({ title: '注销失败，请重试', icon: 'none' });
         });
     }
 });

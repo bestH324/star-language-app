@@ -52,6 +52,11 @@ public class TokenService {
         if (token != null) store.remove(token);
     }
 
+    /** 注销指定用户的所有 token */
+    public void invalidateAll(long userId) {
+        store.entrySet().removeIf(e -> e.getValue().userId() == userId);
+    }
+
     /** 清理过期 token */
     private void cleanup() {
         long now = System.currentTimeMillis();

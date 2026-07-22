@@ -26,7 +26,7 @@
 若平台违规泄露、售卖儿童隐私信息，将承担全部民事赔偿责任并配合监管部门调查；监护人恶意盗取、批量转发平台内其他家庭隐私数据，平台有权封禁账号并追究法律责任。</text>
     </scroll-view>
 
-    <view class="checkbox-group">
+    <view wx:if="{{!readonly}}" class="checkbox-group">
         <checkbox-group bindchange="onCheckPrivacy">
             <label class="checkbox-item">
                 <checkbox value="privacy" checked="{{agreedPrivacy}}" color="#6B1D5E" />
@@ -39,8 +39,12 @@
         </checkbox-group>
     </view>
 
-    <view class="agreement-btns">
+    <view wx:if="{{!readonly}}" class="agreement-btns">
         <button class="btn btn-outline" bindtap="onReject">拒绝</button>
         <button class="btn btn-primary" bindtap="onConfirm" disabled="{{!canConfirm}}">确认同意</button>
+    </view>
+
+    <view wx:if="{{readonly}}" class="agreement-btns">
+        <button class="btn btn-primary btn-block" bindtap="goBack">返回</button>
     </view>
 </view>

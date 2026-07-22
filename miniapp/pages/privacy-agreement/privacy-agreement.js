@@ -6,12 +6,16 @@ Page({
         agreedPrivacy: false,
         agreedResearch: false,
         canConfirm: false,
-        childId: ''
+        childId: '',
+        readonly: false
     },
 
     onLoad(options) {
         if (options.childId) {
             this.setData({ childId: options.childId });
+        }
+        if (options.readonly === '1') {
+            this.setData({ readonly: true });
         }
     },
 
@@ -23,6 +27,10 @@ Page({
             agreedResearch: agreedResearch,
             canConfirm: checked
         });
+    },
+
+    goBack() {
+        wx.navigateBack({ delta: 1 });
     },
 
     onReject() {

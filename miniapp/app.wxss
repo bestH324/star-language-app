@@ -93,6 +93,16 @@ page {
     color: #fff;
 }
 
+.btn-danger {
+    background: transparent;
+    color: #D32F2F;
+    border: 2rpx solid #D32F2F;
+}
+
+.btn-danger:active {
+    background: #FFF5F5;
+}
+
 /* ==================== 页面容器 ==================== */
 .page-content {
     flex: 1;

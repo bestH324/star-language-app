@@ -130,6 +130,10 @@ Page({
             }));
             const totalQuestions = questions.length;
 
+            // 记录最近筛查的儿童ID，供转诊页城市匹配使用
+            app.globalData.screening = app.globalData.screening || {};
+            app.globalData.screening.lastChildId = cid;
+
             this.setData({
                 questionnaireInfo: questionnaire,
                 questionnaireId: questionnaire.id,
@@ -227,6 +231,8 @@ Page({
         }).then(data => {
             wx.hideLoading();
             this.setData({ started: false });
+            // 提交成功后请求订阅消息授权（后续筛查提醒、复测提醒等）
+            app.requestSubscribeMessage();
             wx.navigateTo({ url: '/pages/result/result?recordId=' + data.id });
         }).catch(() => {
             wx.hideLoading();

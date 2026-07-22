@@ -21,25 +21,64 @@ App({
         }
     },
 
+    // 微信订阅消息模板ID配置
+    // 需在微信公众平台（mp.weixin.qq.com）「功能 → 订阅消息」中申请以下模板后，
+    // 将实际模板ID替换下方占位符即可启用推送。
+    subscribeTemplateIds: {
+        // 未筛查提醒：注册后第7天/30天/60天提醒用户完成首次筛查
+        firstScreening: '',   // 示例模板名：筛查提醒  字段：宝宝姓名、提醒内容、提醒时间
+        // 高风险就医提醒：高风险筛查结果后提醒就医
+        highRiskFollowup: '', // 示例模板名：就诊提醒  字段：宝宝姓名、风险等级、温馨提示
+        // 月龄复测提醒：达到下一问卷月龄时提醒复测
+        retest: ''            // 示例模板名：复测提醒  字段：宝宝姓名、适用量表、建议时间
+    },
+
     onLaunch() {
         // 从本地存储恢复数据
         this.loadFromStorage();
-        // 请求微信订阅消息权限（筛查提醒、复测提醒等）
-        this.requestSubscribeMessage();
     },
 
-    requestSubscribeMessage() {
-        // 模板 ID 需在微信公众平台申请后替换
-        const tmplIds = [];
-        if (tmplIds.length === 0) return;
-        wx.requestSubscribeMessage({
-            tmplIds: tmplIds,
-            success(res) {
-                console.log('订阅消息授权结果:', res);
-            },
-            fail(err) {
-                console.log('订阅消息授权失败:', err);
-            }
+    /**
+     * 请求微信订阅消息授权
+     * 注意：wx.requestSubscribeMessage 必须由用户点击行为（tap）触发，
+     * 因此请在页面按钮事件中调用此方法，不要在 onLaunch/onShow 中调用。
+     *
+     * @param {string[]} types 要订阅的消息类型，可选值：'firstScreening' | 'highRiskFollowup' | 'retest'
+     *                        不传则订阅全部已配置模板ID的消息类型
+     * @returns {Promise<object>} 返回授权结果，{ accepted: string[], rejected: string[] }
+     */
+    requestSubscribeMessage(types) {
+        const allIds = this.subscribeTemplateIds;
+        // 筛选已配置模板ID的消息类型
+        let ids = [];
+        if (types && types.length > 0) {
+            ids = types.map(t => allIds[t]).filter(Boolean);
+        } else {
+            ids = Object.values(allIds).filter(Boolean);
+        }
+        if (ids.length === 0) {
+            console.log('[订阅消息] 尚未配置模板ID，跳过。请在微信公众平台申请后填入 app.js 的 subscribeTemplateIds');
+            return Promise.resolve({ accepted: [], rejected: [], skipped: true });
+        }
+        return new Promise((resolve) => {
+            wx.requestSubscribeMessage({
+                tmplIds: ids,
+                success(res) {
+                    // res 格式：{ [tmplId]: 'accept' | 'reject' | 'ban' }
+                    const accepted = [];
+                    const rejected = [];
+                    Object.entries(res).forEach(([id, status]) => {
+                        if (status === 'accept') accepted.push(id);
+                        else rejected.push(id);
+                    });
+                    console.log('[订阅消息] 授权结果 - 接受:', accepted.length, '拒绝:', rejected.length);
+                    resolve({ accepted, rejected });
+                },
+                fail(err) {
+                    console.log('[订阅消息] 授权失败:', err);
+                    resolve({ accepted: [], rejected: [], error: err });
+                }
+            });
         });
     },
 

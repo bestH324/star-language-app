@@ -198,6 +198,27 @@ public class UserService {
         jdbc.update(sql.toString(), params.toArray());
     }
 
+    /** 注销账号：删除用户及其关联的所有数据（儿童、筛查记录、提醒等由外键 ON DELETE CASCADE 自动删除） */
+    public void deleteAccount(long userId) {
+        // 使所有 token 失效
+        tokenService.invalidateAll(userId);
+        // 删除用户（children/answers/reminders/appointments/caregivers 由外键 CASCADE 自动删除）
+        int affected = jdbc.update("DELETE FROM users WHERE id=?", userId);
+        if (affected == 0) {
+            throw new BizException("用户不存在");
+        }
+    }
+
+    /** 获取用户的提醒消息列表 */
+    public List<Map<String, Object>> getReminders(long userId) {
+        return jdbc.queryForList(
+                "SELECT r.id, r.reminder_type, r.trigger_reason, r.scheduled_days, r.status, r.sent_at, r.create_time, " +
+                        " c.name AS child_name, c.avatar AS child_avatar " +
+                        " FROM reminders r LEFT JOIN children c ON r.child_id = c.id " +
+                        " WHERE r.user_id = ? AND r.status != 'cancelled' " +
+                        " ORDER BY r.create_time DESC LIMIT 50", userId);
+    }
+
     /** 校验验证码 */
     private void verifyCode(String phone, String code) {
         if (demoCode.equals(code)) {
