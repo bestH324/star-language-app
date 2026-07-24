@@ -72,6 +72,11 @@ Page({
         wx.navigateTo({ url: '/pages/reminders/reminders' });
     },
 
+    goTimeline() {
+        if (!this.data.isLoggedIn) { wx.navigateTo({ url: '/pages/login/login' }); return; }
+        wx.navigateTo({ url: '/pages/timeline/timeline' });
+    },
+
     goAbout() { wx.navigateTo({ url: '/pages/about/about' }); },
 
     showPrivacy() {

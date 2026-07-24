@@ -70,22 +70,96 @@ Page({
         app.saveToStorage();
         wx.redirectTo({ url: '/pages/index/index' });
     },
-    exportData() {
-        const t = this.data.tab;
-        const app = getApp();
-        const url = app.globalData.baseUrl + '/api/admin/export-csv?type=' + t;
+    // 导出数据按钮事件：根据 data-format 决定导出 Excel 或 CSV
+    exportData(e) {
+        const format = e.currentTarget.dataset.format; // 'excel' | 'csv'
+        const tabType = this.data.tab;                 // 'users' | 'children' | 'records'
+        const apiPath = format === 'excel'
+            ? '/api/admin/export-excel?type=' + tabType
+            : '/api/admin/export-csv?type=' + tabType;
+        this._doExport(apiPath, format, tabType, 0);
+    },
 
-        wx.showModal({
-            title: '导出 CSV',
-            content: '请在电脑浏览器中打开以下地址下载：\n\n' + url,
-            confirmText: '复制地址',
-            cancelText: '关闭',
-            success(res) {
-                if (res.confirm) {
-                    wx.setClipboardData({
-                        data: url,
-                        success() {
-                            wx.showToast({ title: '地址已复制，请在浏览器中打开', icon: 'none', duration: 2000 });
+    // 递归下载，retryCount 由参数传递避免 setData 异步问题
+    _doExport(apiPath, format, tabType, retryCount) {
+        const MAX_RETRY = 3;
+        wx.showLoading({ title: '下载中...', mask: true });
+
+        getApp().downloadFile(apiPath).then(tempFilePath => {
+            wx.hideLoading();
+            this._openDocument(tempFilePath, format, apiPath, tabType, 0);
+        }).catch(err => {
+            wx.hideLoading();
+            const msg = (err && err.errMsg) ? err.errMsg : '';
+            const isTimeout = msg.includes('timeout') || msg.includes('fail') || msg.includes('network') || msg.includes('offline');
+
+            if (isTimeout && retryCount < MAX_RETRY) {
+                wx.showModal({
+                    title: '网络超时',
+                    content: '网络超时，请检查网络后重试（剩余' + (MAX_RETRY - retryCount) + '次）',
+                    confirmText: '重试',
+                    cancelText: '取消',
+                    success: (res) => {
+                        if (res.confirm) this._doExport(apiPath, format, tabType, retryCount + 1);
+                    }
+                });
+            } else if (retryCount >= MAX_RETRY) {
+                wx.showModal({
+                    title: '导出失败',
+                    content: '已重试' + MAX_RETRY + '次仍失败，请检查网络连接后稍后再试',
+                    showCancel: false,
+                    confirmText: '知道了'
+                });
+            } else {
+                wx.showToast({ title: '导出失败，请重试', icon: 'none' });
+            }
+        });
+    },
+
+    // 打开下载完成的文件，处理权限/格式错误
+    _openDocument(tempFilePath, format, apiPath, tabType, retryCount) {
+        const MAX_RETRY = 3;
+
+        wx.openDocument({
+            filePath: tempFilePath,
+            fileType: format === 'excel' ? 'xlsx' : undefined,
+            showMenu: true,
+            success: () => {
+                // 文件打开成功，用户可通过右上角菜单分享/收藏
+            },
+            fail: (err) => {
+                const msg = (err && err.errMsg) ? err.errMsg : '';
+                const isPermission = msg.includes('auth deny') || msg.includes('permission') || msg.includes('deny');
+
+                if (isPermission && retryCount < MAX_RETRY) {
+                    wx.showModal({
+                        title: '需要文件权限',
+                        content: '需要文件存储权限来打开导出文件，请在系统弹窗中授权后重试（剩余' + (MAX_RETRY - retryCount) + '次）',
+                        confirmText: '重试',
+                        cancelText: '取消',
+                        success: (res) => {
+                            if (res.confirm) this._openDocument(tempFilePath, format, apiPath, tabType, retryCount + 1);
+                        }
+                    });
+                } else if (retryCount >= MAX_RETRY) {
+                    wx.showModal({
+                        title: '无法打开文件',
+                        content: '文件下载成功但多次打开失败。请检查系统文件权限设置。',
+                        showCancel: false,
+                        confirmText: '知道了'
+                    });
+                } else {
+                    // 其他错误：回退尝试不指定 fileType
+                    wx.openDocument({
+                        filePath: tempFilePath,
+                        showMenu: true,
+                        fail: () => {
+                            wx.showModal({
+                                title: '打开失败',
+                                content: '文件已下载但无法打开，请确认已安装支持该格式的应用',
+                                showCancel: false,
+                                confirmText: '知道了'
+                            });
                         }
                     });
                 }

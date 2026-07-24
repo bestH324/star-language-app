@@ -30,6 +30,12 @@ spring:
       max-file-size: 50MB
       max-request-size: 50MB
 
+# 微信小程序配置
+wechat:
+  miniapp:
+    appid: ${WECHAT_APPID:wx92d3840f1ef5331c}
+    secret: ${WECHAT_SECRET:}
+
 # 业务自定义配置
 autism:
   # 视频文件存放目录（绝对或相对路径）

@@ -24,6 +24,11 @@
             <text class="menu-text">消息提醒</text>
             <text class="menu-arrow">›</text>
         </view>
+        <view class="menu-item" bindtap="goTimeline">
+            <text class="menu-icon">🕐</text>
+            <text class="menu-text">我的历程</text>
+            <text class="menu-arrow">›</text>
+        </view>
         <view class="menu-item" bindtap="goAbout">
             <text class="menu-icon">ℹ️</text>
             <text class="menu-text">关于我们</text>

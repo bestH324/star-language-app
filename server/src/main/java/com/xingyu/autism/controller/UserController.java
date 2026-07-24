@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -106,5 +107,12 @@ public class UserController {
     public Result<List<Map<String, Object>>> reminders() {
         long uid = AuthContext.currentUserId();
         return Result.success(userService.getReminders(uid));
+    }
+
+    /** 获取用户历程时间轴 */
+    @GetMapping("/timeline")
+    public Result<List<Map<String, Object>>> timeline() {
+        long uid = AuthContext.currentUserId();
+        return Result.success(userService.getTimeline(uid));
     }
 }

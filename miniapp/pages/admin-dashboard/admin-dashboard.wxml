@@ -41,9 +41,15 @@
         </view>
     </view>
 
-    <button class="btn btn-outline btn-block" style="margin-top:12px" bindtap="exportData">📥 导出数据 (CSV表格)</button>
-    <view class="export-tip" style="text-align:center;padding:6px 12px">
-        <text style="font-size:12px;color:#888">点击导出后复制地址，在电脑浏览器打开即可下载 CSV 文件</text>
+    <view class="export-section">
+        <text class="export-title">📥 导出数据</text>
+        <view class="export-buttons">
+            <button class="btn btn-primary btn-block" bindtap="exportData" data-format="excel">📊 导出 Excel (.xlsx)</button>
+            <button class="btn btn-outline btn-block" bindtap="exportData" data-format="csv">📄 导出 CSV (.csv)</button>
+        </view>
+        <view class="export-tip">
+            <text>导出为 Excel 可获得更完整的表格格式（推荐）</text>
+        </view>
     </view>
     <button class="btn btn-outline btn-block" style="margin-top:8px" bindtap="doLogout">退出后台</button>
 </view>

@@ -1,5 +1,6 @@
 package com.xingyu.autism.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xingyu.autism.common.BizException;
 import com.xingyu.autism.config.AuthContext;
 import com.xingyu.autism.config.TokenService;
@@ -7,13 +8,17 @@ import com.xingyu.autism.dto.LoginRequest;
 import com.xingyu.autism.dto.LoginResponse;
 import com.xingyu.autism.dto.RegisterRequest;
 import com.xingyu.autism.dto.SendCodeRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +27,8 @@ import java.util.Map;
  */
 @Service
 public class UserService {
+
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
     @Autowired
     private JdbcTemplate jdbc;
@@ -35,8 +42,17 @@ public class UserService {
     @Autowired
     private ReminderService reminderService;
 
+    @Autowired
+    private RestTemplate restTemplate;
+
     @Value("${autism.demo-code:123456}")
     private String demoCode;
+
+    @Value("${wechat.miniapp.appid}")
+    private String wechatAppid;
+
+    @Value("${wechat.miniapp.secret:}")
+    private String wechatSecret;
 
     /** 发送验证码（演示模式：固定 123456，写入 users.code） */
     public String sendCode(SendCodeRequest req) {
@@ -122,13 +138,71 @@ public class UserService {
 
     /**
      * 微信小程序登录
-     * @param code 小程序 wx.login() 返回的 code
-     *             （演示模式：直接生成/查找 openid，未对接微信服务端接口）
+     * 调用微信 jscode2session 接口获取 openid，然后查找或创建用户。
+     * 若未配置 wechat.miniapp.secret 则自动降级为演示模式。
+     *
+     * @param code 小程序 wx.login() 返回的临时 code
      */
     public LoginResponse wxLogin(String code) {
-        // TODO 生产环境替换为真实调用：https://api.weixin.qq.com/sns/jscode2session
-        // 此处演示：用 code 作为虚拟 openid
-        String openid = "demo_" + (code == null ? "guest" : code.hashCode());
+        if (code == null || code.isBlank()) {
+            throw new BizException("登录凭证不能为空");
+        }
+
+        // 未配置 AppSecret → 演示模式
+        if (wechatSecret == null || wechatSecret.isBlank()) {
+            log.warn("未配置微信 AppSecret，使用演示模式登录");
+            return wxLoginDemo(code);
+        }
+
+        // 调用微信 jscode2session
+        String url = "https://api.weixin.qq.com/sns/jscode2session"
+                + "?appid=" + wechatAppid
+                + "&secret=" + wechatSecret
+                + "&js_code=" + code
+                + "&grant_type=authorization_code";
+
+        String openid;
+        try {
+            String respJson = restTemplate.getForObject(url, String.class);
+            log.debug("微信 jscode2session 响应: {}", respJson);
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> wxResp = new ObjectMapper().readValue(respJson, Map.class);
+
+            // 检查微信返回的错误
+            if (wxResp.containsKey("errcode")) {
+                int errcode = ((Number) wxResp.get("errcode")).intValue();
+                if (errcode != 0) {
+                    String errmsg = (String) wxResp.getOrDefault("errmsg", "未知错误");
+                    log.error("微信 jscode2session 返回错误: errcode={}, errmsg={}", errcode, errmsg);
+                    throw new BizException("微信登录失败，请稍后重试");
+                }
+            }
+
+            openid = (String) wxResp.get("openid");
+            if (openid == null || openid.isBlank()) {
+                log.error("微信 jscode2session 未返回 openid: {}", respJson);
+                throw new BizException("获取微信身份失败，请稍后重试");
+            }
+        } catch (BizException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("调用微信 jscode2session 异常: {}", e.getMessage(), e);
+            throw new BizException("微信登录服务异常，请稍后重试");
+        }
+
+        // 查找或创建用户
+        return loginByOpenid(openid);
+    }
+
+    /** 演示模式：用 code 生成虚拟 openid */
+    private LoginResponse wxLoginDemo(String code) {
+        String openid = "demo_" + code.hashCode();
+        return loginByOpenid(openid);
+    }
+
+    /** 根据 openid 查找或创建用户，生成 token 并返回 */
+    private LoginResponse loginByOpenid(String openid) {
         List<Map<String, Object>> rows = jdbc.queryForList(
                 "SELECT id, phone, nickname, avatar FROM users WHERE openid=?", openid);
         if (rows.isEmpty()) {
@@ -207,6 +281,126 @@ public class UserService {
         if (affected == 0) {
             throw new BizException("用户不存在");
         }
+    }
+
+    /**
+     * 获取用户历程时间轴
+     * 事件类型: register, first_screening, screening, referral, retest
+     */
+    public List<Map<String, Object>> getTimeline(long userId) {
+        List<Map<String, Object>> events = new ArrayList<>();
+
+        // 1. 注册事件
+        List<Map<String, Object>> userRows = jdbc.queryForList(
+                "SELECT create_time FROM users WHERE id=?", userId);
+        if (!userRows.isEmpty()) {
+            Map<String, Object> reg = new LinkedHashMap<>();
+            reg.put("type", "register");
+            reg.put("date", userRows.get(0).get("create_time"));
+            reg.put("title", "注册加入星语");
+            reg.put("description", "开始您的孤独症早期筛查之旅");
+            reg.put("icon", "star");
+            events.add(reg);
+        }
+
+        // 2. 筛查事件（首次筛查单独标记）
+        List<Map<String, Object>> screeningRows = jdbc.queryForList(
+                "SELECT a.id, a.create_time, a.total_score, a.risk_level, " +
+                " c.name AS child_name, q.title AS questionnaire_title " +
+                " FROM answers a " +
+                " JOIN children c ON a.child_id = c.id " +
+                " LEFT JOIN questionnaires q ON a.qid = q.id " +
+                " WHERE c.user_id = ? " +
+                " ORDER BY a.create_time ASC", userId);
+
+        boolean firstDone = false;
+        for (Map<String, Object> row : screeningRows) {
+            Map<String, Object> evt = new LinkedHashMap<>();
+            if (!firstDone) {
+                evt.put("type", "first_screening");
+                evt.put("title", "完成首次筛查");
+                firstDone = true;
+            } else {
+                evt.put("type", "screening");
+                evt.put("title", "完成筛查");
+            }
+            evt.put("icon", "check");
+            evt.put("date", row.get("create_time"));
+            evt.put("childName", row.get("child_name"));
+            evt.put("questionnaireTitle", row.get("questionnaire_title"));
+            evt.put("totalScore", row.get("total_score"));
+            String risk = (String) row.get("risk_level");
+            evt.put("riskLevel", risk);
+            evt.put("riskText", risk == null ? "" :
+                    ("high".equals(risk) ? "高风险" : "medium".equals(risk) ? "中风险" : "低风险"));
+            evt.put("description",
+                    (row.get("child_name") != null ? row.get("child_name") : "宝宝") +
+                    " · " + (row.get("questionnaire_title") != null ? row.get("questionnaire_title") : "筛查") +
+                    " · 得分" + row.get("total_score") +
+                    " · " + evt.get("riskText"));
+            events.add(evt);
+        }
+
+        // 3. 转诊预约事件
+        List<Map<String, Object>> referralRows = jdbc.queryForList(
+                "SELECT a.id, a.hospital_name, a.type AS appointment_type, " +
+                " a.appointment_time, a.status, a.create_time, c.name AS child_name " +
+                " FROM appointments a " +
+                " JOIN children c ON a.child_id = c.id " +
+                " WHERE c.user_id = ? " +
+                " ORDER BY a.create_time ASC", userId);
+        for (Map<String, Object> row : referralRows) {
+            Map<String, Object> evt = new LinkedHashMap<>();
+            evt.put("type", "referral");
+            evt.put("date", row.get("create_time"));
+            evt.put("title", "转诊预约");
+            evt.put("icon", "hospital");
+            evt.put("hospitalName", row.get("hospital_name"));
+            evt.put("appointmentType", row.get("appointment_type"));
+            evt.put("appointmentTime", row.get("appointment_time"));
+            evt.put("status", row.get("status"));
+            evt.put("childName", row.get("child_name"));
+            evt.put("description", "预约" + row.get("hospital_name") + " · " +
+                    (row.get("appointment_type") != null ? row.get("appointment_type") : "就诊") +
+                    " · " + (row.get("status") != null ? row.get("status") : ""));
+            events.add(evt);
+        }
+
+        // 4. 复测提醒事件（retest 类型且未取消）
+        List<Map<String, Object>> retestRows = jdbc.queryForList(
+                "SELECT r.id, r.scheduled_days, r.trigger_reason, r.status, r.create_time, c.name AS child_name " +
+                " FROM reminders r " +
+                " JOIN children c ON r.child_id = c.id " +
+                " WHERE r.user_id = ? AND r.reminder_type = 'retest' AND r.status != 'cancelled' " +
+                " ORDER BY r.create_time ASC", userId);
+        for (Map<String, Object> row : retestRows) {
+            Map<String, Object> evt = new LinkedHashMap<>();
+            evt.put("type", "retest");
+            evt.put("date", row.get("create_time"));
+            evt.put("title", "复测提醒");
+            evt.put("icon", "repeat");
+            evt.put("scheduledDays", row.get("scheduled_days"));
+            evt.put("triggerReason", row.get("trigger_reason"));
+            evt.put("status", row.get("status"));
+            evt.put("childName", row.get("child_name"));
+            evt.put("description",
+                    (row.get("child_name") != null ? row.get("child_name") : "宝宝") +
+                    " · " + (row.get("trigger_reason") != null ? row.get("trigger_reason") : "建议复测") +
+                    " · " + ("sent".equals(row.get("status")) ? "已提醒" : "待提醒"));
+            events.add(evt);
+        }
+
+        // 按时间升序排列
+        events.sort((a, b) -> {
+            String da = (String) a.get("date");
+            String db = (String) b.get("date");
+            if (da == null && db == null) return 0;
+            if (da == null) return -1;
+            if (db == null) return 1;
+            return da.compareTo(db);
+        });
+
+        return events;
     }
 
     /** 获取用户的提醒消息列表 */

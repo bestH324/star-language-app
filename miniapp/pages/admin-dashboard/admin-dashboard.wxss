@@ -25,3 +25,7 @@
 .badge-sm.low { background: var(--risk-low-bg); color: var(--risk-low); }
 .badge-sm.medium { background: var(--risk-medium-bg); color: var(--risk-medium); }
 .badge-sm.high { background: var(--risk-high-bg); color: var(--risk-high); }
+.export-section { margin-top: 16px; }
+.export-title { font-size: 16px; font-weight: 600; display: block; margin-bottom: 10px; }
+.export-buttons { display: flex; flex-direction: column; gap: 10px; }
+.export-tip { text-align: center; padding: 8px 12px; font-size: 12px; color: var(--text-hint); }
