@@ -1,5 +1,5 @@
 <view class="page-content">
-    <view wx:if="{{list.length === 0}}" class="empty-state"><text class="empty-icon">👶</text><text>还没有添加宝宝信息</text><text style="font-size:13px;color:var(--text-hint)">点击下方按钮添加宝宝，开始筛查</text></view>
+    <view wx:if="{{list.length == 0}}" class="empty-state"><text class="empty-icon">👶</text><text>还没有添加宝宝信息</text><text style="font-size:13px;color:var(--text-hint)">点击下方按钮添加宝宝，开始筛查</text></view>
     <view wx:for="{{list}}" wx:key="id" class="child-card">
         <view class="child-info" bindtap="goScreening" data-id="{{item.id}}">
             <text class="child-avatar">{{item.avatar || '👶'}}</text>

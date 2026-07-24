@@ -18,7 +18,8 @@ Page({
     _render() {
         request.get('/api/child/list').then(children => {
             const list = (children || []).map(c => {
-                const isPremature = c.is_premature === 1;
+                // MySQL TINYINT(1) 经 JDBC 返回布尔值 true/false，用 == 而非 ===
+                const isPremature = c.is_premature == 1 || c.is_premature === true;
                 const prematureWeeks = c.premature_weeks || 0;
                 const birthDate = c.birth_date;
                 const actualMonths = this._calcMonths(birthDate);
