@@ -17,11 +17,12 @@ Page({
                 // 按类型映射图标
                 let iconEmoji = '●';
                 switch (e.type) {
-                    case 'register':        iconEmoji = '🌟'; break;
-                    case 'first_screening': iconEmoji = '✅'; break;
-                    case 'screening':       iconEmoji = '🔍'; break;
-                    case 'referral':        iconEmoji = '🏥'; break;
-                    case 'retest':          iconEmoji = '🔄'; break;
+                    case 'register':              iconEmoji = '🌟'; break;
+                    case 'first_screening':       iconEmoji = '✅'; break;
+                    case 'screening':             iconEmoji = '🔍'; break;
+                    case 'referral':              iconEmoji = '🏥'; break;
+                    case 'retest':                iconEmoji = '🔄'; break;
+                    case 'missed_questionnaire':  iconEmoji = '⏭️'; break;
                 }
 
                 // 格式化日期
@@ -35,11 +36,12 @@ Page({
                 // 按类型映射圆点颜色类
                 let dotClass = 'dot-default';
                 switch (e.type) {
-                    case 'register':        dotClass = 'dot-primary'; break;
-                    case 'first_screening': dotClass = 'dot-success'; break;
-                    case 'screening':       dotClass = 'dot-info';    break;
-                    case 'referral':        dotClass = 'dot-warning'; break;
-                    case 'retest':          dotClass = 'dot-accent';  break;
+                    case 'register':              dotClass = 'dot-primary'; break;
+                    case 'first_screening':       dotClass = 'dot-success'; break;
+                    case 'screening':             dotClass = 'dot-info';    break;
+                    case 'referral':              dotClass = 'dot-warning'; break;
+                    case 'retest':                dotClass = 'dot-accent';  break;
+                    case 'missed_questionnaire':  dotClass = 'dot-danger';  break;
                 }
 
                 // 风险等级颜色

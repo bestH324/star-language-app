@@ -124,6 +124,8 @@ public class AnswerService {
             reminderService.createHighRiskReminders(uid, req.getChildId());
         }
         reminderService.createRetestReminder(uid, req.getChildId(), req.getQid());
+        // 检测是否跳过了中间问卷
+        reminderService.createMissedQuestionnaireCheck(uid, req.getChildId(), req.getQid());
 
         return report(answerId);
     }

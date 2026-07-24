@@ -390,13 +390,34 @@ public class UserService {
             events.add(evt);
         }
 
-        // 按时间升序排列
+        // 5. 跳过问卷提醒事件（missed_questionnaire 类型）
+        List<Map<String, Object>> missedRows = jdbc.queryForList(
+                "SELECT r.id, r.trigger_reason, r.status, r.create_time, c.name AS child_name " +
+                " FROM reminders r " +
+                " JOIN children c ON r.child_id = c.id " +
+                " WHERE r.user_id = ? AND r.reminder_type = 'missed_questionnaire' AND r.status != 'cancelled' " +
+                " ORDER BY r.create_time ASC", userId);
+        for (Map<String, Object> row : missedRows) {
+            Map<String, Object> evt = new LinkedHashMap<>();
+            evt.put("type", "missed_questionnaire");
+            evt.put("date", String.valueOf(row.get("create_time")));
+            evt.put("title", "跳过阶段");
+            evt.put("icon", "warning");
+            evt.put("status", row.get("status"));
+            evt.put("childName", row.get("child_name"));
+            evt.put("description", row.get("trigger_reason") != null ? row.get("trigger_reason") : "跳过了某个阶段的问卷");
+            events.add(evt);
+        }
+
+        // 按时间升序排列（date 可能是 String 或 LocalDateTime，统一转为 String 比较）
         events.sort((a, b) -> {
-            String da = (String) a.get("date");
-            String db = (String) b.get("date");
-            if (da == null && db == null) return 0;
-            if (da == null) return -1;
-            if (db == null) return 1;
+            String da = String.valueOf(a.get("date"));
+            String db = String.valueOf(b.get("date"));
+            if (da == null || "null".equals(da)) {
+                if (db == null || "null".equals(db)) return 0;
+                return -1;
+            }
+            if (db == null || "null".equals(db)) return 1;
             return da.compareTo(db);
         });
 

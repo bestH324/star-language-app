@@ -87,6 +87,51 @@ public class ReminderService {
         log.info("已创建月龄复测提醒 userId={} childId={} daysUntil={}", userId, childId, daysUntil);
     }
 
+    /** 跳过问卷提醒 — 检测当前提交和上一次筛查之间是否跳过了某个中间问卷 */
+    public void createMissedQuestionnaireCheck(long userId, long childId, long currentQid) {
+        // 查上一次筛查的问卷
+        List<Map<String, Object>> prevAnswers = jdbc.queryForList(
+                "SELECT a.qid FROM answers a WHERE a.child_id=? AND a.qid < ? ORDER BY a.qid DESC LIMIT 1",
+                childId, currentQid);
+        if (prevAnswers.isEmpty()) return; // 首次筛查，无前一问卷
+
+        int prevQid = ((Number) prevAnswers.get(0).get("qid")).intValue();
+
+        // 查中间所有问卷（prevQid < qid < currentQid）
+        List<Map<String, Object>> skipped = jdbc.queryForList(
+                "SELECT id, title, min_age_months, max_age_months FROM questionnaires WHERE id > ? AND id < ? ORDER BY id",
+                prevQid, currentQid);
+        if (skipped.isEmpty()) return;
+
+        // 计算儿童当前矫正月龄
+        List<Map<String, Object>> childRows = jdbc.queryForList(
+                "SELECT birth_date, is_premature, premature_weeks FROM children WHERE id=?", childId);
+        if (childRows.isEmpty()) return;
+        Map<String, Object> child = childRows.get(0);
+        Object bd = child.get("birth_date");
+        if (bd == null) return;
+        String birthDate = bd instanceof java.sql.Date d ? d.toString() : bd.toString();
+        LocalDate birth = LocalDate.parse(birthDate);
+        long actualMonths = Period.between(birth, LocalDate.now()).toTotalMonths();
+        boolean isPremature = toInt(child.get("is_premature")) == 1;
+        int prematureWeeks = toInt(child.get("premature_weeks"));
+        long correctedMonths = ChildAgeUtils.getCorrectedMonths(actualMonths, isPremature ? prematureWeeks : 0);
+
+        // 筛选：当前矫正月龄已超过该问卷的 max_age_months → 确定跳过
+        for (Map<String, Object> q : skipped) {
+            int maxAge = ((Number) q.get("max_age_months")).intValue();
+            if (correctedMonths > maxAge) {
+                String title = (String) q.get("title");
+                String reason = "您跳过了「" + title + "」（适用于 "
+                        + q.get("min_age_months") + "-" + maxAge + " 个月），建议关注对应月龄发育指标";
+                cancelExisting(userId, childId, "missed_questionnaire_" + q.get("id"));
+                jdbc.update("INSERT INTO reminders(user_id, child_id, reminder_type, scheduled_days, trigger_reason) VALUES(?,?,?,?,?)",
+                        userId, childId, "missed_questionnaire", 0, reason);
+                log.info("已创建跳过问卷提醒 userId={} childId={} skippedQid={} reason={}", userId, childId, q.get("id"), reason);
+            }
+        }
+    }
+
     /** 每日定时扫描待发送提醒 */
     @Scheduled(cron = "0 0 9 * * *")
     public void processDailyReminders() {
@@ -129,6 +174,10 @@ public class ReminderService {
             case "retest":
                 title = "📋 复测提醒";
                 content = "您的宝宝月龄已达到下一阶段量表适用范围，建议进行再次筛查。原因：" + reason;
+                break;
+            case "missed_questionnaire":
+                title = "⚠️ 跳过阶段提醒";
+                content = reason;
                 break;
             default:
                 title = "星语提醒";

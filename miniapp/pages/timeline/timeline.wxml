@@ -49,6 +49,11 @@
                         <text wx:if="{{item.hospitalName}}" class="extra-item">🏥 {{item.hospitalName}}</text>
                         <text wx:if="{{item.appointmentTime}}" class="extra-item">📅 {{item.appointmentTime}}</text>
                     </view>
+
+                    <!-- 跳过阶段节点：红色提示 -->
+                    <view wx:if="{{item.type === 'missed_questionnaire'}}" class="timeline-extra timeline-missed">
+                        <text class="extra-item missed-hint">⚠️ 请关注对应月龄发育指标，必要时可前往儿童保健科补做评估</text>
+                    </view>
                 </view>
             </view>
         </block>
