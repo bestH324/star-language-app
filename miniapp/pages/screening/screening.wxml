@@ -17,7 +17,7 @@
                 <text>• 请仔细观看视频后，根据 <text style="font-weight:bold">宝宝日常表现</text> 作答</text>
                 <text>• 预计用时 <text style="font-weight:bold">10-15分钟</text></text>
                 <view wx:if="{{questionnaireInfo && questionnaireInfo.isCorrected}}" class="corrected-age-hint">
-                    <text>💡 宝宝为早产儿（< 24月龄），系统已自动使用矫正月龄 <text style="font-weight:bold">{{questionnaireInfo.matchMonths}}个月</text>（实际 {{questionnaireInfo.actualMonths}} 个月）匹配本量表。满24个实际月龄后不再矫正。</text>
+                    <text>💡 宝宝为早产儿（小于24月龄），系统已自动使用矫正月龄 <text style="font-weight:bold">{{questionnaireInfo.matchMonths}}个月</text>（实际 {{questionnaireInfo.actualMonths}} 个月）匹配本量表。满24个实际月龄后不再矫正。</text>
                 </view>
             </view>
         </view>
