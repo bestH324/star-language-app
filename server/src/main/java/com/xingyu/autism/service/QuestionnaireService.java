@@ -3,6 +3,7 @@ package com.xingyu.autism.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xingyu.autism.common.BizException;
+import com.xingyu.autism.util.ChildAgeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -75,11 +76,8 @@ public class QuestionnaireService {
         boolean isPremature = toInt(child.get("is_premature")) == 1;
         int prematureWeeks = toInt(child.get("premature_weeks"));
 
-        // 早产儿且实际月龄 < 24 个月时，使用矫正月龄
-        long matchMonths = actualMonths;
-        if (isPremature && actualMonths < 24) {
-            matchMonths = Math.max(0, actualMonths - prematureWeeks / 4);
-        }
+        // 早产儿且实际月龄 < 24 个月时使用矫正月龄（统一工具方法，精确浮点除法）
+        long matchMonths = ChildAgeUtils.getCorrectedMonths(actualMonths, isPremature ? prematureWeeks : 0);
 
         // 匹配年龄范围适合的问卷
         List<Map<String, Object>> matched = jdbc.queryForList(

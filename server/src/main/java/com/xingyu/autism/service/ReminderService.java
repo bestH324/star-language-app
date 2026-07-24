@@ -1,5 +1,6 @@
 package com.xingyu.autism.service;
 
+import com.xingyu.autism.util.ChildAgeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,10 +74,7 @@ public class ReminderService {
         long actualMonths = Period.between(birth, LocalDate.now()).toTotalMonths();
         boolean isPremature = toInt(child.get("is_premature")) == 1;
         int prematureWeeks = toInt(child.get("premature_weeks"));
-        long currentMonths = actualMonths;
-        if (isPremature && actualMonths < 24) {
-            currentMonths = Math.max(0, actualMonths - prematureWeeks / 4);
-        }
+        long currentMonths = ChildAgeUtils.getCorrectedMonths(actualMonths, isPremature ? prematureWeeks : 0);
 
         // 计算距下一问卷月龄的天数
         long monthsUntil = nextMinMonths - currentMonths;

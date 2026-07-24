@@ -22,9 +22,9 @@ Page({
                 const prematureWeeks = c.premature_weeks || 0;
                 const birthDate = c.birth_date;
                 const actualMonths = this._calcMonths(birthDate);
-                // 矫正月龄：早产且实际月龄 < 24 时生效
+                // 矫正月龄：早产且实际月龄 < 24 时生效，使用 Math.round 精确四舍五入（与后端 ChildAgeUtils 一致）
                 const correctedMonths = (isPremature && actualMonths < 24)
-                    ? Math.max(0, actualMonths - Math.floor(prematureWeeks / 4))
+                    ? Math.max(0, Math.round(actualMonths - prematureWeeks / 4))
                     : actualMonths;
                 const isCorrected = correctedMonths !== actualMonths;
 
