@@ -1,58 +1,28 @@
 <view class="page-content">
-    <!-- Loading -->
     <view wx:if="{{loading}}" class="empty-state">
-        <text class="empty-icon">⏳</text>
         <text>加载中...</text>
     </view>
-
-    <!-- 空状态 -->
-    <view wx:elif="{{events.length === 0}}" class="empty-state">
-        <text class="empty-icon">📋</text>
+    <view wx:elif="{{empty}}" class="empty-state">
         <text>暂无历程记录</text>
-        <text style="font-size:13px;color:var(--text-hint);margin-top:8px;display:block">完成筛查后将在此显示您的完整历程</text>
+        <text>完成筛查后将在此显示您的完整历程</text>
     </view>
-
-    <!-- 时间轴 -->
     <view wx:else class="timeline">
-        <block wx:for="{{events}}" wx:key="index">
-            <!-- 日期分组标签 -->
+        <block wx:for="{{events}}" wx:key="id">
             <view class="timeline-date-label" wx:if="{{item.showDateLabel}}">
-                <text class="date-text">{{item.dateDisplay}}</text>
+                <text>{{item.dateDisplay}}</text>
             </view>
-
-            <!-- 时间轴节点 -->
             <view class="timeline-node">
-                <!-- 左侧：圆点 + 连线 -->
                 <view class="timeline-left">
                     <view class="timeline-dot {{item.dotClass}}">
-                        <text class="dot-icon">{{item.iconEmoji}}</text>
+                        <text>{{item.iconEmoji}}</text>
                     </view>
-                    <view class="timeline-line" wx:if="{{!item.isLast}}"></view>
+                    <view class="timeline-line" wx:if="{{item.showLine}}"></view>
                 </view>
-
-                <!-- 右侧：事件卡片 -->
                 <view class="timeline-card">
-                    <view class="timeline-card-header">
-                        <text class="timeline-card-title">{{item.title}}</text>
-                        <text wx:if="{{item.statusText}}" class="timeline-status {{item.statusClass}}">{{item.statusText}}</text>
-                    </view>
-                    <text class="timeline-card-desc">{{item.description}}</text>
-
-                    <!-- 筛查节点：得分 + 风险标签 -->
-                    <view wx:if="{{item.hasScore}}" class="timeline-extra">
-                        <text class="extra-item">📊 得分: {{item.totalScore}}</text>
-                        <text wx:if="{{item.riskText}}" class="extra-item risk-tag" style="color:{{item.riskColor}}">{{item.riskText}}</text>
-                    </view>
-
-                    <!-- 转诊节点 -->
-                    <view wx:if="{{item.hospitalName}}" class="timeline-extra">
-                        <text wx:if="{{item.hospitalName}}" class="extra-item">🏥 {{item.hospitalName}}</text>
-                        <text wx:if="{{item.appointmentTime}}" class="extra-item">📅 {{item.appointmentTime}}</text>
-                    </view>
-
-                    <!-- 跳过阶段节点 -->
-                    <view wx:if="{{item.type === 'missed_questionnaire'}}" class="timeline-extra timeline-missed">
-                        <text class="extra-item missed-hint">⚠️ 请关注对应月龄发育指标，必要时可前往儿童保健科补做评估</text>
+                    <text>{{item.title}}</text>
+                    <text>{{item.description}}</text>
+                    <view wx:if="{{item.isMissed}}">
+                        <text>提示：请关注对应月龄发育指标</text>
                     </view>
                 </view>
             </view>

@@ -1,106 +1,72 @@
-const request = require('../../utils/request');
+var request = require('../../utils/request');
 
 Page({
     data: {
         events: [],
+        empty: false,
         loading: true
     },
 
-    onShow() {
+    onShow: function () {
         this._loadTimeline();
     },
 
-    _loadTimeline() {
-        this.setData({ loading: true });
-        request.get('/api/user/timeline').then(events => {
-            const list = (events || []).map(function (e, index, arr) {
-                // 类型 -> 图标
+    _loadTimeline: function () {
+        var self = this;
+        self.setData({ loading: true });
+        request.get('/api/user/timeline').then(function (events) {
+            events = events || [];
+            var list = [];
+            var prevDate = '';
+
+            for (var i = 0; i < events.length; i++) {
+                var e = events[i];
+
                 var iconEmoji = '●';
-                switch (e.type) {
-                    case 'register':              iconEmoji = '🌟'; break;
-                    case 'first_screening':       iconEmoji = '✅'; break;
-                    case 'screening':             iconEmoji = '🔍'; break;
-                    case 'referral':              iconEmoji = '🏥'; break;
-                    case 'retest':                iconEmoji = '🔄'; break;
-                    case 'missed_questionnaire':  iconEmoji = '⏭️'; break;
-                }
+                if (e.type === 'register') iconEmoji = '🌟';
+                else if (e.type === 'first_screening') iconEmoji = '✅';
+                else if (e.type === 'screening') iconEmoji = '🔍';
+                else if (e.type === 'referral') iconEmoji = '🏥';
+                else if (e.type === 'retest') iconEmoji = '🔄';
+                else if (e.type === 'missed_questionnaire') iconEmoji = '⏭';
 
-                // 类型 -> 圆点颜色类
                 var dotClass = 'dot-default';
-                switch (e.type) {
-                    case 'register':              dotClass = 'dot-primary'; break;
-                    case 'first_screening':       dotClass = 'dot-success'; break;
-                    case 'screening':             dotClass = 'dot-info';    break;
-                    case 'referral':              dotClass = 'dot-warning'; break;
-                    case 'retest':                dotClass = 'dot-accent';  break;
-                    case 'missed_questionnaire':  dotClass = 'dot-danger';  break;
-                }
+                if (e.type === 'register') dotClass = 'dot-primary';
+                else if (e.type === 'first_screening') dotClass = 'dot-success';
+                else if (e.type === 'screening') dotClass = 'dot-info';
+                else if (e.type === 'referral') dotClass = 'dot-warning';
+                else if (e.type === 'retest') dotClass = 'dot-accent';
+                else if (e.type === 'missed_questionnaire') dotClass = 'dot-danger';
 
-                // 风险颜色
-                var riskColor = '#27AE60';
-                if (e.riskLevel === 'high') riskColor = '#E74C3C';
-                else if (e.riskLevel === 'medium') riskColor = '#F39C12';
-
-                // 日期格式化
                 var dateDisplay = '';
                 if (e.date) {
-                    var ds = String(e.date);
-                    dateDisplay = ds.length >= 10 ? ds.substring(0, 10) : ds;
+                    dateDisplay = String(e.date).substring(0, 10);
                 }
 
-                // 日期标签是否显示（第一个事件 或 与前一个事件的日期不同）
-                var showDateLabel = index === 0;
-                if (!showDateLabel && index > 0) {
-                    showDateLabel = dateDisplay !== arr[index - 1].dateDisplay;
-                }
+                var showDateLabel = (dateDisplay !== '' && dateDisplay !== prevDate);
+                prevDate = dateDisplay;
 
-                // 状态文本（避免 WXML 嵌套三元）
-                var statusText = '';
-                if (e.status) {
-                    if (e.status === 'sent') statusText = '已推送';
-                    else if (e.status === 'pending') statusText = '待推送';
-                    else statusText = e.status;
-                }
+                var showLine = (i < events.length - 1);
+                var isMissed = (e.type === 'missed_questionnaire');
 
-                // 状态样式类
-                var statusClass = '';
-                if (e.status === 'sent' || e.status === 'confirmed') {
-                    statusClass = 'status-ok';
-                } else if (e.status) {
-                    statusClass = 'status-pending';
-                }
-
-                // 是否有得分（避免 WXML !== undefined）
-                var hasScore = (e.totalScore !== null && e.totalScore !== undefined);
-
-                // 是否为最后一项（控制连接线显示）
-                var isLast = index >= arr.length - 1;
-
-                return {
+                list.push({
+                    _id: i,
                     type: e.type,
                     title: e.title || '',
                     description: e.description || '',
                     iconEmoji: iconEmoji,
                     dotClass: dotClass,
-                    riskColor: riskColor,
                     dateDisplay: dateDisplay,
                     showDateLabel: showDateLabel,
-                    statusText: statusText,
-                    statusClass: statusClass,
-                    hasScore: hasScore,
-                    totalScore: e.totalScore,
-                    riskText: e.riskText || '',
-                    riskLevel: e.riskLevel || '',
-                    hospitalName: e.hospitalName || '',
-                    appointmentTime: e.appointmentTime || '',
-                    isLast: isLast
-                };
-            });
+                    showLine: showLine,
+                    isMissed: isMissed
+                });
+            }
 
-            this.setData({ events: list, loading: false });
+            self.setData({ events: list, empty: list.length === 0, loading: false });
         }).catch(function () {
-            this.setData({ loading: false });
-            wx.showToast({ title: '加载失败，请检查网络', icon: 'none' });
-        }.bind(this));
+            self.setData({ loading: false, empty: true });
+            wx.showToast({ title: '加载失败', icon: 'none' });
+        });
     }
 });
