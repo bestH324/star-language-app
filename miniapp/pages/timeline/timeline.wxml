@@ -15,8 +15,8 @@
     <!-- 时间轴 -->
     <view wx:else class="timeline">
         <block wx:for="{{events}}" wx:key="index">
-            <!-- 日期分组标签：同一天仅显示一次 -->
-            <view class="timeline-date-label" wx:if="{{index === 0 || item.dateDisplay !== events[index-1].dateDisplay}}">
+            <!-- 日期分组标签 -->
+            <view class="timeline-date-label" wx:if="{{item.showDateLabel}}">
                 <text class="date-text">{{item.dateDisplay}}</text>
             </view>
 
@@ -27,30 +27,30 @@
                     <view class="timeline-dot {{item.dotClass}}">
                         <text class="dot-icon">{{item.iconEmoji}}</text>
                     </view>
-                    <view class="timeline-line" wx:if="{{index < events.length - 1}}"></view>
+                    <view class="timeline-line" wx:if="{{!item.isLast}}"></view>
                 </view>
 
                 <!-- 右侧：事件卡片 -->
                 <view class="timeline-card">
                     <view class="timeline-card-header">
                         <text class="timeline-card-title">{{item.title}}</text>
-                        <text wx:if="{{item.status}}" class="timeline-status {{item.status === 'sent' || item.status === 'confirmed' ? 'status-ok' : 'status-pending'}}">{{item.status === 'sent' ? '已推送' : item.status === 'pending' ? '待推送' : item.status}}</text>
+                        <text wx:if="{{item.statusText}}" class="timeline-status {{item.statusClass}}">{{item.statusText}}</text>
                     </view>
                     <text class="timeline-card-desc">{{item.description}}</text>
 
                     <!-- 筛查节点：得分 + 风险标签 -->
-                    <view wx:if="{{item.type === 'first_screening' || item.type === 'screening'}}" class="timeline-extra">
-                        <text wx:if="{{item.totalScore !== undefined}}" class="extra-item">📊 得分: {{item.totalScore}}</text>
+                    <view wx:if="{{item.hasScore}}" class="timeline-extra">
+                        <text class="extra-item">📊 得分: {{item.totalScore}}</text>
                         <text wx:if="{{item.riskText}}" class="extra-item risk-tag" style="color:{{item.riskColor}}">{{item.riskText}}</text>
                     </view>
 
-                    <!-- 转诊节点：医院 + 预约时间 -->
-                    <view wx:if="{{item.type === 'referral'}}" class="timeline-extra">
+                    <!-- 转诊节点 -->
+                    <view wx:if="{{item.hospitalName}}" class="timeline-extra">
                         <text wx:if="{{item.hospitalName}}" class="extra-item">🏥 {{item.hospitalName}}</text>
                         <text wx:if="{{item.appointmentTime}}" class="extra-item">📅 {{item.appointmentTime}}</text>
                     </view>
 
-                    <!-- 跳过阶段节点：红色提示 -->
+                    <!-- 跳过阶段节点 -->
                     <view wx:if="{{item.type === 'missed_questionnaire'}}" class="timeline-extra timeline-missed">
                         <text class="extra-item missed-hint">⚠️ 请关注对应月龄发育指标，必要时可前往儿童保健科补做评估</text>
                     </view>
