@@ -53,5 +53,13 @@ Page({
         });
     },
 
-    goLogin() { wx.navigateBack(); }
+    goLogin() { wx.navigateBack(); },
+
+    showServiceAgreement() {
+        wx.navigateTo({ url: '/pages/privacy-agreement/privacy-agreement?readonly=1' });
+    },
+
+    showPrivacyPolicy() {
+        wx.navigateTo({ url: '/pages/privacy-agreement/privacy-agreement?readonly=1' });
+    }
 });

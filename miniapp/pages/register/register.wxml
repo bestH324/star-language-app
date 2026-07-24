@@ -5,7 +5,7 @@
     </view>
     <view class="form-group"><text class="form-label">设置密码</text><input class="form-input" type="password" placeholder="请设置6-16位密码" maxlength="16" value="{{password}}" bindinput="onPwdInput" /></view>
     <view class="form-group"><text class="form-label">确认密码</text><input class="form-input" type="password" placeholder="请再次输入密码" maxlength="16" value="{{confirm}}" bindinput="onConfirmInput" /></view>
-    <view class="form-agreement"><checkbox checked="{{agree}}" bindtap="toggleAgree" /><text>我已阅读并同意 <text class="link">《用户服务协议》</text> 和 <text class="link">《隐私政策》</text></text></view>
+    <view class="form-agreement"><checkbox checked="{{agree}}" bindtap="toggleAgree" /><text>我已阅读并同意 <text class="link" bindtap="showServiceAgreement">《用户服务协议》</text> 和 <text class="link" bindtap="showPrivacyPolicy">《隐私政策》</text></text></view>
     <button class="btn btn-primary btn-block" bindtap="doRegister">注册</button>
     <view class="form-bottom-text"><text>已有账号？</text><text class="link" bindtap="goLogin">立即登录</text></view>
 </view>
