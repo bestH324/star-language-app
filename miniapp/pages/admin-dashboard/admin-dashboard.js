@@ -70,14 +70,14 @@ Page({
         app.saveToStorage();
         wx.redirectTo({ url: '/pages/index/index' });
     },
-    // 导出数据按钮事件：根据 data-format 决定导出 Excel 或 CSV
+    // 导出数据按钮事件：data-type 指定导出类型，data-format 指定文件格式
     exportData(e) {
         const format = e.currentTarget.dataset.format; // 'excel' | 'csv'
-        const tabType = this.data.tab;                 // 'users' | 'children' | 'records'
+        const exportType = e.currentTarget.dataset.type; // 'users' | 'children' | 'records'
         const apiPath = format === 'excel'
-            ? '/api/admin/export-excel?type=' + tabType
-            : '/api/admin/export-csv?type=' + tabType;
-        this._doExport(apiPath, format, tabType, 0);
+            ? '/api/admin/export-excel?type=' + exportType
+            : '/api/admin/export-csv?type=' + exportType;
+        this._doExport(apiPath, format, exportType, 0);
     },
 
     // 递归下载，retryCount 由参数传递避免 setData 异步问题

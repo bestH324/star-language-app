@@ -28,27 +28,37 @@
             <view class="dt-header"><text style="flex:1">电话</text><text style="flex:1">注册时间</text></view>
             <view wx:if="{{users.length==0}}"><text class="dt-empty">暂无用户数据</text></view>
             <view wx:for="{{users}}" wx:key="id" class="dt-row"><text style="flex:1">{{item.phone}}</text><text style="flex:1">{{item.time}}</text></view>
+            <view class="export-section">
+                <text class="export-title">📥 导出用户列表</text>
+                <view class="export-buttons">
+                    <button class="btn btn-primary btn-block" bindtap="exportData" data-format="excel" data-type="users">📊 导出 Excel (.xlsx)</button>
+                    <button class="btn btn-outline btn-block" bindtap="exportData" data-format="csv" data-type="users">📄 导出 CSV (.csv)</button>
+                </view>
+            </view>
         </view>
         <view wx:if="{{tab=='children'}}">
             <view class="dt-header"><text style="flex:1.5">昵称</text><text style="flex:0.8">性别</text><text style="flex:1.2">年龄</text><text style="flex:1">筛查次数</text></view>
             <view wx:if="{{children.length==0}}"><text class="dt-empty">暂无儿童数据</text></view>
             <view wx:for="{{children}}" wx:key="id" class="dt-row"><text style="flex:1.5">{{item.avatar||'👶'}} {{item.name}}</text><text style="flex:0.8">{{item.gender=='male'?'男':'女'}}</text><text style="flex:1.2">{{item.ageText}}</text><text style="flex:1">{{item.screeningCount}}次</text></view>
+            <view class="export-section">
+                <text class="export-title">📥 导出儿童列表</text>
+                <view class="export-buttons">
+                    <button class="btn btn-primary btn-block" bindtap="exportData" data-format="excel" data-type="children">📊 导出 Excel (.xlsx)</button>
+                    <button class="btn btn-outline btn-block" bindtap="exportData" data-format="csv" data-type="children">📄 导出 CSV (.csv)</button>
+                </view>
+            </view>
         </view>
         <view wx:if="{{tab=='records'}}">
             <view class="dt-header"><text style="flex:1.2">儿童</text><text style="flex:0.8">风险</text><text style="flex:0.6">得分</text><text style="flex:1.2">时间</text></view>
             <view wx:if="{{records.length==0}}"><text class="dt-empty">暂无筛查记录</text></view>
             <view wx:for="{{records}}" wx:key="id" class="dt-row" bindtap="viewRecord" data-id="{{item.id}}"><text style="flex:1.2">{{item.childAvatar||'👶'}} {{item.childName}}</text><text style="flex:0.8"><text class="badge-sm {{item.riskLevel}}">{{item.riskText}}</text></text><text style="flex:0.6">{{item.totalScore}}</text><text style="flex:1.2">{{item.time}}</text></view>
-        </view>
-    </view>
-
-    <view class="export-section">
-        <text class="export-title">📥 导出数据</text>
-        <view class="export-buttons">
-            <button class="btn btn-primary btn-block" bindtap="exportData" data-format="excel">📊 导出 Excel (.xlsx)</button>
-            <button class="btn btn-outline btn-block" bindtap="exportData" data-format="csv">📄 导出 CSV (.csv)</button>
-        </view>
-        <view class="export-tip">
-            <text>导出为 Excel 可获得更完整的表格格式（推荐）</text>
+            <view class="export-section">
+                <text class="export-title">📥 导出筛查记录</text>
+                <view class="export-buttons">
+                    <button class="btn btn-primary btn-block" bindtap="exportData" data-format="excel" data-type="records">📊 导出 Excel (.xlsx)</button>
+                    <button class="btn btn-outline btn-block" bindtap="exportData" data-format="csv" data-type="records">📄 导出 CSV (.csv)</button>
+                </view>
+            </view>
         </view>
     </view>
     <button class="btn btn-outline btn-block" style="margin-top:8px" bindtap="doLogout">退出后台</button>
