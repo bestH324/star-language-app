@@ -23,33 +23,40 @@ Page({
     },
 
     onReady() {
-        // 获取 scroll-view 的实际可滚动高度
+        this._queryClientHeight();
+    },
+
+    _clientHeight: 0,
+
+    /** 获取 scroll-view 的实际可滚动高度 */
+    _queryClientHeight() {
         const query = wx.createSelectorQuery();
         query.select('.agreement-scroll').boundingClientRect();
         query.exec((res) => {
-            if (res[0]) {
+            if (res[0] && res[0].height) {
                 this._clientHeight = res[0].height;
             }
         });
     },
 
-    _bottomTimer: null,
-    _clientHeight: 0,
-
     /** 滚动事件：检测到达/离开底部 */
     onScroll(e) {
+        // 首次滚动时如果还没取到高度，补一次查询
+        if (!this._clientHeight) this._queryClientHeight();
+
         const { scrollTop, scrollHeight } = e.detail;
         const clientHeight = this._clientHeight || 300;
         const atBottom = (scrollTop + clientHeight >= scrollHeight - 5);
 
-        if (atBottom && !this.data.scrollAtBottom) {
-            // 刚到达底部，开始倒计时
+        if (atBottom && !this.data.scrollAtBottom && !this.data.bottomTimerDone) {
+            // 到达底部且未完成计时 → 开始倒计时
             this.setData({ scrollAtBottom: true, bottomCountdown: 3 });
             this._startCountdown();
-        } else if (!atBottom && this.data.scrollAtBottom) {
-            // 离开底部，重置
+        } else if (!atBottom && this.data.scrollAtBottom && !this.data.bottomTimerDone) {
+            // 计时未完成时离开底部 → 重置
             this._resetCountdown();
         }
+        // 注意：bottomTimerDone 一旦为 true 就不再重置，复选框永久解锁
     },
 
     _startCountdown() {
