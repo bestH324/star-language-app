@@ -50,15 +50,15 @@ public class ExcelExportService {
             // 表头
             Row header = sheet.createRow(0);
             String[] headers = {
-                    "筛查儿童姓名", "性别", "出生年月日", "评估时间", "所用筛查量表", "评估风险等级",
+                    "筛查儿童姓名", "性别", "出生年月日", "评估时间", "所用筛查量表", "评估风险等级", "总分",
                     "家长/照护者姓名", "性别", "年龄", "照顾者关系", "是否单亲", "教育程度", "家庭收入",
                     "量表条目及选项"
             };
             for (int i = 0; i < headers.length; i++) {
                 Cell cell = header.createCell(i);
                 cell.setCellValue(headers[i]);
-                if (i < 6) cell.setCellStyle(headerGreen);
-                else if (i < 13) cell.setCellStyle(headerYellow);
+                if (i <= 6) cell.setCellStyle(headerGreen);
+                else if (i < 14) cell.setCellStyle(headerYellow);
                 else cell.setCellStyle(headerRed);
             }
 
@@ -74,6 +74,7 @@ public class ExcelExportService {
                 setCell(row, col++, r.get("create_time"), dataStyle);
                 setCell(row, col++, r.get("questionnaire_title"), dataStyle);
                 setCell(row, col++, riskLabel(r.get("risk_level")), dataStyle);
+                setCell(row, col++, r.get("total_score"), dataStyle);
 
                 setCell(row, col++, r.get("cg_name"), dataStyle);
                 setCell(row, col++, genderLabel(r.get("cg_gender")), dataStyle);
@@ -248,7 +249,7 @@ public class ExcelExportService {
         };
     }
 
-    /** 解析 answer_json → "Q1:经常会; Q2:有时; ..." */
+    /** 解析 answer_json → "Q1:经常会(1); Q2:有时(0⚠); ..."，score=0 为非典型 */
     private String formatAnswerDetail(String answerJson) {
         if (answerJson == null || answerJson.isBlank()) return "";
         try {
@@ -258,7 +259,9 @@ public class ExcelExportService {
             for (Map<String, Object> item : items) {
                 if (idx > 1) sb.append("; ");
                 String label = (String) item.get("label");
-                sb.append("Q").append(idx).append(":").append(label != null ? label : "-");
+                int score = ((Number) item.getOrDefault("score", 1)).intValue();
+                sb.append("Q").append(idx).append(":").append(label != null ? label : "-")
+                        .append("(").append(score).append(score == 0 ? "⚠" : "").append(")");
                 idx++;
             }
             return sb.toString();

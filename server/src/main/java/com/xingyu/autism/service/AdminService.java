@@ -140,7 +140,7 @@ public class AdminService {
                 break;
             }
             case "records" -> {
-                sb.append("筛查儿童姓名,性别,出生年月日,评估时间,所用筛查量表,评估风险等级," +
+                sb.append("筛查儿童姓名,性别,出生年月日,评估时间,所用筛查量表,评估风险等级,总分," +
                         "家长/照护者姓名,性别,年龄,照顾者关系,是否单亲,教育程度,家庭收入,量表条目及选项\n");
                 for (Map<String, Object> r : fetchRecordsForExport()) {
                     sb.append(csv(r.get("child_name"))).append(',')
@@ -149,6 +149,7 @@ public class AdminService {
                             .append(csv(r.get("create_time"))).append(',')
                             .append(csv(r.get("questionnaire_title"))).append(',')
                             .append(riskLabel(r.get("risk_level"))).append(',')
+                            .append(csv(r.get("total_score"))).append(',')
                             .append(csv(r.get("cg_name"))).append(',')
                             .append(genderLabel(r.get("cg_gender"))).append(',')
                             .append(csv(r.get("cg_age"))).append(',')
@@ -277,7 +278,7 @@ public class AdminService {
         return "male".equals(g) ? "男" : "女";
     }
 
-    /** 解析 answer_json 为 "Q1:经常会, Q2:有时, ..." 格式 */
+    /** 解析 answer_json 为 "Q1:经常会(1); Q2:有时(0⚠); ..." 格式，score=0 为非典型 */
     private String formatAnswerDetail(String answerJson) {
         if (answerJson == null || answerJson.isBlank()) return "";
         try {
@@ -287,7 +288,9 @@ public class AdminService {
             for (Map<String, Object> item : items) {
                 if (idx > 1) sb.append("; ");
                 String label = (String) item.get("label");
-                sb.append("Q").append(idx).append(":").append(label != null ? label : "-");
+                int score = ((Number) item.getOrDefault("score", 1)).intValue();
+                sb.append("Q").append(idx).append(":").append(label != null ? label : "-")
+                        .append("(").append(score).append(score == 0 ? "⚠" : "").append(")");
                 idx++;
             }
             return sb.toString();
