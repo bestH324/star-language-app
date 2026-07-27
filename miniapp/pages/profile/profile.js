@@ -100,27 +100,14 @@ Page({
     doDeleteAccount() {
         wx.showModal({
             title: '⚠️ 注销账号',
-            content: '注销后将永久删除您的账号、所有宝宝档案及全部筛查记录，数据不可恢复。\n\n确定要继续吗？',
+            content: '此操作不可撤销！\n\n注销后将永久删除：\n• 您的账号\n• 所有宝宝档案\n• 全部筛查记录\n• 所有关联数据\n\n确定要继续吗？',
             confirmText: '确认注销',
             cancelText: '我再想想',
             confirmColor: '#D32F2F',
             success: (res) => {
-                if (!res.confirm) return;
-                // 延迟弹出二次确认，等第一个弹窗完全关闭
-                setTimeout(() => {
-                    wx.showModal({
-                        title: '⚠️ 最后确认',
-                        content: '此操作不可撤销！您即将永久删除账号及全部数据。\n\n是否确认注销？',
-                        confirmText: '是的，确认注销',
-                        cancelText: '取消',
-                        confirmColor: '#D32F2F',
-                        success: (res2) => {
-                            if (res2.confirm) {
-                                this._executeDeleteAccount();
-                            }
-                        }
-                    });
-                }, 350);
+                if (res.confirm) {
+                    this._executeDeleteAccount();
+                }
             }
         });
     },
