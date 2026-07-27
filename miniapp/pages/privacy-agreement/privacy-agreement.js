@@ -8,7 +8,6 @@ Page({
         canConfirm: false,
         childId: '',
         readonly: false,
-        // 滚动到底部停留倒计时
         scrollAtBottom: false,
         bottomCountdown: 3,
         bottomTimerDone: false
@@ -23,25 +22,39 @@ Page({
         }
     },
 
+    onReady() {
+        // 获取 scroll-view 的实际可滚动高度
+        const query = wx.createSelectorQuery();
+        query.select('.agreement-scroll').boundingClientRect();
+        query.exec((res) => {
+            if (res[0]) {
+                this._clientHeight = res[0].height;
+            }
+        });
+    },
+
     _bottomTimer: null,
+    _clientHeight: 0,
 
-    /** 滚动事件：检测是否到达底部 */
-    onScroll(e) {
-        const { scrollTop, scrollHeight, clientHeight } = e.detail;
-        // 允许 5px 误差
-        const atBottom = (scrollTop + clientHeight >= scrollHeight - 5);
-
-        if (atBottom && !this.data.scrollAtBottom) {
-            // 刚到达底部，开始 3 秒倒计时
+    /** 触底事件：用户滑动到最底部 */
+    onScrollToLower() {
+        if (!this.data.scrollAtBottom) {
             this.setData({ scrollAtBottom: true, bottomCountdown: 3 });
             this._startCountdown();
-        } else if (!atBottom && this.data.scrollAtBottom) {
-            // 离开底部，重置
+        }
+    },
+
+    /** 滚动事件：检测用户是否离开底部 */
+    onScroll(e) {
+        if (!this.data.scrollAtBottom) return;
+        const { scrollTop, scrollHeight } = e.detail;
+        const clientHeight = this._clientHeight || 300; // fallback
+        // 判断是否离开底部（允许 5px 误差）
+        if (scrollTop + clientHeight < scrollHeight - 5) {
             this._resetCountdown();
         }
     },
 
-    /** 开始 3 秒倒计时 */
     _startCountdown() {
         this._clearCountdown();
         this._bottomTimer = setInterval(() => {
@@ -55,7 +68,6 @@ Page({
         }, 1000);
     },
 
-    /** 重置倒计时（用户离开底部） */
     _resetCountdown() {
         this._clearCountdown();
         this.setData({ scrollAtBottom: false, bottomCountdown: 3, bottomTimerDone: false });
@@ -73,9 +85,8 @@ Page({
     },
 
     onCheckPrivacy(e) {
-        // 未完成底部停留，不允许勾选
         if (!this.data.bottomTimerDone) {
-            wx.showToast({ title: '请先滑动到页面底部阅读全部内容', icon: 'none' });
+            wx.showToast({ title: '请先滑动到页面底部并等待倒计时结束', icon: 'none' });
             return;
         }
         const checked = e.detail.value.includes('privacy');
