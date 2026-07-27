@@ -31,7 +31,7 @@
                 <text class="hint-text">↓ 请继续下滑至底部以解锁勾选</text>
             </view>
             <view wx:if="{{scrollAtBottom && !bottomTimerDone}}" class="scroll-hint">
-                <text class="hint-countdown">⏳ 已触底，{{bottomCountdown}} 秒后可勾选同意</text>
+                <text class="hint-countdown">⏳ {{bottomCountdown}} 秒后可勾选同意</text>
             </view>
             <view wx:if="{{bottomTimerDone}}" class="scroll-done">
                 <text class="done-icon">✅</text>
