@@ -36,21 +36,18 @@ Page({
     _bottomTimer: null,
     _clientHeight: 0,
 
-    /** 触底事件：用户滑动到最底部 */
-    onScrollToLower() {
-        if (!this.data.scrollAtBottom) {
+    /** 滚动事件：检测到达/离开底部 */
+    onScroll(e) {
+        const { scrollTop, scrollHeight } = e.detail;
+        const clientHeight = this._clientHeight || 300;
+        const atBottom = (scrollTop + clientHeight >= scrollHeight - 5);
+
+        if (atBottom && !this.data.scrollAtBottom) {
+            // 刚到达底部，开始倒计时
             this.setData({ scrollAtBottom: true, bottomCountdown: 3 });
             this._startCountdown();
-        }
-    },
-
-    /** 滚动事件：检测用户是否离开底部 */
-    onScroll(e) {
-        if (!this.data.scrollAtBottom) return;
-        const { scrollTop, scrollHeight } = e.detail;
-        const clientHeight = this._clientHeight || 300; // fallback
-        // 判断是否离开底部（允许 5px 误差）
-        if (scrollTop + clientHeight < scrollHeight - 5) {
+        } else if (!atBottom && this.data.scrollAtBottom) {
+            // 离开底部，重置
             this._resetCountdown();
         }
     },
