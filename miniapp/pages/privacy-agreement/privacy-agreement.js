@@ -39,24 +39,17 @@ Page({
         });
     },
 
-    /** 滚动事件：检测到达/离开底部 */
+    /** 滚动事件：第一次触底即开始计时，之后不重置 */
     onScroll(e) {
-        // 首次滚动时如果还没取到高度，补一次查询
+        if (this.data.scrollAtBottom) return; // 已经开始计时，不再处理
         if (!this._clientHeight) this._queryClientHeight();
 
         const { scrollTop, scrollHeight } = e.detail;
         const clientHeight = this._clientHeight || 300;
-        const atBottom = (scrollTop + clientHeight >= scrollHeight - 5);
-
-        if (atBottom && !this.data.scrollAtBottom && !this.data.bottomTimerDone) {
-            // 到达底部且未完成计时 → 开始倒计时
+        if (scrollTop + clientHeight >= scrollHeight - 5) {
             this.setData({ scrollAtBottom: true, bottomCountdown: 3 });
             this._startCountdown();
-        } else if (!atBottom && this.data.scrollAtBottom && !this.data.bottomTimerDone) {
-            // 计时未完成时离开底部 → 重置
-            this._resetCountdown();
         }
-        // 注意：bottomTimerDone 一旦为 true 就不再重置，复选框永久解锁
     },
 
     _startCountdown() {
@@ -70,11 +63,6 @@ Page({
                 this.setData({ bottomCountdown: next });
             }
         }, 1000);
-    },
-
-    _resetCountdown() {
-        this._clearCountdown();
-        this.setData({ scrollAtBottom: false, bottomCountdown: 3, bottomTimerDone: false });
     },
 
     _clearCountdown() {

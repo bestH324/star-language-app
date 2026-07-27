@@ -27,13 +27,15 @@
 
         <!-- 底部锚点提示 -->
         <view class="scroll-bottom-indicator">
-            <view wx:if="{{!bottomTimerDone}}" class="scroll-hint">
-                <text wx:if="{{!scrollAtBottom}}" class="hint-text">↓ 请继续下滑阅读全部条款</text>
-                <text wx:if="{{scrollAtBottom && bottomCountdown > 0}}" class="hint-countdown">⏳ 请在底部停留 {{bottomCountdown}} 秒后即可勾选同意</text>
+            <view wx:if="{{!scrollAtBottom}}" class="scroll-hint">
+                <text class="hint-text">↓ 请继续下滑至底部以解锁勾选</text>
+            </view>
+            <view wx:if="{{scrollAtBottom && !bottomTimerDone}}" class="scroll-hint">
+                <text class="hint-countdown">⏳ 已触底，{{bottomCountdown}} 秒后可勾选同意</text>
             </view>
             <view wx:if="{{bottomTimerDone}}" class="scroll-done">
                 <text class="done-icon">✅</text>
-                <text class="done-text">您已阅读至底部，请在下方勾选同意</text>
+                <text class="done-text">请在下方勾选同意</text>
             </view>
         </view>
     </scroll-view>
