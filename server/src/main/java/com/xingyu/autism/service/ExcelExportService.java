@@ -51,8 +51,8 @@ public class ExcelExportService {
             Row header = sheet.createRow(0);
             String[] headers = {
                     "筛查儿童姓名", "性别", "出生年月日", "评估时间", "所用筛查量表", "评估风险等级",
-                    "照护者姓名", "性别", "年龄", "照护关系", "是否单亲", "教育程度", "家庭收入",
-                    "量表条目详情"
+                    "家长/照护者姓名", "性别", "年龄", "照顾者关系", "是否单亲", "教育程度", "家庭收入",
+                    "量表条目及选项"
             };
             for (int i = 0; i < headers.length; i++) {
                 Cell cell = header.createCell(i);

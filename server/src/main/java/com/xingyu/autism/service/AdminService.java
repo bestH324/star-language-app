@@ -140,8 +140,8 @@ public class AdminService {
                 break;
             }
             case "records" -> {
-                sb.append("筛查儿童姓名,性别,出生年月日,评估时间,所用筛查量表,评估风险等级,总分," +
-                        "家长姓名,家长性别,家长年龄,照顾者关系,是否单亲,教育程度,家庭收入,量表条目详情\n");
+                sb.append("筛查儿童姓名,性别,出生年月日,评估时间,所用筛查量表,评估风险等级," +
+                        "家长/照护者姓名,性别,年龄,照顾者关系,是否单亲,教育程度,家庭收入,量表条目及选项\n");
                 for (Map<String, Object> r : fetchRecordsForExport()) {
                     sb.append(csv(r.get("child_name"))).append(',')
                             .append(genderLabel(r.get("child_gender"))).append(',')
@@ -149,12 +149,11 @@ public class AdminService {
                             .append(csv(r.get("create_time"))).append(',')
                             .append(csv(r.get("questionnaire_title"))).append(',')
                             .append(riskLabel(r.get("risk_level"))).append(',')
-                            .append(csv(r.get("total_score"))).append(',')
-                            .append(csv(parentName(r))).append(',')
-                            .append(genderLabel(r.get("parent_gender"))).append(',')
-                            .append(calcAge(r.get("parent_birth_date"))).append(',')
+                            .append(csv(r.get("cg_name"))).append(',')
+                            .append(genderLabel(r.get("cg_gender"))).append(',')
+                            .append(csv(r.get("cg_age"))).append(',')
                             .append(csv(r.get("relationship"))).append(',')
-                            .append(singleParentLabel(r.get("single_parent"))).append(',')
+                            .append(csv(r.get("is_single_parent"))).append(',')
                             .append(csv(r.get("education"))).append(',')
                             .append(csv(r.get("income"))).append(',')
                             .append(csv(formatAnswerDetail((String) r.get("answer_json")))).append('\n');
@@ -232,46 +231,35 @@ public class AdminService {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    /** 筛查记录导出专用查询：JOIN 三张表，含家长人口学信息（自动降级） */
+    /** 筛查记录导出专用查询：JOIN children + caregivers，含照护者人口学信息 */
     private List<Map<String, Object>> fetchRecordsForExport() {
-        // 尝试完整查询（含 users 人口学字段）
+        // 完整查询（含 caregivers 人口学字段）
         try {
             return jdbc.queryForList(
                     "SELECT a.id, a.total_score, a.risk_level, a.create_time, a.answer_json, " +
                             " c.name AS child_name, c.gender AS child_gender, c.birth_date AS child_birth_date, " +
                             " q.title AS questionnaire_title, " +
-                            " u.nickname AS parent_nickname, u.phone AS parent_phone, " +
-                            " u.gender AS parent_gender, u.birth_date AS parent_birth_date, " +
-                            " u.education, u.income, u.relationship, u.single_parent " +
+                            " cg.name AS cg_name, cg.gender AS cg_gender, cg.age AS cg_age, " +
+                            " cg.relationship, cg.is_single_parent, cg.education, cg.income " +
                             " FROM answers a " +
                             " JOIN children c ON a.child_id = c.id " +
-                            " JOIN users u ON c.user_id = u.id " +
                             " LEFT JOIN questionnaires q ON a.qid = q.id " +
+                            " LEFT JOIN caregivers cg ON c.id = cg.child_id " +
                             " ORDER BY a.create_time DESC");
         } catch (Exception e) {
-            // 降级：users 表缺少人口学字段时使用简化查询
+            // 降级：caregivers 表缺失时使用简化查询（不含人口学字段）
             return jdbc.queryForList(
                     "SELECT a.id, a.total_score, a.risk_level, a.create_time, a.answer_json, " +
                             " c.name AS child_name, c.gender AS child_gender, c.birth_date AS child_birth_date, " +
-                            " q.title AS questionnaire_title, " +
-                            " u.nickname AS parent_nickname, u.phone AS parent_phone " +
+                            " q.title AS questionnaire_title " +
                             " FROM answers a " +
                             " JOIN children c ON a.child_id = c.id " +
-                            " JOIN users u ON c.user_id = u.id " +
                             " LEFT JOIN questionnaires q ON a.qid = q.id " +
                             " ORDER BY a.create_time DESC");
         }
     }
 
     /** 家长姓名：昵称优先，无昵称显示脱敏手机号 */
-    private String parentName(Map<String, Object> row) {
-        String nickname = (String) row.get("parent_nickname");
-        if (nickname != null && !nickname.isBlank()) return nickname;
-        String phone = (String) row.get("parent_phone");
-        if (phone == null) return "";
-        return phone.length() >= 7 ? phone.substring(0, 3) + "****" + phone.substring(phone.length() - 4) : phone;
-    }
-
     /** 风险等级中文 */
     private String riskLabel(Object level) {
         if (level == null) return "";
@@ -287,36 +275,6 @@ public class AdminService {
     private String genderLabel(Object g) {
         if (g == null) return "";
         return "male".equals(g) ? "男" : "女";
-    }
-
-    /** 计算年龄（从出生日期） */
-    private String calcAge(Object birthDate) {
-        if (birthDate == null) return "";
-        try {
-            String bd = birthDate.toString();
-            if (bd.length() >= 10) bd = bd.substring(0, 10);
-            long months = Period.between(LocalDate.parse(bd), LocalDate.now()).toTotalMonths();
-            if (months < 12) return months + "个月";
-            int years = (int) (months / 12);
-            int rm = (int) (months % 12);
-            return rm > 0 ? years + "岁" + rm + "个月" : years + "岁";
-        } catch (Exception e) {
-            return "";
-        }
-    }
-
-    /** 是否单亲中文 */
-    private String singleParentLabel(Object v) {
-        if (v == null) return "";
-        return toInt(v) == 1 ? "是" : "否";
-    }
-
-    /** 安全转换 MySQL TINYINT(1) → int（Boolean 或 Number 均可） */
-    private int toInt(Object val) {
-        if (val == null) return 0;
-        if (val instanceof Boolean b) return b ? 1 : 0;
-        if (val instanceof Number n) return n.intValue();
-        return 0;
     }
 
     /** 解析 answer_json 为 "Q1:经常会, Q2:有时, ..." 格式 */

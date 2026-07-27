@@ -9,5 +9,7 @@
 .premature-hint { display: flex; align-items: flex-start; gap: 6px; margin-top: 8px; padding: 8px 12px; background: #FFF8E1; border-radius: 6px; border-left: 4rpx solid #FFA000; }
 .premature-hint-icon { font-size: 15px; flex-shrink: 0; }
 .premature-hint-text { font-size: 13px; color: #E65100; line-height: 1.6; }
+.section-divider { margin: 20px 0 14px 0; padding-top: 16px; border-top: 2rpx dashed var(--border); }
+.section-divider-text { font-size: 14px; color: var(--primary); font-weight: 500; }
 .form-btns { display: flex; gap: 12px; margin-top: 16px; } .form-btns .btn { flex: 1; }
 .picker-like { line-height: 48px; }

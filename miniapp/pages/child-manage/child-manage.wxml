@@ -47,6 +47,46 @@
         <view class="form-group"><text class="form-label">头像</text>
             <view class="avatar-row"><text wx:for="{{avatars}}" wx:key="*this" class="avatar-opt {{form.avatar===item?'selected':''}}" bindtap="onAvatar" data-a="{{item}}">{{item}}</text></view>
         </view>
+
+        <!-- 照护者信息 -->
+        <view class="section-divider"><text class="section-divider-text">📋 照护者信息（选填，用于筛查评估参考）</text></view>
+
+        <view class="form-group"><text class="form-label">照护者姓名</text><input class="form-input" placeholder="请输入照护者姓名" value="{{caregiver.name}}" bindinput="onCgName" /></view>
+
+        <view class="form-group"><text class="form-label">照护者性别</text>
+            <view class="gender-row">
+                <view class="gender-btn {{caregiver.gender==='male'?'selected':''}}" bindtap="onCgGender" data-g="male">👨 男</view>
+                <view class="gender-btn {{caregiver.gender==='female'?'selected':''}}" bindtap="onCgGender" data-g="female">👩 女</view>
+            </view>
+        </view>
+
+        <view class="form-group"><text class="form-label">照护者年龄</text><input class="form-input" type="number" placeholder="请输入年龄" value="{{caregiver.age}}" bindinput="onCgAge" /></view>
+
+        <view class="form-group"><text class="form-label">照顾者关系</text>
+            <picker mode="selector" range="{{relationOptions}}" bindchange="onCgRelation">
+                <view class="form-input picker-like">{{caregiver.relationship || '请选择与宝宝的关系'}}</view>
+            </picker>
+        </view>
+
+        <view class="form-group"><text class="form-label">是否单亲</text>
+            <view class="gender-row">
+                <view class="gender-btn {{caregiver.is_single_parent==='是'?'selected':''}}" bindtap="onCgSingle" data-v="是">是</view>
+                <view class="gender-btn {{caregiver.is_single_parent==='否'?'selected':''}}" bindtap="onCgSingle" data-v="否">否</view>
+            </view>
+        </view>
+
+        <view class="form-group"><text class="form-label">教育程度</text>
+            <picker mode="selector" range="{{educationOptions}}" bindchange="onCgEducation">
+                <view class="form-input picker-like">{{caregiver.education || '请选择教育程度'}}</view>
+            </picker>
+        </view>
+
+        <view class="form-group"><text class="form-label">家庭收入</text>
+            <picker mode="selector" range="{{incomeOptions}}" bindchange="onCgIncome">
+                <view class="form-input picker-like">{{caregiver.income || '请选择家庭月收入'}}</view>
+            </picker>
+        </view>
+
         <view class="form-btns"><button class="btn btn-outline" bindtap="cancelForm">取消</button><button class="btn btn-primary" bindtap="saveChild">保存</button></view>
     </view>
 </view>

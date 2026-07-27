@@ -5,7 +5,11 @@ Page({
     data: {
         list: [], showForm: false, editingId: null, today: '',
         avatars: ['👶', '👦', '👧', '🧒', '🐻', '🐰'],
-        form: { name: '', gender: '', birth: '', avatar: '👶', isPremature: false, prematureWeeks: '', city: '' }
+        form: { name: '', gender: '', birth: '', avatar: '👶', isPremature: false, prematureWeeks: '', city: '' },
+        caregiver: { name: '', gender: '', age: '', relationship: '', is_single_parent: '', education: '', income: '' },
+        relationOptions: ['母亲', '父亲', '其他'],
+        educationOptions: ['初中及以下', '高中/中专', '大专', '本科', '研究生及以上'],
+        incomeOptions: ['＜5000元', '5000–9999元', '10000–19999元', '20000–29999元', '≥30000元']
     },
 
     onShow() {
@@ -49,7 +53,11 @@ Page({
     },
 
     showForm() {
-        this.setData({ showForm: true, editingId: null, form: { name: '', gender: '', birth: '', avatar: '👶', isPremature: false, prematureWeeks: '', city: '' } });
+        this.setData({
+            showForm: true, editingId: null,
+            form: { name: '', gender: '', birth: '', avatar: '👶', isPremature: false, prematureWeeks: '', city: '' },
+            caregiver: { name: '', gender: '', age: '', relationship: '', is_single_parent: '', education: '', income: '' }
+        });
     },
 
     cancelForm() { this.setData({ showForm: false }); },
@@ -62,14 +70,40 @@ Page({
     onCity(e) { this.setData({ 'form.city': e.detail.value }); },
     onAvatar(e) { this.setData({ 'form.avatar': e.currentTarget.dataset.a }); },
 
+    // 照护者信息
+    onCgName(e) { this.setData({ 'caregiver.name': e.detail.value }); },
+    onCgGender(e) { this.setData({ 'caregiver.gender': e.currentTarget.dataset.g }); },
+    onCgAge(e) { this.setData({ 'caregiver.age': e.detail.value }); },
+    onCgRelation(e) { const v = this.data.relationOptions[e.detail.value]; this.setData({ 'caregiver.relationship': v }); },
+    onCgSingle(e) { this.setData({ 'caregiver.is_single_parent': e.currentTarget.dataset.v }); },
+    onCgEducation(e) { const v = this.data.educationOptions[e.detail.value]; this.setData({ 'caregiver.education': v }); },
+    onCgIncome(e) { const v = this.data.incomeOptions[e.detail.value]; this.setData({ 'caregiver.income': v }); },
+
     editChild(e) {
         const id = e.currentTarget.dataset.id;
         const c = this.data.list.find(x => x.id === id);
         if (!c) return;
         this.setData({
             showForm: true, editingId: id,
-            form: { name: c.name, gender: c.gender, birth: c.birthDate, avatar: c.avatar || '👶', isPremature: c.isPremature || false, prematureWeeks: c.prematureWeeks || '', city: c.city || '' }
+            form: { name: c.name, gender: c.gender, birth: c.birthDate, avatar: c.avatar || '👶', isPremature: c.isPremature || false, prematureWeeks: c.prematureWeeks || '', city: c.city || '' },
+            caregiver: { name: '', gender: '', age: '', relationship: '', is_single_parent: '', education: '', income: '' }
         });
+        // 加载已有的照护者信息
+        request.get('/api/caregiver/' + id).then(cg => {
+            if (cg) {
+                this.setData({
+                    caregiver: {
+                        name: cg.name || '',
+                        gender: cg.gender || '',
+                        age: cg.age ? String(cg.age) : '',
+                        relationship: cg.relationship || '',
+                        is_single_parent: cg.is_single_parent || '',
+                        education: cg.education || '',
+                        income: cg.income || ''
+                    }
+                });
+            }
+        }).catch(() => {});
     },
 
     deleteChild(e) {
@@ -102,15 +136,44 @@ Page({
         wx.showLoading({ title: '保存中...' });
         const payload = { name, gender, birthDate: birth, avatar, isPremature, prematureWeeks: isPremature ? Number(prematureWeeks) : 0, city: city || '' };
 
+        const saveCaregiver = (childId) => {
+            const cg = this.data.caregiver;
+            console.log('[saveCaregiver] childId=', childId, 'cg=', JSON.stringify(cg));
+            if (cg.name || cg.gender || cg.age || cg.relationship || cg.is_single_parent || cg.education || cg.income) {
+                const payload = {
+                    name: cg.name || null,
+                    gender: cg.gender || null,
+                    age: cg.age ? Number(cg.age) : null,
+                    relationship: cg.relationship || null,
+                    is_single_parent: cg.is_single_parent || null,
+                    education: cg.education || null,
+                    income: cg.income || null
+                };
+                console.log('[saveCaregiver] sending payload:', JSON.stringify(payload));
+                request.post('/api/caregiver/' + childId, payload).then(() => {
+                    console.log('[saveCaregiver] success');
+                }).catch(err => {
+                    console.error('[saveCaregiver] failed:', err);
+                });
+            } else {
+                console.log('[saveCaregiver] skipped - no caregiver data filled');
+            }
+        };
+
         if (this.data.editingId) {
             request.put('/api/child/update/' + this.data.editingId, payload).then(() => {
+                saveCaregiver(this.data.editingId);
                 wx.hideLoading();
                 this.setData({ showForm: false });
                 this._render();
                 wx.showToast({ title: '已更新', icon: 'success' });
             }).catch(() => { wx.hideLoading(); });
         } else {
-            request.post('/api/child/add', payload).then(() => {
+            request.post('/api/child/add', payload).then((res) => {
+                console.log('[saveChild] child/add response:', JSON.stringify(res));
+                const childId = res.data && res.data.id ? res.data.id : res.id;
+                console.log('[saveChild] extracted childId=', childId);
+                if (childId) saveCaregiver(childId);
                 wx.hideLoading();
                 this.setData({ showForm: false });
                 this._render();
