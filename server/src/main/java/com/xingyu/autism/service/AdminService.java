@@ -310,7 +310,7 @@ public class AdminService {
             String bd = birth.length() >= 10 ? birth.substring(0, 10) : birth;
             String st = screeningTime.length() >= 10 ? screeningTime.substring(0, 10) : screeningTime;
             long actualMonths = Period.between(LocalDate.parse(bd), LocalDate.parse(st)).toTotalMonths();
-            long correctedMonths = actualMonths - (premWeeks / 4);
+            long correctedMonths = Math.round(actualMonths - premWeeks / 4.0);
             if (correctedMonths < 0) correctedMonths = 0;
             if (correctedMonths < 12) return correctedMonths + "个月(矫正)";
             int years = (int) (correctedMonths / 12);
