@@ -140,13 +140,23 @@ public class AdminService {
                 break;
             }
             case "records" -> {
-                sb.append("筛查儿童姓名,性别,出生年月日,评估时间,所用筛查量表,评估风险等级,总分," +
+                sb.append("筛查儿童姓名,性别,出生年月日,筛查时月龄,是否早产,早产周数,矫正月龄," +
+                        "评估时间,所用筛查量表,评估风险等级,总分," +
                         "家长/照护者姓名,性别,年龄,照顾者关系,是否单亲,教育程度,家庭收入,量表条目及选项\n");
                 for (Map<String, Object> r : fetchRecordsForExport()) {
+                    String birth = csv(r.get("child_birth_date"));
+                    String screeningTime = csv(r.get("create_time"));
+                    boolean isPremature = toBool(r.get("is_premature"));
+                    int premWeeks = toInt(r.get("premature_weeks"));
+
                     sb.append(csv(r.get("child_name"))).append(',')
                             .append(genderLabel(r.get("child_gender"))).append(',')
-                            .append(csv(r.get("child_birth_date"))).append(',')
-                            .append(csv(r.get("create_time"))).append(',')
+                            .append(birth).append(',')
+                            .append(calcAgeMonths(birth, screeningTime)).append(',')
+                            .append(isPremature ? "是" : "否").append(',')
+                            .append(isPremature ? String.valueOf(premWeeks) : "").append(',')
+                            .append(calcCorrectedAge(birth, screeningTime, isPremature, premWeeks)).append(',')
+                            .append(screeningTime).append(',')
                             .append(csv(r.get("questionnaire_title"))).append(',')
                             .append(riskLabel(r.get("risk_level"))).append(',')
                             .append(csv(r.get("total_score"))).append(',')
@@ -232,13 +242,14 @@ public class AdminService {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    /** 筛查记录导出专用查询：JOIN children + caregivers，含照护者人口学信息 */
+    /** 筛查记录导出专用查询：JOIN children + caregivers，含早产信息 */
     private List<Map<String, Object>> fetchRecordsForExport() {
-        // 完整查询（含 caregivers 人口学字段）
+        // 完整查询（含 caregivers 人口学字段 + 早产信息）
         try {
             return jdbc.queryForList(
                     "SELECT a.id, a.total_score, a.risk_level, a.create_time, a.answer_json, " +
                             " c.name AS child_name, c.gender AS child_gender, c.birth_date AS child_birth_date, " +
+                            " c.is_premature, c.premature_weeks, " +
                             " q.title AS questionnaire_title, " +
                             " cg.name AS cg_name, cg.gender AS cg_gender, cg.age AS cg_age, " +
                             " cg.relationship, cg.is_single_parent, cg.education, cg.income " +
@@ -252,6 +263,7 @@ public class AdminService {
             return jdbc.queryForList(
                     "SELECT a.id, a.total_score, a.risk_level, a.create_time, a.answer_json, " +
                             " c.name AS child_name, c.gender AS child_gender, c.birth_date AS child_birth_date, " +
+                            " c.is_premature, c.premature_weeks, " +
                             " q.title AS questionnaire_title " +
                             " FROM answers a " +
                             " JOIN children c ON a.child_id = c.id " +
@@ -260,7 +272,53 @@ public class AdminService {
         }
     }
 
-    /** 家长姓名：昵称优先，无昵称显示脱敏手机号 */
+    /** 安全转换 MySQL TINYINT(1) → boolean */
+    private boolean toBool(Object val) {
+        if (val == null) return false;
+        if (val instanceof Boolean b) return b;
+        if (val instanceof Number n) return n.intValue() != 0;
+        return false;
+    }
+
+    /** 安全转换为 int */
+    private int toInt(Object val) {
+        if (val == null) return 0;
+        if (val instanceof Boolean b) return b ? 1 : 0;
+        if (val instanceof Number n) return n.intValue();
+        try { return Integer.parseInt(val.toString()); }
+        catch (NumberFormatException e) { return 0; }
+    }
+
+    /** 计算筛查时月龄（从出生到筛查日期的月数） */
+    private String calcAgeMonths(String birth, String screeningTime) {
+        if (birth == null || birth.isBlank() || screeningTime == null || screeningTime.isBlank()) return "";
+        try {
+            String bd = birth.length() >= 10 ? birth.substring(0, 10) : birth;
+            String st = screeningTime.length() >= 10 ? screeningTime.substring(0, 10) : screeningTime;
+            long months = Period.between(LocalDate.parse(bd), LocalDate.parse(st)).toTotalMonths();
+            if (months < 12) return months + "个月";
+            int years = (int) (months / 12);
+            int rm = (int) (months % 12);
+            return rm > 0 ? years + "岁" + rm + "个月" : years + "岁";
+        } catch (Exception e) { return ""; }
+    }
+
+    /** 计算矫正月龄：实际月龄 - 早产周数/4 */
+    private String calcCorrectedAge(String birth, String screeningTime, boolean isPremature, int premWeeks) {
+        if (!isPremature || premWeeks <= 0 || birth == null || screeningTime == null) return "";
+        try {
+            String bd = birth.length() >= 10 ? birth.substring(0, 10) : birth;
+            String st = screeningTime.length() >= 10 ? screeningTime.substring(0, 10) : screeningTime;
+            long actualMonths = Period.between(LocalDate.parse(bd), LocalDate.parse(st)).toTotalMonths();
+            long correctedMonths = actualMonths - (premWeeks / 4);
+            if (correctedMonths < 0) correctedMonths = 0;
+            if (correctedMonths < 12) return correctedMonths + "个月(矫正)";
+            int years = (int) (correctedMonths / 12);
+            int rm = (int) (correctedMonths % 12);
+            return rm > 0 ? years + "岁" + rm + "个月(矫正)" : years + "岁(矫正)";
+        } catch (Exception e) { return ""; }
+    }
+
     /** 风险等级中文 */
     private String riskLabel(Object level) {
         if (level == null) return "";

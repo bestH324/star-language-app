@@ -29,6 +29,7 @@ public class ExcelExportService {
         List<Map<String, Object>> rows = jdbc.queryForList(
                 "SELECT a.total_score, a.risk_level, a.create_time, a.answer_json, " +
                         " c.name AS child_name, c.gender AS child_gender, c.birth_date AS child_birth_date, " +
+                        " c.is_premature, c.premature_weeks, " +
                         " q.title AS questionnaire_title, " +
                         " cg.name AS cg_name, cg.gender AS cg_gender, cg.age AS cg_age, " +
                         " cg.relationship, cg.is_single_parent, cg.education, cg.income " +
@@ -37,6 +38,15 @@ public class ExcelExportService {
                         " LEFT JOIN questionnaires q ON a.qid = q.id " +
                         " LEFT JOIN caregivers cg ON c.id = cg.child_id " +
                         " ORDER BY a.create_time DESC");
+
+        // 解析所有答案，找到最大题目数
+        int maxQuestions = 0;
+        List<List<Map<String, Object>>> allAnswerDetails = new ArrayList<>();
+        for (Map<String, Object> r : rows) {
+            List<Map<String, Object>> items = parseAnswerItems((String) r.get("answer_json"));
+            allAnswerDetails.add(items);
+            if (items.size() > maxQuestions) maxQuestions = items.size();
+        }
 
         try (Workbook wb = new XSSFWorkbook()) {
             Sheet sheet = wb.createSheet("筛查记录");
@@ -47,55 +57,94 @@ public class ExcelExportService {
             CellStyle headerRed = headerStyle(wb, IndexedColors.RED.getIndex());
             CellStyle dataStyle = dataStyle(wb);
 
-            // 表头
+            // 构建表头（基础列 + 逐题列）
             Row header = sheet.createRow(0);
-            String[] headers = {
-                    "筛查儿童姓名", "性别", "出生年月日", "评估时间", "所用筛查量表", "评估风险等级", "总分",
-                    "家长/照护者姓名", "性别", "年龄", "照顾者关系", "是否单亲", "教育程度", "家庭收入",
-                    "量表条目及选项"
-            };
-            for (int i = 0; i < headers.length; i++) {
-                Cell cell = header.createCell(i);
-                cell.setCellValue(headers[i]);
-                if (i <= 6) cell.setCellStyle(headerGreen);
-                else if (i < 14) cell.setCellStyle(headerYellow);
-                else cell.setCellStyle(headerRed);
+            int col = 0;
+
+            // 基础信息列（绿色）
+            String[] baseHeaders = {"筛查儿童姓名", "性别", "出生年月日", "筛查时月龄", "是否早产", "早产周数", "矫正月龄",
+                    "评估时间", "所用筛查量表", "评估风险等级", "总分"};
+            for (String h : baseHeaders) {
+                Cell cell = header.createCell(col++);
+                cell.setCellValue(h);
+                cell.setCellStyle(headerGreen);
+            }
+
+            // 照护者信息列（黄色）
+            String[] caregiverHeaders = {"家长/照护者姓名", "性别", "年龄", "照顾者关系", "是否单亲", "教育程度", "家庭收入"};
+            for (String h : caregiverHeaders) {
+                Cell cell = header.createCell(col++);
+                cell.setCellValue(h);
+                cell.setCellStyle(headerYellow);
+            }
+
+            // 逐题列（红色）：Q1选项, Q1得分, Q2选项, Q2得分, ...
+            for (int q = 1; q <= maxQuestions; q++) {
+                Cell cell1 = header.createCell(col++);
+                cell1.setCellValue("Q" + q + "选项");
+                cell1.setCellStyle(headerRed);
+                Cell cell2 = header.createCell(col++);
+                cell2.setCellValue("Q" + q + "得分");
+                cell2.setCellStyle(headerRed);
             }
 
             // 数据行
             int rowIdx = 1;
-            for (Map<String, Object> r : rows) {
+            for (int i = 0; i < rows.size(); i++) {
+                Map<String, Object> r = rows.get(i);
+                List<Map<String, Object>> answerItems = allAnswerDetails.get(i);
+
                 Row row = sheet.createRow(rowIdx++);
-                int col = 0;
+                int c = 0;
 
-                setCell(row, col++, r.get("child_name"), dataStyle);
-                setCell(row, col++, genderLabel(r.get("child_gender")), dataStyle);
-                setCell(row, col++, r.get("child_birth_date"), dataStyle);
-                setCell(row, col++, r.get("create_time"), dataStyle);
-                setCell(row, col++, r.get("questionnaire_title"), dataStyle);
-                setCell(row, col++, riskLabel(r.get("risk_level")), dataStyle);
-                setCell(row, col++, r.get("total_score"), dataStyle);
+                String birth = str(r.get("child_birth_date"));
+                String screeningTime = str(r.get("create_time"));
+                boolean isPremature = toBool(r.get("is_premature"));
+                int premWeeks = toInt(r.get("premature_weeks"));
 
-                setCell(row, col++, r.get("cg_name"), dataStyle);
-                setCell(row, col++, genderLabel(r.get("cg_gender")), dataStyle);
-                setCell(row, col++, r.get("cg_age"), dataStyle);
-                setCell(row, col++, r.get("relationship"), dataStyle);
-                setCell(row, col++, r.get("is_single_parent"), dataStyle);
-                setCell(row, col++, r.get("education"), dataStyle);
-                setCell(row, col++, r.get("income"), dataStyle);
+                setCell(row, c++, r.get("child_name"), dataStyle);
+                setCell(row, c++, genderLabel(r.get("child_gender")), dataStyle);
+                setCell(row, c++, birth, dataStyle);
+                setCell(row, c++, calcAgeMonths(birth, screeningTime), dataStyle);
+                setCell(row, c++, isPremature ? "是" : "否", dataStyle);
+                setCell(row, c++, isPremature ? String.valueOf(premWeeks) : "", dataStyle);
+                setCell(row, c++, calcCorrectedAge(birth, screeningTime, isPremature, premWeeks), dataStyle);
+                setCell(row, c++, screeningTime, dataStyle);
+                setCell(row, c++, r.get("questionnaire_title"), dataStyle);
+                setCell(row, c++, riskLabel(r.get("risk_level")), dataStyle);
+                setCell(row, c++, r.get("total_score"), dataStyle);
 
-                setCell(row, col, formatAnswerDetail((String) r.get("answer_json")), dataStyle);
+                setCell(row, c++, r.get("cg_name"), dataStyle);
+                setCell(row, c++, genderLabel(r.get("cg_gender")), dataStyle);
+                setCell(row, c++, r.get("cg_age"), dataStyle);
+                setCell(row, c++, r.get("relationship"), dataStyle);
+                setCell(row, c++, r.get("is_single_parent"), dataStyle);
+                setCell(row, c++, r.get("education"), dataStyle);
+                setCell(row, c++, r.get("income"), dataStyle);
+
+                // 逐题数据
+                for (Map<String, Object> item : answerItems) {
+                    String label = (String) item.getOrDefault("label", "");
+                    int score = ((Number) item.getOrDefault("score", 0)).intValue();
+                    setCell(row, c++, label, dataStyle);
+                    setCell(row, c++, String.valueOf(score), dataStyle);
+                }
+                // 补齐空白列
+                for (int q = answerItems.size(); q < maxQuestions; q++) {
+                    setCell(row, c++, "", dataStyle);
+                    setCell(row, c++, "", dataStyle);
+                }
             }
 
             // 自动列宽
-            for (int i = 0; i < headers.length; i++) {
+            for (int i = 0; i < col; i++) {
                 sheet.autoSizeColumn(i, true);
-                int width = Math.min(sheet.getColumnWidth(i) + 1024, 20 * 256);
+                int width = Math.min(sheet.getColumnWidth(i) + 1024, 18 * 256);
                 sheet.setColumnWidth(i, width);
             }
 
-            // 冻结首行
-            sheet.createFreezePane(0, 1);
+            // 冻结首行首列
+            sheet.createFreezePane(1, 1);
 
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             wb.write(bos);
@@ -234,6 +283,23 @@ public class ExcelExportService {
 
     // ========== 值转换 ==========
 
+    private String str(Object v) { return v == null ? "" : v.toString(); }
+
+    private boolean toBool(Object val) {
+        if (val == null) return false;
+        if (val instanceof Boolean b) return b;
+        if (val instanceof Number n) return n.intValue() != 0;
+        return false;
+    }
+
+    private int toInt(Object val) {
+        if (val == null) return 0;
+        if (val instanceof Boolean b) return b ? 1 : 0;
+        if (val instanceof Number n) return n.intValue();
+        try { return Integer.parseInt(val.toString()); }
+        catch (NumberFormatException e) { return 0; }
+    }
+
     private String genderLabel(Object g) {
         if (g == null) return "";
         return "male".equals(g) ? "男" : "女";
@@ -249,24 +315,43 @@ public class ExcelExportService {
         };
     }
 
-    /** 解析 answer_json → "Q1:经常会(1); Q2:有时(0⚠); ..."，score=0 为非典型 */
-    private String formatAnswerDetail(String answerJson) {
-        if (answerJson == null || answerJson.isBlank()) return "";
+    /** 计算筛查时月龄 */
+    private String calcAgeMonths(String birth, String screeningTime) {
+        if (birth == null || birth.isBlank() || screeningTime == null || screeningTime.isBlank()) return "";
         try {
-            List<Map<String, Object>> items = mapper.readValue(answerJson, new TypeReference<>() {});
-            StringBuilder sb = new StringBuilder();
-            int idx = 1;
-            for (Map<String, Object> item : items) {
-                if (idx > 1) sb.append("; ");
-                String label = (String) item.get("label");
-                int score = ((Number) item.getOrDefault("score", 1)).intValue();
-                sb.append("Q").append(idx).append(":").append(label != null ? label : "-")
-                        .append("(").append(score).append(score == 0 ? "⚠" : "").append(")");
-                idx++;
-            }
-            return sb.toString();
+            String bd = birth.length() >= 10 ? birth.substring(0, 10) : birth;
+            String st = screeningTime.length() >= 10 ? screeningTime.substring(0, 10) : screeningTime;
+            long months = Period.between(LocalDate.parse(bd), LocalDate.parse(st)).toTotalMonths();
+            if (months < 12) return months + "个月";
+            int years = (int) (months / 12);
+            int rm = (int) (months % 12);
+            return rm > 0 ? years + "岁" + rm + "个月" : years + "岁";
+        } catch (Exception e) { return ""; }
+    }
+
+    /** 计算矫正月龄 */
+    private String calcCorrectedAge(String birth, String screeningTime, boolean isPremature, int premWeeks) {
+        if (!isPremature || premWeeks <= 0 || birth == null || screeningTime == null) return "";
+        try {
+            String bd = birth.length() >= 10 ? birth.substring(0, 10) : birth;
+            String st = screeningTime.length() >= 10 ? screeningTime.substring(0, 10) : screeningTime;
+            long actualMonths = Period.between(LocalDate.parse(bd), LocalDate.parse(st)).toTotalMonths();
+            long correctedMonths = actualMonths - (premWeeks / 4);
+            if (correctedMonths < 0) correctedMonths = 0;
+            if (correctedMonths < 12) return correctedMonths + "个月(矫正)";
+            int years = (int) (correctedMonths / 12);
+            int rm = (int) (correctedMonths % 12);
+            return rm > 0 ? years + "岁" + rm + "个月(矫正)" : years + "岁(矫正)";
+        } catch (Exception e) { return ""; }
+    }
+
+    /** 解析 answer_json 为 List */
+    private List<Map<String, Object>> parseAnswerItems(String answerJson) {
+        if (answerJson == null || answerJson.isBlank()) return List.of();
+        try {
+            return mapper.readValue(answerJson, new TypeReference<>() {});
         } catch (Exception e) {
-            return "";
+            return List.of();
         }
     }
 }
