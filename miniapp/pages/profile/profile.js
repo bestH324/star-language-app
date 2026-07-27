@@ -106,19 +106,21 @@ Page({
             confirmColor: '#D32F2F',
             success: (res) => {
                 if (!res.confirm) return;
-                // 二次确认
-                wx.showModal({
-                    title: '⚠️ 最后确认',
-                    content: '此操作不可撤销！您即将永久删除账号及全部数据。\n\n是否确认注销？',
-                    confirmText: '是的，确认注销',
-                    cancelText: '取消',
-                    confirmColor: '#D32F2F',
-                    success: (res2) => {
-                        if (res2.confirm) {
-                            this._executeDeleteAccount();
+                // 延迟弹出二次确认，等第一个弹窗完全关闭
+                setTimeout(() => {
+                    wx.showModal({
+                        title: '⚠️ 最后确认',
+                        content: '此操作不可撤销！您即将永久删除账号及全部数据。\n\n是否确认注销？',
+                        confirmText: '是的，确认注销',
+                        cancelText: '取消',
+                        confirmColor: '#D32F2F',
+                        success: (res2) => {
+                            if (res2.confirm) {
+                                this._executeDeleteAccount();
+                            }
                         }
-                    }
-                });
+                    });
+                }, 350);
             }
         });
     },
