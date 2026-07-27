@@ -1,5 +1,5 @@
 <view class="page-content">
-    <scroll-view scroll-y class="agreement-scroll">
+    <scroll-view scroll-y class="agreement-scroll" bindscroll="onScroll" scroll-with-animation>
         <text class="agreement-title">知情同意与信息保密承诺书</text>
         <text class="agreement-text">您好，本小程序提供婴幼儿孤独症线上风险初筛服务，您填写的监护人信息、儿童身份、月龄、全部问卷作答记录、筛查风险结果均属于未成年人医疗健康敏感信息，平台严格履行保密义务，请您完整阅读以下全部条款：
 
@@ -24,16 +24,28 @@
 
 7. 违约责任
 若平台违规泄露、售卖儿童隐私信息，将承担全部民事赔偿责任并配合监管部门调查；监护人恶意盗取、批量转发平台内其他家庭隐私数据，平台有权封禁账号并追究法律责任。</text>
+
+        <!-- 底部锚点提示 -->
+        <view class="scroll-bottom-indicator">
+            <view wx:if="{{!bottomTimerDone}}" class="scroll-hint">
+                <text wx:if="{{!scrollAtBottom}}" class="hint-text">↓ 请继续下滑阅读全部条款</text>
+                <text wx:if="{{scrollAtBottom && bottomCountdown > 0}}" class="hint-countdown">⏳ 请在底部停留 {{bottomCountdown}} 秒后即可勾选同意</text>
+            </view>
+            <view wx:if="{{bottomTimerDone}}" class="scroll-done">
+                <text class="done-icon">✅</text>
+                <text class="done-text">您已阅读至底部，请在下方勾选同意</text>
+            </view>
+        </view>
     </scroll-view>
 
     <view wx:if="{{!readonly}}" class="checkbox-group">
         <checkbox-group bindchange="onCheckPrivacy">
-            <label class="checkbox-item">
-                <checkbox value="privacy" checked="{{agreedPrivacy}}" color="#6B1D5E" />
+            <label class="checkbox-item {{bottomTimerDone ? '' : 'checkbox-disabled'}}">
+                <checkbox value="privacy" checked="{{agreedPrivacy}}" color="#6B1D5E" disabled="{{!bottomTimerDone}}" />
                 <text class="checkbox-label"><text class="required">*</text>我已完整阅读并同意以上《知情同意与信息保密承诺书》全部条款，自愿使用本小程序完成儿童孤独症线上筛查。（必选）</text>
             </label>
-            <label class="checkbox-item">
-                <checkbox value="research" checked="{{agreedResearch}}" color="#6B1D5E" />
+            <label class="checkbox-item {{bottomTimerDone ? '' : 'checkbox-disabled'}}">
+                <checkbox value="research" checked="{{agreedResearch}}" color="#6B1D5E" disabled="{{!bottomTimerDone}}" />
                 <text class="checkbox-label">我自愿授权平台将本次脱敏后的筛查数据用于孤独症相关学术科研研究（不勾选不影响正常筛查）</text>
             </label>
         </checkbox-group>
