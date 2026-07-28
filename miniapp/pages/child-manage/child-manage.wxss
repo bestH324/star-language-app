@@ -13,3 +13,22 @@
 .section-divider-text { font-size: 14px; color: var(--primary); font-weight: 500; }
 .form-btns { display: flex; gap: 12px; margin-top: 16px; } .form-btns .btn { flex: 1; }
 .picker-like { line-height: 48px; }
+
+/* 时间轴弹窗 */
+.timeline-mask { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.45); z-index: 1000; display: flex; align-items: flex-end; justify-content: center; }
+.timeline-popup { background: #fff; width: 100%; max-height: 75vh; border-radius: 20px 20px 0 0; display: flex; flex-direction: column; overflow: hidden; }
+.timeline-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.timeline-title { font-size: 17px; font-weight: 600; }
+.timeline-close { font-size: 20px; color: var(--text-hint); padding: 4px 8px; }
+.timeline-empty { display: flex; flex-direction: column; align-items: center; padding: 40px 20px; gap: 8px; color: var(--text-secondary); }
+.timeline-empty-icon { font-size: 48px; }
+.timeline-body { padding: 16px 20px 28px; overflow-y: auto; flex: 1; }
+.timeline-node { display: flex; gap: 12px; }
+.timeline-line { display: flex; flex-direction: column; align-items: center; width: 20px; flex-shrink: 0; }
+.timeline-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+.timeline-connector { width: 2px; flex: 1; min-height: 28px; background: #e0e0e0; margin: 4px 0; }
+.timeline-content { flex: 1; padding-bottom: 18px; }
+.timeline-item { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.timeline-time { font-size: 14px; color: var(--text-primary); font-weight: 500; }
+.timeline-badge { font-size: 11px; color: #fff; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+.timeline-detail { font-size: 12px; color: var(--text-hint); }

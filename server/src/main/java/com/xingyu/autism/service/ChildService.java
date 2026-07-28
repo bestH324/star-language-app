@@ -68,6 +68,17 @@ public class ChildService {
         jdbc.update("DELETE FROM children WHERE id=?", id);
     }
 
+    /** 筛查时间轴：按时间升序返回该宝宝每次筛查记录 */
+    public List<Map<String, Object>> timeline(long childId) {
+        long uid = AuthContext.currentUserId();
+        checkOwnership(childId, uid);
+        return jdbc.queryForList(
+                "SELECT a.id, a.total_score, a.risk_level, a.create_time, " +
+                " q.title AS questionnaire_title " +
+                " FROM answers a LEFT JOIN questionnaires q ON a.qid = q.id " +
+                " WHERE a.child_id = ? ORDER BY a.create_time ASC", childId);
+    }
+
     /** 详情 */
     public Map<String, Object> detail(long id) {
         List<Map<String, Object>> rows = jdbc.queryForList("SELECT * FROM children WHERE id=?", id);

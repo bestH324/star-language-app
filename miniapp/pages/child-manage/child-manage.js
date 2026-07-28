@@ -9,7 +9,10 @@ Page({
         caregiver: { name: '', gender: '', age: '', relationship: '', is_single_parent: '', education: '', income: '' },
         relationOptions: ['母亲', '父亲', '其他'],
         educationOptions: ['初中及以下', '高中/中专', '大专', '本科', '研究生及以上'],
-        incomeOptions: ['＜5000元', '5000–9999元', '10000–19999元', '20000–29999元', '≥30000元']
+        incomeOptions: ['＜5000元', '5000–9999元', '10000–19999元', '20000–29999元', '≥30000元'],
+        showTimeline: false,
+        timelineChild: null,
+        timelineData: []
     },
 
     onShow() {
@@ -28,10 +31,13 @@ Page({
                 const birthDate = c.birth_date;
                 const actualMonths = this._calcMonths(birthDate);
                 // 矫正月龄：早产且实际月龄 < 24 时生效，使用 Math.round 精确四舍五入（与后端 ChildAgeUtils 一致）
-                const correctedMonths = (isPremature && actualMonths < 24)
+                const correctedMonths = (isPremature && actualMonths < 24 && prematureWeeks > 0)
                     ? Math.max(0, Math.round(actualMonths - prematureWeeks / 4))
                     : actualMonths;
-                const isCorrected = correctedMonths !== actualMonths;
+                // 只要宝宝是早产儿（有早产周数）且未满24月龄，就显示矫正月龄
+                // 不再依赖 correctedMonths !== actualMonths，避免轻度早产（1-2周）
+                // 四舍五入后月龄不变导致不显示的问题
+                const isCorrected = isPremature && actualMonths < 24 && prematureWeeks > 0;
 
                 return {
                     id: c.id,
@@ -66,7 +72,21 @@ Page({
     onGender(e) { this.setData({ 'form.gender': e.currentTarget.dataset.g }); },
     onDate(e) { this.setData({ 'form.birth': e.detail.value }); },
     onPremature(e) { this.setData({ 'form.isPremature': e.currentTarget.dataset.v }); },
-    onPrematureWeeks(e) { this.setData({ 'form.prematureWeeks': e.detail.value }); },
+    onPrematureWeeks(e) {
+        const v = Number(e.detail.value);
+        if (v > 24) {
+            wx.showModal({
+                title: '提示',
+                content: '请填写正确早产周数',
+                showCancel: false,
+                confirmText: '重新填写',
+                success: () => {}
+            });
+            this.setData({ 'form.prematureWeeks': '' });
+            return;
+        }
+        this.setData({ 'form.prematureWeeks': e.detail.value });
+    },
     onCity(e) { this.setData({ 'form.city': e.detail.value }); },
     onAvatar(e) { this.setData({ 'form.avatar': e.currentTarget.dataset.a }); },
 
@@ -127,6 +147,10 @@ Page({
         if (!gender) { wx.showToast({ title: '请选择性别', icon: 'none' }); return; }
         if (!birth) { wx.showToast({ title: '请选择出生日期', icon: 'none' }); return; }
         if (isPremature && !prematureWeeks) { wx.showToast({ title: '请填写早产周数', icon: 'none' }); return; }
+        if (isPremature && Number(prematureWeeks) > 24) {
+            wx.showModal({ title: '提示', content: '请填写正确早产周数', showCancel: false, confirmText: '重新填写' });
+            return;
+        }
         const m = (new Date() - new Date(birth)) / (1000 * 60 * 60 * 24 * 30.44);
         if (m < 12 || m > 60) {
             wx.showToast({ title: '本筛查适用于1-5岁（12-60个月）的儿童', icon: 'none', duration: 2500 });
@@ -202,6 +226,46 @@ Page({
         wx.switchTab({ url: '/pages/screening/screening' });
     },
 
+    // 查看筛查时间轴
+    viewTimeline(e) {
+        const childId = e.currentTarget.dataset.id;
+        const child = this.data.list.find(x => x.id === childId);
+        if (!child) return;
+        wx.showLoading({ title: '加载中...' });
+        request.get('/api/child/' + childId + '/timeline').then(data => {
+            wx.hideLoading();
+            const timeline = (data || []).map(item => ({
+                id: item.id,
+                score: item.total_score,
+                riskLevel: item.risk_level,
+                riskText: this._riskText(item.risk_level),
+                riskColor: this._riskColor(item.risk_level),
+                time: this._fmtDateTime(item.create_time),
+                questionnaire: item.questionnaire_title || '筛查量表'
+            }));
+            this.setData({ showTimeline: true, timelineChild: child, timelineData: timeline });
+        }).catch(() => {
+            wx.hideLoading();
+            wx.showToast({ title: '加载失败', icon: 'none' });
+        });
+    },
+
+    closeTimeline() {
+        this.setData({ showTimeline: false, timelineChild: null, timelineData: [] });
+    },
+
+    _riskText(level) {
+        if (level === 'high') return '高风险';
+        if (level === 'medium') return '中风险';
+        return '低风险';
+    },
+
+    _riskColor(level) {
+        if (level === 'high') return '#E74C3C';
+        if (level === 'medium') return '#F39C12';
+        return '#27AE60';
+    },
+
     _calcMonths(b) {
         if (!b) return 0;
         return Math.floor((new Date() - new Date(b)) / (1000 * 60 * 60 * 24 * 30.44));
@@ -222,5 +286,12 @@ Page({
         if (!d) return '';
         const dt = new Date(d);
         return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
+    },
+
+    _fmtDateTime(d) {
+        if (!d) return '';
+        const dt = new Date(d);
+        const pad = n => String(n).padStart(2, '0');
+        return dt.getFullYear() + '-' + pad(dt.getMonth() + 1) + '-' + pad(dt.getDate()) + ' ' + pad(dt.getHours()) + ':' + pad(dt.getMinutes());
     }
 });

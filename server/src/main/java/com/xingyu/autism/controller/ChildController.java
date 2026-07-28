@@ -45,4 +45,10 @@ public class ChildController {
     public Result<Map<String, Object>> detail(@PathVariable long id) {
         return Result.success(childService.detail(id));
     }
+
+    /** 筛查时间轴 */
+    @GetMapping("/{id}/timeline")
+    public Result<List<Map<String, Object>>> timeline(@PathVariable long id) {
+        return Result.success(childService.timeline(id));
+    }
 }
