@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
-import java.time.Period;
+import com.xingyu.autism.util.ChildAgeUtils;
 import java.util.*;
 
 /**
@@ -324,26 +324,26 @@ public class ExcelExportService {
         try {
             String bd = birth.length() >= 10 ? birth.substring(0, 10) : birth;
             String st = screeningTime.length() >= 10 ? screeningTime.substring(0, 10) : screeningTime;
-            long months = Period.between(LocalDate.parse(bd), LocalDate.parse(st)).toTotalMonths();
+            int months = ChildAgeUtils.getActualAgeMonths(LocalDate.parse(bd), LocalDate.parse(st));
             if (months < 12) return months + "个月";
-            int years = (int) (months / 12);
-            int rm = (int) (months % 12);
+            int years = months / 12;
+            int rm = months % 12;
             return rm > 0 ? years + "岁" + rm + "个月" : years + "岁";
         } catch (Exception e) { return ""; }
     }
 
-    /** 计算矫正月龄 */
+    /** 计算矫正月龄：使用 ChildAgeUtils 统一算法（含满24月不再矫正、防负月龄） */
     private String calcCorrectedAge(String birth, String screeningTime, boolean isPremature, int premWeeks) {
         if (!isPremature || premWeeks <= 0 || birth == null || screeningTime == null) return "";
         try {
             String bd = birth.length() >= 10 ? birth.substring(0, 10) : birth;
             String st = screeningTime.length() >= 10 ? screeningTime.substring(0, 10) : screeningTime;
-            long actualMonths = Period.between(LocalDate.parse(bd), LocalDate.parse(st)).toTotalMonths();
-            long correctedMonths = Math.round(actualMonths - premWeeks / 4.0);
-            if (correctedMonths < 0) correctedMonths = 0;
+            int actualMonths = ChildAgeUtils.getActualAgeMonths(LocalDate.parse(bd), LocalDate.parse(st));
+            int birthGestationalWeeks = 40 - premWeeks;
+            int correctedMonths = ChildAgeUtils.getAdjustedAgeMonths(actualMonths, birthGestationalWeeks);
             if (correctedMonths < 12) return correctedMonths + "个月(矫正)";
-            int years = (int) (correctedMonths / 12);
-            int rm = (int) (correctedMonths % 12);
+            int years = correctedMonths / 12;
+            int rm = correctedMonths % 12;
             return rm > 0 ? years + "岁" + rm + "个月(矫正)" : years + "岁(矫正)";
         } catch (Exception e) { return ""; }
     }

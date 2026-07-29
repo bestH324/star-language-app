@@ -9,7 +9,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,13 +70,13 @@ public class QuestionnaireService {
         else { birthDate = bd.toString(); }
 
         LocalDate birth = LocalDate.parse(birthDate);
-        long actualMonths = Period.between(birth, LocalDate.now()).toTotalMonths();
+        int actualMonths = ChildAgeUtils.getActualAgeMonths(birth);
 
         boolean isPremature = toInt(child.get("is_premature")) == 1;
         int prematureWeeks = toInt(child.get("premature_weeks"));
+        int birthGestationalWeeks = isPremature ? (40 - prematureWeeks) : 40;
 
-        // 早产儿且实际月龄 < 24 个月时使用矫正月龄（统一工具方法，精确浮点除法）
-        long matchMonths = ChildAgeUtils.getCorrectedMonths(actualMonths, isPremature ? prematureWeeks : 0);
+        int matchMonths = ChildAgeUtils.getAdjustedAgeMonths(actualMonths, birthGestationalWeeks);
 
         // 匹配年龄范围适合的问卷
         List<Map<String, Object>> matched = jdbc.queryForList(

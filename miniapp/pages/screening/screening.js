@@ -1,5 +1,6 @@
 const app = getApp();
 const request = require('../../utils/request');
+const ageUtils = require('../../utils/age');
 
 Page({
     data: {
@@ -241,9 +242,7 @@ Page({
 
     _getAge(birthDate) {
         if (!birthDate) return '';
-        const birth = new Date(birthDate);
-        const now = new Date();
-        const m = (now.getFullYear() - birth.getFullYear()) * 12 + now.getMonth() - birth.getMonth();
+        const m = ageUtils.getActualAgeMonths(birthDate);
         if (m < 12) return m + '个月';
         const y = Math.floor(m / 12);
         const rm = m % 12;

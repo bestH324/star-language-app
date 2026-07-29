@@ -1,5 +1,6 @@
 const app = getApp();
 const request = require('../../utils/request');
+const ageUtils = require('../../utils/age');
 
 Page({
     data: {
@@ -29,14 +30,9 @@ Page({
                 const isPremature = c.is_premature == 1 || c.is_premature === true;
                 const prematureWeeks = c.premature_weeks || 0;
                 const birthDate = c.birth_date;
-                const actualMonths = this._calcMonths(birthDate);
-                // 矫正月龄：早产且实际月龄 < 24 时生效，使用 Math.round 精确四舍五入（与后端 ChildAgeUtils 一致）
-                const correctedMonths = (isPremature && actualMonths < 24 && prematureWeeks > 0)
-                    ? Math.max(0, Math.round(actualMonths - prematureWeeks / 4))
-                    : actualMonths;
-                // 只要宝宝是早产儿（有早产周数）且未满24月龄，就显示矫正月龄
-                // 不再依赖 correctedMonths !== actualMonths，避免轻度早产（1-2周）
-                // 四舍五入后月龄不变导致不显示的问题
+                const actualMonths = ageUtils.getActualAgeMonths(birthDate);
+                const birthGestationalWeeks = isPremature ? (40 - prematureWeeks) : 40;
+                const correctedMonths = ageUtils.getAdjustedAgeMonths(actualMonths, birthGestationalWeeks);
                 const isCorrected = isPremature && actualMonths < 24 && prematureWeeks > 0;
 
                 return {
@@ -48,8 +44,8 @@ Page({
                     isPremature,
                     prematureWeeks,
                     city: c.city || '',
-                    ageText: this._monthsToAgeText(actualMonths),
-                    correctedAgeText: isCorrected ? this._monthsToAgeText(correctedMonths) : '',
+                    ageText: ageUtils.monthsToAgeText(actualMonths),
+                    correctedAgeText: isCorrected ? ageUtils.monthsToAgeText(correctedMonths) : '',
                     isCorrected,
                     birthFmt: this._fmt(birthDate)
                 };
@@ -268,14 +264,11 @@ Page({
 
     _calcMonths(b) {
         if (!b) return 0;
-        return Math.floor((new Date() - new Date(b)) / (1000 * 60 * 60 * 24 * 30.44));
+        return ageUtils.getActualAgeMonths(b);
     },
 
     _monthsToAgeText(m) {
-        if (m < 12) return m + '个月';
-        const y = Math.floor(m / 12);
-        const rm = m % 12;
-        return rm > 0 ? y + '岁' + rm + '个月' : y + '岁';
+        return ageUtils.monthsToAgeText(m);
     },
 
     _age(b) {

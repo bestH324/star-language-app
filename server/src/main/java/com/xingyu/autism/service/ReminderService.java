@@ -9,7 +9,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
@@ -71,10 +70,11 @@ public class ReminderService {
         if (bd == null) return;
         String birthDate = bd instanceof java.sql.Date d ? d.toString() : bd.toString();
         LocalDate birth = LocalDate.parse(birthDate);
-        long actualMonths = Period.between(birth, LocalDate.now()).toTotalMonths();
+        int actualMonths = ChildAgeUtils.getActualAgeMonths(birth);
         boolean isPremature = toInt(child.get("is_premature")) == 1;
         int prematureWeeks = toInt(child.get("premature_weeks"));
-        long currentMonths = ChildAgeUtils.getCorrectedMonths(actualMonths, isPremature ? prematureWeeks : 0);
+        int birthGestationalWeeks = isPremature ? (40 - prematureWeeks) : 40;
+        int currentMonths = ChildAgeUtils.getAdjustedAgeMonths(actualMonths, birthGestationalWeeks);
 
         // 计算距下一问卷月龄的天数
         long monthsUntil = nextMinMonths - currentMonths;
@@ -112,10 +112,11 @@ public class ReminderService {
         if (bd == null) return;
         String birthDate = bd instanceof java.sql.Date d ? d.toString() : bd.toString();
         LocalDate birth = LocalDate.parse(birthDate);
-        long actualMonths = Period.between(birth, LocalDate.now()).toTotalMonths();
+        int actualMonths = ChildAgeUtils.getActualAgeMonths(birth);
         boolean isPremature = toInt(child.get("is_premature")) == 1;
         int prematureWeeks = toInt(child.get("premature_weeks"));
-        long correctedMonths = ChildAgeUtils.getCorrectedMonths(actualMonths, isPremature ? prematureWeeks : 0);
+        int birthGestationalWeeks = isPremature ? (40 - prematureWeeks) : 40;
+        int correctedMonths = ChildAgeUtils.getAdjustedAgeMonths(actualMonths, birthGestationalWeeks);
 
         // 筛选：当前矫正月龄已超过该问卷的 max_age_months → 确定跳过
         for (Map<String, Object> q : skipped) {
