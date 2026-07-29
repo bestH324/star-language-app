@@ -62,6 +62,15 @@ public class DataInitializer {
                     " update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP," +
                     " FOREIGN KEY (child_id) REFERENCES children(id) ON DELETE CASCADE" +
                     ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
+                // 软删除字段
+                "ALTER TABLE users ADD COLUMN deleted_at DATETIME DEFAULT NULL",
+                "ALTER TABLE users ADD COLUMN is_deleted TINYINT(1) DEFAULT 0",
+                "ALTER TABLE children ADD COLUMN is_deleted TINYINT(1) DEFAULT 0",
+                "ALTER TABLE children ADD COLUMN deleted_at DATETIME DEFAULT NULL",
+                "ALTER TABLE answers ADD COLUMN is_deleted TINYINT(1) DEFAULT 0",
+                "ALTER TABLE answers ADD COLUMN deleted_at DATETIME DEFAULT NULL",
+                "ALTER TABLE reminders ADD COLUMN is_deleted TINYINT(1) DEFAULT 0",
+                "ALTER TABLE reminders ADD COLUMN deleted_at DATETIME DEFAULT NULL",
                 "CREATE TABLE IF NOT EXISTS reminders (" +
                     " id INT PRIMARY KEY AUTO_INCREMENT," +
                     " user_id INT NOT NULL, child_id INT NOT NULL," +
@@ -71,6 +80,8 @@ public class DataInitializer {
                     " status VARCHAR(20) DEFAULT 'pending'," +
                     " sent_at DATETIME, cancelled_at DATETIME," +
                     " create_time DATETIME DEFAULT CURRENT_TIMESTAMP," +
+                    " is_deleted TINYINT(1) DEFAULT 0," +
+                    " deleted_at DATETIME DEFAULT NULL," +
                     " FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE," +
                     " FOREIGN KEY (child_id) REFERENCES children(id) ON DELETE CASCADE" +
                     ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"

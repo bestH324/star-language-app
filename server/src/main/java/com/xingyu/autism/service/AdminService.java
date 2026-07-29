@@ -43,62 +43,64 @@ public class AdminService {
         return new LoginResponse(token, id, username, "管理员", null);
     }
 
-    /** 数据总览 + 风险分布 */
+    /** 数据总览 + 风险分布（排除已软删除） */
     public Map<String, Object> stats() {
         Map<String, Object> stats = new LinkedHashMap<>();
-        stats.put("totalUsers", count("users"));
-        stats.put("totalChildren", count("children"));
-        stats.put("totalScreenings", count("answers"));
+        stats.put("totalUsers", countWhere("users", "deleted_at IS NULL"));
+        stats.put("totalChildren", countWhere("children", "is_deleted=0"));
+        stats.put("totalScreenings", countWhere("answers", "is_deleted=0"));
 
         Map<String, Object> risk = new LinkedHashMap<>();
-        risk.put("high", countWhere("answers", "risk_level='high'"));
-        risk.put("medium", countWhere("answers", "risk_level='medium'"));
-        risk.put("low", countWhere("answers", "risk_level='low'"));
+        risk.put("high", countWhere("answers", "risk_level='high' AND is_deleted=0"));
+        risk.put("medium", countWhere("answers", "risk_level='medium' AND is_deleted=0"));
+        risk.put("low", countWhere("answers", "risk_level='low' AND is_deleted=0"));
         stats.put("riskDistribution", risk);
 
         // 年龄段分布
         stats.put("ageDistribution", ageDistribution());
-        // 答题完成率（已完成筛查 / 儿童数）
-        long screened = countWhere("children", "id IN (SELECT DISTINCT child_id FROM answers)");
-        long totalChildren = count("children");
+        // 答题完成率
+        long screened = countWhere("children", "id IN (SELECT DISTINCT child_id FROM answers WHERE is_deleted=0) AND is_deleted=0");
+        long totalChildren = countWhere("children", "is_deleted=0");
         double completion = totalChildren == 0 ? 0 : (screened * 100.0 / totalChildren);
         stats.put("completionRate", Math.round(completion * 100) / 100.0);
         return stats;
     }
 
-    /** 用户列表 */
+    /** 用户列表（排除已注销） */
     public List<Map<String, Object>> userList() {
         return jdbc.queryForList(
                 "SELECT u.id, u.phone, u.nickname, u.create_time, " +
-                        " (SELECT COUNT(*) FROM children c WHERE c.user_id=u.id) AS child_count, " +
-                        " (SELECT COUNT(*) FROM answers a JOIN children c2 ON a.child_id=c2.id WHERE c2.user_id=u.id) AS screening_count " +
-                        " FROM users u ORDER BY u.create_time DESC");
+                        " (SELECT COUNT(*) FROM children c WHERE c.user_id=u.id AND c.is_deleted=0) AS child_count, " +
+                        " (SELECT COUNT(*) FROM answers a JOIN children c2 ON a.child_id=c2.id WHERE c2.user_id=u.id AND a.is_deleted=0) AS screening_count " +
+                        " FROM users u WHERE u.deleted_at IS NULL ORDER BY u.create_time DESC");
     }
 
-    /** 儿童列表 */
+    /** 儿童列表（排除已注销用户和已软删除儿童） */
     public List<Map<String, Object>> childrenList() {
         return jdbc.queryForList(
                 "SELECT c.id, c.name, c.gender, c.birth_date, c.avatar, c.create_time, u.phone AS user_phone, " +
-                        " (SELECT COUNT(*) FROM answers a WHERE a.child_id=c.id) AS screening_count " +
-                        " FROM children c JOIN users u ON c.user_id=u.id ORDER BY c.create_time DESC");
+                        " (SELECT COUNT(*) FROM answers a WHERE a.child_id=c.id AND a.is_deleted=0) AS screening_count " +
+                        " FROM children c JOIN users u ON c.user_id=u.id " +
+                        " WHERE c.is_deleted=0 AND u.deleted_at IS NULL ORDER BY c.create_time DESC");
     }
 
-    /** 筛查记录列表 */
+    /** 筛查记录列表（排除已注销用户和已软删除数据） */
     public List<Map<String, Object>> recordsList() {
         return jdbc.queryForList(
                 "SELECT a.id, a.child_id, a.total_score, a.risk_level, a.create_time, " +
                         " c.name AS child_name, c.avatar AS child_avatar, u.phone AS user_phone " +
                         " FROM answers a JOIN children c ON a.child_id=c.id JOIN users u ON c.user_id=u.id " +
+                        " WHERE a.is_deleted=0 AND c.is_deleted=0 AND u.deleted_at IS NULL " +
                         " ORDER BY a.create_time DESC");
     }
 
-    /** 记录详情（管理员） */
+    /** 记录详情（管理员，排除已软删除） */
     public Map<String, Object> recordDetail(long answerId) {
-        List<Map<String, Object>> ansRows = jdbc.queryForList("SELECT * FROM answers WHERE id=?", answerId);
+        List<Map<String, Object>> ansRows = jdbc.queryForList("SELECT * FROM answers WHERE id=? AND is_deleted=0", answerId);
         if (ansRows.isEmpty()) throw new BizException("筛查记录不存在");
         Map<String, Object> ans = ansRows.get(0);
         List<Map<String, Object>> childRows = jdbc.queryForList(
-                "SELECT c.*, u.phone AS user_phone FROM children c JOIN users u ON c.user_id=u.id WHERE c.id=?", ans.get("child_id"));
+                "SELECT c.*, u.phone AS user_phone FROM children c JOIN users u ON c.user_id=u.id WHERE c.id=? AND c.is_deleted=0", ans.get("child_id"));
         if (childRows.isEmpty()) throw new BizException("儿童档案不存在");
         Map<String, Object> child = childRows.get(0);
         Map<String, Object> result = new LinkedHashMap<>();
@@ -204,7 +206,8 @@ public class AdminService {
     }
 
     private List<Map<String, Object>> ageDistribution() {
-        List<Map<String, Object>> children = jdbc.queryForList("SELECT birth_date FROM children");
+        List<Map<String, Object>> children = jdbc.queryForList(
+                "SELECT c.birth_date FROM children c JOIN users u ON c.user_id=u.id WHERE c.is_deleted=0 AND u.deleted_at IS NULL");
         Map<String, Integer> buckets = new LinkedHashMap<>();
         buckets.put("1-2岁", 0);
         buckets.put("2-3岁", 0);
@@ -255,8 +258,10 @@ public class AdminService {
                             " cg.relationship, cg.is_single_parent, cg.education, cg.income " +
                             " FROM answers a " +
                             " JOIN children c ON a.child_id = c.id " +
+                            " JOIN users u ON c.user_id = u.id " +
                             " LEFT JOIN questionnaires q ON a.qid = q.id " +
                             " LEFT JOIN caregivers cg ON c.id = cg.child_id " +
+                            " WHERE a.is_deleted=0 AND c.is_deleted=0 AND u.deleted_at IS NULL " +
                             " ORDER BY a.create_time DESC");
         } catch (Exception e) {
             // 降级：caregivers 表缺失时使用简化查询（不含人口学字段）
@@ -267,7 +272,9 @@ public class AdminService {
                             " q.title AS questionnaire_title " +
                             " FROM answers a " +
                             " JOIN children c ON a.child_id = c.id " +
+                            " JOIN users u ON c.user_id = u.id " +
                             " LEFT JOIN questionnaires q ON a.qid = q.id " +
+                            " WHERE a.is_deleted=0 AND c.is_deleted=0 AND u.deleted_at IS NULL " +
                             " ORDER BY a.create_time DESC");
         }
     }

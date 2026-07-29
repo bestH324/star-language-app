@@ -31,9 +31,9 @@ public class AnswerService {
     public Map<String, Object> submit(AnswerSubmitRequest req) {
         long uid = AuthContext.currentUserId();
 
-        // 校验儿童归属
+        // 校验儿童归属（排除已软删除）
         List<Map<String, Object>> ownerRows = jdbc.queryForList(
-                "SELECT user_id FROM children WHERE id=?", req.getChildId());
+                "SELECT user_id FROM children WHERE id=? AND is_deleted=0", req.getChildId());
         if (ownerRows.isEmpty()) throw new BizException("儿童档案不存在");
         int owner = ((Number) ownerRows.get(0).get("user_id")).intValue();
         if (owner != uid) throw new BizException(403, "无权为他人儿童提交筛查");
@@ -132,7 +132,7 @@ public class AnswerService {
 
     /** 报告详情 */
     public Map<String, Object> report(long answerId) {
-        List<Map<String, Object>> ansRows = jdbc.queryForList("SELECT * FROM answers WHERE id=?", answerId);
+        List<Map<String, Object>> ansRows = jdbc.queryForList("SELECT * FROM answers WHERE id=? AND is_deleted=0", answerId);
         if (ansRows.isEmpty()) throw new BizException("筛查记录不存在");
         Map<String, Object> ans = ansRows.get(0);
         List<Map<String, Object>> childRows = jdbc.queryForList(
@@ -171,14 +171,14 @@ public class AnswerService {
         return result;
     }
 
-    /** 当前用户的历史记录列表 */
+    /** 当前用户的历史记录列表（排除已软删除） */
     public List<Map<String, Object>> myHistory() {
         long uid = AuthContext.currentUserId();
         return jdbc.queryForList(
                 "SELECT a.id, a.child_id, a.total_score, a.risk_level, a.create_time, " +
                         " c.name AS child_name, c.avatar AS child_avatar " +
                         " FROM answers a JOIN children c ON a.child_id=c.id " +
-                        " WHERE c.user_id=? ORDER BY a.create_time DESC", uid);
+                        " WHERE c.user_id=? AND a.is_deleted=0 AND c.is_deleted=0 ORDER BY a.create_time DESC", uid);
     }
 
     /** 历史详情（校验归属） */

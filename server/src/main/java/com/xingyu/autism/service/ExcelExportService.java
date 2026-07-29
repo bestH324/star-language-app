@@ -35,8 +35,10 @@ public class ExcelExportService {
                         " cg.relationship, cg.is_single_parent, cg.education, cg.income " +
                         " FROM answers a " +
                         " JOIN children c ON a.child_id = c.id " +
+                        " JOIN users u ON c.user_id = u.id " +
                         " LEFT JOIN questionnaires q ON a.qid = q.id " +
                         " LEFT JOIN caregivers cg ON c.id = cg.child_id " +
+                        " WHERE a.is_deleted=0 AND c.is_deleted=0 AND u.deleted_at IS NULL " +
                         " ORDER BY a.create_time DESC");
 
         // 解析所有答案，找到最大题目数
@@ -158,9 +160,9 @@ public class ExcelExportService {
     public byte[] exportUsers() {
         List<Map<String, Object>> rows = jdbc.queryForList(
                 "SELECT u.id, u.phone, u.nickname, u.create_time, " +
-                        " (SELECT COUNT(*) FROM children c WHERE c.user_id=u.id) AS child_count, " +
-                        " (SELECT COUNT(*) FROM answers a JOIN children c2 ON a.child_id=c2.id WHERE c2.user_id=u.id) AS screening_count " +
-                        " FROM users u ORDER BY u.create_time DESC");
+                        " (SELECT COUNT(*) FROM children c WHERE c.user_id=u.id AND c.is_deleted=0) AS child_count, " +
+                        " (SELECT COUNT(*) FROM answers a JOIN children c2 ON a.child_id=c2.id WHERE c2.user_id=u.id AND a.is_deleted=0) AS screening_count " +
+                        " FROM users u WHERE u.deleted_at IS NULL ORDER BY u.create_time DESC");
 
         try (Workbook wb = new XSSFWorkbook()) {
             Sheet sheet = wb.createSheet("用户列表");
@@ -199,12 +201,13 @@ public class ExcelExportService {
         }
     }
 
-    /** 生成儿童列表 Excel */
+    /** 生成儿童列表 Excel（排除已软删除） */
     public byte[] exportChildren() {
         List<Map<String, Object>> rows = jdbc.queryForList(
                 "SELECT c.id, c.name, c.gender, c.birth_date, c.create_time, u.phone AS user_phone, " +
-                        " (SELECT COUNT(*) FROM answers a WHERE a.child_id=c.id) AS screening_count " +
-                        " FROM children c JOIN users u ON c.user_id=u.id ORDER BY c.create_time DESC");
+                        " (SELECT COUNT(*) FROM answers a WHERE a.child_id=c.id AND a.is_deleted=0) AS screening_count " +
+                        " FROM children c JOIN users u ON c.user_id=u.id " +
+                        " WHERE c.is_deleted=0 AND u.deleted_at IS NULL ORDER BY c.create_time DESC");
 
         try (Workbook wb = new XSSFWorkbook()) {
             Sheet sheet = wb.createSheet("儿童列表");

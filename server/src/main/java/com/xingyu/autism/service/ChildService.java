@@ -21,11 +21,11 @@ public class ChildService {
     @Autowired
     private JdbcTemplate jdbc;
 
-    /** 列表 */
+    /** 列表（排除已软删除） */
     public List<Map<String, Object>> list() {
         long uid = AuthContext.currentUserId();
         return jdbc.queryForList(
-                "SELECT id, user_id, name, gender, birth_date, avatar, is_premature, premature_weeks, city, create_time FROM children WHERE user_id=? ORDER BY create_time DESC",
+                "SELECT id, user_id, name, gender, birth_date, avatar, is_premature, premature_weeks, city, create_time FROM children WHERE user_id=? AND is_deleted=0 ORDER BY create_time DESC",
                 uid);
     }
 
@@ -61,11 +61,11 @@ public class ChildService {
         return rows.get(0);
     }
 
-    /** 删除（连带删除筛查记录，由外键 ON DELETE CASCADE 处理） */
+    /** 软删除 */
     public void delete(long id) {
         long uid = AuthContext.currentUserId();
         checkOwnership(id, uid);
-        jdbc.update("DELETE FROM children WHERE id=?", id);
+        jdbc.update("UPDATE children SET is_deleted=1, deleted_at=NOW() WHERE id=?", id);
     }
 
     /** 筛查时间轴：按时间升序返回该宝宝每次筛查记录 */
@@ -76,12 +76,12 @@ public class ChildService {
                 "SELECT a.id, a.total_score, a.risk_level, a.create_time, " +
                 " q.title AS questionnaire_title " +
                 " FROM answers a LEFT JOIN questionnaires q ON a.qid = q.id " +
-                " WHERE a.child_id = ? ORDER BY a.create_time ASC", childId);
+                " WHERE a.child_id = ? AND a.is_deleted=0 ORDER BY a.create_time ASC", childId);
     }
 
     /** 详情 */
     public Map<String, Object> detail(long id) {
-        List<Map<String, Object>> rows = jdbc.queryForList("SELECT * FROM children WHERE id=?", id);
+        List<Map<String, Object>> rows = jdbc.queryForList("SELECT * FROM children WHERE id=? AND is_deleted=0", id);
         if (rows.isEmpty()) throw new BizException("儿童档案不存在");
         return rows.get(0);
     }
@@ -103,7 +103,7 @@ public class ChildService {
 
     /** 校验归属权 */
     private void checkOwnership(long childId, long uid) {
-        List<Map<String, Object>> rows = jdbc.queryForList("SELECT user_id FROM children WHERE id=?", childId);
+        List<Map<String, Object>> rows = jdbc.queryForList("SELECT user_id FROM children WHERE id=? AND is_deleted=0", childId);
         if (rows.isEmpty()) throw new BizException("儿童档案不存在");
         int owner = ((Number) rows.get(0).get("user_id")).intValue();
         if (owner != uid) throw new BizException(403, "无权操作他人儿童档案");

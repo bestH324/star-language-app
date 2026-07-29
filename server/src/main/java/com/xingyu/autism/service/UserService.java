@@ -54,11 +54,11 @@ public class UserService {
     @Value("${wechat.miniapp.secret:}")
     private String wechatSecret;
 
-    /** 发送验证码（演示模式：固定 123456，写入 users.code） */
+    /** 发送验证码。已删除用户重新注册时，复用原记录避免 UNIQUE 冲突。 */
     public String sendCode(SendCodeRequest req) {
         String phone = req.getPhone();
         String code = demoCode;
-        List<Map<String, Object>> rows = jdbc.queryForList("SELECT id FROM users WHERE phone=?", phone);
+        List<Map<String, Object>> rows = jdbc.queryForList("SELECT id, deleted_at FROM users WHERE phone=?", phone);
         if (rows.isEmpty()) {
             jdbc.update("INSERT INTO users(phone, code) VALUES(?,?)", phone, code);
         } else {
@@ -67,25 +67,36 @@ public class UserService {
         return code;
     }
 
-    /** 注册 */
+    /** 注册（支持软删除用户用原手机号重新注册） */
     public LoginResponse register(RegisterRequest req) {
         if (req.getPasswordConfirm() != null && !req.getPassword().equals(req.getPasswordConfirm())) {
             throw new BizException("两次密码不一致");
         }
         verifyCode(req.getPhone(), req.getCode());
-        // 是否已注册
+        // 是否已注册（排除已删除用户）
         List<Map<String, Object>> registeredRows = jdbc.queryForList(
-                "SELECT id FROM users WHERE phone=? AND password IS NOT NULL", req.getPhone());
+                "SELECT id FROM users WHERE phone=? AND password IS NOT NULL AND deleted_at IS NULL", req.getPhone());
         if (!registeredRows.isEmpty()) {
             throw new BizException("该手机号已注册，请直接登录");
         }
         String hashed = passwordEncoder.encode(req.getPassword());
+        // 查询该手机号所有记录（含软删除），以便复用已删除用户的 ID
         List<Map<String, Object>> existingRows = jdbc.queryForList(
-                "SELECT id FROM users WHERE phone=?", req.getPhone());
+                "SELECT id, deleted_at FROM users WHERE phone=?", req.getPhone());
         long userId;
         if (!existingRows.isEmpty()) {
-            userId = ((Number) existingRows.get(0).get("id")).longValue();
-            jdbc.update("UPDATE users SET password=?, code=NULL, update_time=NOW() WHERE phone=?", hashed, req.getPhone());
+            Map<String, Object> row = existingRows.get(0);
+            userId = ((Number) row.get("id")).longValue();
+            if (row.get("deleted_at") != null) {
+                // 软删除用户重新注册：恢复账号并更新密码，同时恢复关联数据
+                jdbc.update("UPDATE users SET password=?, code=NULL, is_deleted=0, deleted_at=NULL, update_time=NOW() WHERE id=?",
+                        hashed, userId);
+                jdbc.update("UPDATE children SET is_deleted=0, deleted_at=NULL WHERE user_id=?", userId);
+                jdbc.update("UPDATE answers SET is_deleted=0, deleted_at=NULL WHERE child_id IN (SELECT id FROM children WHERE user_id=?)", userId);
+                jdbc.update("UPDATE reminders SET is_deleted=0, deleted_at=NULL WHERE user_id=?", userId);
+            } else {
+                jdbc.update("UPDATE users SET password=?, code=NULL, update_time=NOW() WHERE phone=?", hashed, req.getPhone());
+            }
         } else {
             jdbc.update("INSERT INTO users(phone, password) VALUES(?,?)", req.getPhone(), hashed);
             List<Map<String, Object>> idRows = jdbc.queryForList("SELECT LAST_INSERT_ID() AS id");
@@ -106,7 +117,7 @@ public class UserService {
     public LoginResponse login(LoginRequest req) {
         verifyCode(req.getPhone(), req.getCode());
         List<Map<String, Object>> rows = jdbc.queryForList(
-                "SELECT id, phone, nickname, avatar FROM users WHERE phone=?", req.getPhone());
+                "SELECT id, phone, nickname, avatar FROM users WHERE phone=? AND deleted_at IS NULL", req.getPhone());
         if (rows.isEmpty()) {
             throw new BizException("该手机号未注册");
         }
@@ -121,7 +132,7 @@ public class UserService {
     /** 密码登录 */
     public LoginResponse loginWithPassword(String phone, String password) {
         List<Map<String, Object>> rows = jdbc.queryForList(
-                "SELECT id, phone, nickname, avatar, password FROM users WHERE phone=?", phone);
+                "SELECT id, phone, nickname, avatar, password FROM users WHERE phone=? AND deleted_at IS NULL", phone);
         if (rows.isEmpty()) {
             throw new BizException("该手机号未注册");
         }
@@ -204,12 +215,12 @@ public class UserService {
     /** 根据 openid 查找或创建用户，生成 token 并返回 */
     private LoginResponse loginByOpenid(String openid) {
         List<Map<String, Object>> rows = jdbc.queryForList(
-                "SELECT id, phone, nickname, avatar FROM users WHERE openid=?", openid);
+                "SELECT id, phone, nickname, avatar FROM users WHERE openid=? AND deleted_at IS NULL", openid);
         if (rows.isEmpty()) {
             jdbc.update("INSERT INTO users(phone, nickname, openid) VALUES(?,?,?)",
                     "wx_" + openid.substring(0, Math.min(11, openid.length())), "微信用户", openid);
             rows = jdbc.queryForList(
-                    "SELECT id, phone, nickname, avatar FROM users WHERE openid=?", openid);
+                    "SELECT id, phone, nickname, avatar FROM users WHERE openid=? AND deleted_at IS NULL", openid);
         }
         Map<String, Object> user = rows.get(0);
         long userId = ((Number) user.get("id")).longValue();
@@ -232,7 +243,7 @@ public class UserService {
     /** 获取指定用户信息 */
     public Map<String, Object> profile(long userId) {
         List<Map<String, Object>> rows = jdbc.queryForList(
-                "SELECT id, phone, nickname, avatar, agreed_privacy, agreed_research, create_time FROM users WHERE id=?", userId);
+                "SELECT id, phone, nickname, avatar, agreed_privacy, agreed_research, create_time FROM users WHERE id=? AND deleted_at IS NULL", userId);
         if (rows.isEmpty()) {
             throw new BizException("用户不存在");
         }
@@ -272,15 +283,17 @@ public class UserService {
         jdbc.update(sql.toString(), params.toArray());
     }
 
-    /** 注销账号：删除用户及其关联的所有数据（儿童、筛查记录、提醒等由外键 ON DELETE CASCADE 自动删除） */
+    /** 注销账号：软删除用户及其关联数据（儿童、筛查记录、提醒）。token 立即失效。 */
     public void deleteAccount(long userId) {
-        // 使所有 token 失效
         tokenService.invalidateAll(userId);
-        // 删除用户（children/answers/reminders/appointments/caregivers 由外键 CASCADE 自动删除）
-        int affected = jdbc.update("DELETE FROM users WHERE id=?", userId);
+        int affected = jdbc.update("UPDATE users SET is_deleted=1, deleted_at=NOW() WHERE id=? AND deleted_at IS NULL", userId);
         if (affected == 0) {
-            throw new BizException("用户不存在");
+            throw new BizException("用户不存在或已注销");
         }
+        // 级联软删除关联数据
+        jdbc.update("UPDATE children SET is_deleted=1, deleted_at=NOW() WHERE user_id=? AND is_deleted=0", userId);
+        jdbc.update("UPDATE answers SET is_deleted=1, deleted_at=NOW() WHERE child_id IN (SELECT id FROM children WHERE user_id=?) AND is_deleted=0", userId);
+        jdbc.update("UPDATE reminders SET is_deleted=1, deleted_at=NOW() WHERE user_id=? AND is_deleted=0", userId);
     }
 
     /**
@@ -292,7 +305,7 @@ public class UserService {
 
         // 1. 注册事件
         List<Map<String, Object>> userRows = jdbc.queryForList(
-                "SELECT create_time FROM users WHERE id=?", userId);
+                "SELECT create_time FROM users WHERE id=? AND deleted_at IS NULL", userId);
         if (!userRows.isEmpty()) {
             Map<String, Object> reg = new LinkedHashMap<>();
             reg.put("type", "register");
@@ -439,7 +452,7 @@ public class UserService {
         if (demoCode.equals(code)) {
             return;
         }
-        List<Map<String, Object>> rows = jdbc.queryForList("SELECT code FROM users WHERE phone=?", phone);
+        List<Map<String, Object>> rows = jdbc.queryForList("SELECT code FROM users WHERE phone=? AND deleted_at IS NULL", phone);
         String saved = rows.isEmpty() ? null : (String) rows.get(0).get("code");
         if (saved == null || !saved.equals(code)) {
             throw new BizException("验证码错误");

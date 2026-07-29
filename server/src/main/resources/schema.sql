@@ -22,7 +22,9 @@ CREATE TABLE IF NOT EXISTS users (
   agreed_research    TINYINT(1) DEFAULT 0,         -- 是否同意科研使用
   privacy_agreed_at  DATETIME,                     -- 同意时间
   create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
-  update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  is_deleted TINYINT(1) DEFAULT 0,
+  deleted_at DATETIME DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 2. 儿童表
@@ -37,6 +39,8 @@ CREATE TABLE IF NOT EXISTS children (
   premature_weeks  INT DEFAULT 0,                      -- 早产周数
   city             VARCHAR(50),                        -- 居住地市
   create_time      DATETIME DEFAULT CURRENT_TIMESTAMP,
+  is_deleted       TINYINT(1) DEFAULT 0,
+  deleted_at       DATETIME DEFAULT NULL,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -73,6 +77,8 @@ CREATE TABLE IF NOT EXISTS answers (
   total_score  INT NOT NULL,                      -- 总得分
   risk_level   VARCHAR(10) NOT NULL,              -- low / medium / high
   create_time  DATETIME DEFAULT CURRENT_TIMESTAMP,
+  is_deleted    TINYINT(1) DEFAULT 0,
+  deleted_at    DATETIME DEFAULT NULL,
   INDEX idx_answers_risk (risk_level),
   FOREIGN KEY (child_id) REFERENCES children(id) ON DELETE CASCADE,
   FOREIGN KEY (qid) REFERENCES questionnaires(id) ON DELETE CASCADE
@@ -167,6 +173,8 @@ CREATE TABLE IF NOT EXISTS reminders (
     sent_at         DATETIME,
     cancelled_at    DATETIME,
     create_time     DATETIME DEFAULT CURRENT_TIMESTAMP,
+    is_deleted      TINYINT(1) DEFAULT 0,
+    deleted_at      DATETIME DEFAULT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (child_id) REFERENCES children(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
