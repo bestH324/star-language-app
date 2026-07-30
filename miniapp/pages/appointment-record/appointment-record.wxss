@@ -1,7 +1,50 @@
 .page { background: #f5f0f5; min-height: 100vh; }
 
-.page-header { background: #6B1D5E; padding: 48px 20px 20px; }
-.page-title { font-size: 20px; font-weight: 700; color: #fff; }
+/* 状态栏占位 */
+.status-bar {
+    height: 88rpx;
+    background: #fff;
+}
+
+.nav-bar {
+    display: flex;
+    align-items: center;
+    padding: 20rpx 30rpx;
+    background: #fff;
+    border-bottom: 2rpx solid #f0f0f0;
+    position: relative;
+    height: 88rpx;
+}
+
+.back-btn {
+    display: flex;
+    align-items: center;
+    padding: 10rpx 20rpx 10rpx 0;
+    z-index: 10;
+    min-width: 120rpx;
+}
+
+.back-icon {
+    font-size: 48rpx;
+    color: #333;
+    font-weight: 300;
+    line-height: 1;
+}
+
+.back-text {
+    font-size: 30rpx;
+    color: #333;
+    margin-left: 4rpx;
+}
+
+.nav-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 34rpx;
+    font-weight: 600;
+    color: #333;
+}
 
 /* 状态 */
 .status-wrap { display: flex; flex-direction: column; align-items: center; padding: 80px 0; }

@@ -10,32 +10,10 @@
 
     <!-- ===== 紧凑型 ABCD 多选标签 ===== -->
     <view class="grade-tags">
-        <!-- A级 -->
-        <view style="{{selectedGrades.indexOf('A') !== -1 ? 'background:#E74C3C!important;color:#fff!important;border-color:#E74C3C!important;display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:12px;' : 'background:#F2F2F2!important;color:#999!important;border-color:#E0E0E0!important;display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:12px;'}}" bindtap="onGradeTap" data-grade="A">
-            <text wx:if="{{selectedGrades.indexOf('A') !== -1}}" class="tag-check">✔</text>
-            <text class="tag-label">A级</text>
-            <text class="tag-desc">三甲</text>
-        </view>
-
-        <!-- B级 -->
-        <view style="{{selectedGrades.indexOf('B') !== -1 ? 'background:#F39C12!important;color:#fff!important;border-color:#F39C12!important;display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:12px;' : 'background:#F2F2F2!important;color:#999!important;border-color:#E0E0E0!important;display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:12px;'}}" bindtap="onGradeTap" data-grade="B">
-            <text wx:if="{{selectedGrades.indexOf('B') !== -1}}" class="tag-check">✔</text>
-            <text class="tag-label">B级</text>
-            <text class="tag-desc">二甲</text>
-        </view>
-
-        <!-- C级 -->
-        <view style="{{selectedGrades.indexOf('C') !== -1 ? 'background:#3498DB!important;color:#fff!important;border-color:#3498DB!important;display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:12px;' : 'background:#F2F2F2!important;color:#999!important;border-color:#E0E0E0!important;display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:12px;'}}" bindtap="onGradeTap" data-grade="C">
-            <text wx:if="{{selectedGrades.indexOf('C') !== -1}}" class="tag-check">✔</text>
-            <text class="tag-label">C级</text>
-            <text class="tag-desc">社区</text>
-        </view>
-
-        <!-- D级 -->
-        <view style="{{selectedGrades.indexOf('D') !== -1 ? 'background:#2ECC71!important;color:#fff!important;border-color:#2ECC71!important;display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:12px;' : 'background:#F2F2F2!important;color:#999!important;border-color:#E0E0E0!important;display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:12px;'}}" bindtap="onGradeTap" data-grade="D">
-            <text wx:if="{{selectedGrades.indexOf('D') !== -1}}" class="tag-check">✔</text>
-            <text class="tag-label">D级</text>
-            <text class="tag-desc">康复</text>
+        <view wx:for="{{gradeList}}" wx:key="grade" class="grade-tag {{item.selected ? 'grade-tag-active active-' + item.grade : 'grade-tag-gray'}}" bindtap="onGradeTap" data-index="{{index}}">
+            <text wx:if="{{item.selected}}" class="tag-check">✔</text>
+            <text class="tag-label">{{item.label}}</text>
+            <text class="tag-desc">{{item.desc}}</text>
         </view>
     </view>
 
@@ -49,9 +27,9 @@
             <text class="func-icon">{{viewMode === 'list' ? '🗺' : '📋'}}</text>
             <text class="func-label">{{viewMode === 'list' ? '地图视图' : '列表视图'}}</text>
         </view>
-        <view class="func-item" bindtap="onOneClickAppointment">
-            <text class="func-icon">📅</text>
-            <text class="func-label">一站式预约</text>
+        <view class="func-item" bindtap="goToMyAppointments">
+            <text class="func-icon">📋</text>
+            <text class="func-label">我的预约</text>
         </view>
         <view class="func-item" bindtap="onRelocate">
             <text class="func-icon">📍</text>
@@ -61,7 +39,7 @@
             <text class="func-icon">📹</text>
             <text class="func-label">专家视频问诊</text>
         </view>
-        <view class="func-item" bindtap="onToggleViewFromGrid" data-mode="list">
+        <view class="func-item" bindtap="handleListBrowse">
             <text class="func-icon">📊</text>
             <text class="func-label">列表浏览</text>
         </view>
@@ -77,38 +55,190 @@
         <view class="retry-btn" bindtap="onRetry">重新加载</view>
     </view>
 
-    <!-- 列表视图 -->
+    <!-- 列表视图：五种浏览模式 -->
     <view wx:elif="{{viewMode === 'list'}}" class="list-section">
-        <view wx:if="{{groupedList.length === 0}}" class="status-wrap">
-            <text class="status-text">暂无该等级的推荐机构</text>
-        </view>
-        <view wx:for="{{groupedList}}" wx:key="city" class="region-group">
-            <text class="region-title">{{item.city}}</text>
-            <view wx:for="{{item.institutions}}" wx:key="id" wx:for-item="inst" class="hospital-card" bindtap="onCardTap" data-id="{{inst.id}}">
-                <view class="card-header">
-                    <view class="card-name-row">
-                        <text class="inst-name">{{inst.name}}</text>
-                        <text class="inst-grade grade-{{inst.grade}}">{{inst.grade}}级</text>
+
+        <!-- ===== 常规列表 normal ===== -->
+        <view wx:if="{{currentViewMode === 'normal'}}">
+            <view wx:if="{{groupedList.length === 0}}" class="status-wrap">
+                <text class="status-text">暂无该等级的推荐机构</text>
+            </view>
+            <view wx:for="{{groupedList}}" wx:key="city" class="region-group">
+                <text class="region-title">{{item.city}}</text>
+                <view wx:for="{{item.institutions}}" wx:key="id" wx:for-item="inst" class="hospital-card" bindtap="onCardTap" data-id="{{inst.id}}">
+                    <view class="card-header">
+                        <view class="card-name-row">
+                            <text class="inst-name">{{inst.name}}</text>
+                            <text class="inst-grade grade-{{inst.grade}}">{{inst.grade}}级</text>
+                        </view>
+                        <text class="inst-grade-label">{{inst.gradeLabel}}</text>
                     </view>
-                    <text class="inst-grade-label">{{inst.gradeLabel}}</text>
+                    <view class="card-scores">
+                        <text class="score-item">综合得分 <text class="score-val">{{inst.totalScore}}</text></text>
+                        <text class="score-item">距离 <text class="score-val">{{inst.distance}}km</text></text>
+                    </view>
+                    <view class="card-meta">
+                        <text class="meta-item">专长分 {{inst.specialtyScore}}</text>
+                        <text class="meta-item">等待约 {{inst.waitTime}}天</text>
+                        <text class="meta-item">评分 {{inst.userScore}}</text>
+                    </view>
+                    <text class="inst-info">📍 {{inst.address}}</text>
                 </view>
-                <view class="card-scores">
-                    <text class="score-item">综合得分 <text class="score-val">{{inst.totalScore}}</text></text>
-                    <text class="score-item">距离 <text class="score-val">{{inst.distance}}km</text></text>
-                </view>
-                <view class="card-meta">
-                    <text class="meta-item">专长分 {{inst.specialtyScore}}</text>
-                    <text class="meta-item">等待约 {{inst.waitTime}}天</text>
-                    <text class="meta-item">评分 {{inst.userScore}}</text>
-                </view>
-                <text class="inst-info">📍 {{inst.address}}</text>
             </view>
         </view>
+
+        <!-- ===== 总览缩略 thumb ===== -->
+        <view wx:elif="{{currentViewMode === 'thumb'}}">
+            <view wx:if="{{hospitalList.length === 0}}" class="status-wrap">
+                <text class="status-text">暂无该等级的推荐机构</text>
+            </view>
+            <view class="mode-thumb">
+                <view wx:for="{{hospitalList}}" wx:key="id" class="thumb-card" bindtap="onCardTap" data-id="{{item.id}}">
+                    <view class="thumb-avatar grade-bg-{{item.grade}}">
+                        <text class="thumb-avatar-text">{{item.name[0]}}</text>
+                    </view>
+                    <text class="thumb-name">{{item.name}}</text>
+                    <text class="inst-grade grade-{{item.grade}} thumb-grade">{{item.grade}}级</text>
+                    <view class="thumb-score">
+                        <text class="thumb-score-label">综合</text>
+                        <text class="thumb-score-val">{{item.totalScore}}</text>
+                    </view>
+                </view>
+            </view>
+        </view>
+
+        <!-- ===== 按地区选择 region ===== -->
+        <view wx:elif="{{currentViewMode === 'region'}}">
+            <view wx:if="{{regionGroupList.length === 0}}" class="status-wrap">
+                <text class="status-text">暂无该等级的推荐机构</text>
+            </view>
+            <view wx:for="{{regionGroupList}}" wx:key="region" class="region-block">
+                <view class="region-header">{{item.region}}</view>
+                <view wx:for="{{item.list}}" wx:key="id" wx:for-item="inst" class="hospital-card" bindtap="onCardTap" data-id="{{inst.id}}">
+                    <view class="card-header">
+                        <view class="card-name-row">
+                            <text class="inst-name">{{inst.name}}</text>
+                            <text class="inst-grade grade-{{inst.grade}}">{{inst.grade}}级</text>
+                        </view>
+                        <text class="inst-grade-label">{{inst.gradeLabel}}</text>
+                    </view>
+                    <view class="card-scores">
+                        <text class="score-item">综合得分 <text class="score-val">{{inst.totalScore}}</text></text>
+                        <text class="score-item">距离 <text class="score-val">{{inst.distance}}km</text></text>
+                    </view>
+                    <view class="card-meta">
+                        <text class="meta-item">专长分 {{inst.specialtyScore}}</text>
+                        <text class="meta-item">等待约 {{inst.waitTime}}天</text>
+                        <text class="meta-item">评分 {{inst.userScore}}</text>
+                    </view>
+                    <text class="inst-info">📍 {{inst.address}}</text>
+                </view>
+            </view>
+        </view>
+
+        <!-- ===== 评分排行 rank ===== -->
+        <view wx:elif="{{currentViewMode === 'rank'}}">
+            <view wx:if="{{rankList.length === 0}}" class="status-wrap">
+                <text class="status-text">暂无该等级的推荐机构</text>
+            </view>
+            <view wx:for="{{rankList}}" wx:key="id" class="rank-row">
+                <view class="rank-index">
+                    <text wx:if="{{index === 0}}" class="rank-medal">🏆</text>
+                    <text wx:elif="{{index === 1}}" class="rank-medal">🥈</text>
+                    <text wx:elif="{{index === 2}}" class="rank-medal">🥉</text>
+                    <text wx:else class="rank-num">{{index + 1}}</text>
+                </view>
+                <view class="rank-info">
+                    <text class="rank-name">{{item.name}}</text>
+                    <view class="rank-meta-row">
+                        <text class="inst-grade grade-{{item.grade}}">{{item.grade}}级</text>
+                        <text class="rank-dist">{{item.distance}}km</text>
+                    </view>
+                </view>
+                <view class="rank-score-box">
+                    <text class="rank-score-num">{{item.totalScore}}</text>
+                    <text class="rank-score-label">综合分</text>
+                </view>
+            </view>
+        </view>
+
+        <!-- ===== 按城市选择 city ===== -->
+        <view wx:elif="{{currentViewMode === 'city'}}">
+            <view class="city-bar" bindtap="openCityPicker">
+                <text class="city-bar-icon">🏙</text>
+                <text class="city-bar-text">{{selectedCity}}</text>
+                <text class="city-bar-arrow">▼</text>
+            </view>
+            <view wx:if="{{filteredCityList.length === 0}}" class="status-wrap">
+                <text class="status-text">该城市暂无推荐机构</text>
+            </view>
+            <view wx:for="{{filteredCityList}}" wx:key="id" class="hospital-card" bindtap="onCardTap" data-id="{{item.id}}">
+                <view class="card-header">
+                    <view class="card-name-row">
+                        <text class="inst-name">{{item.name}}</text>
+                        <text class="inst-grade grade-{{item.grade}}">{{item.grade}}级</text>
+                    </view>
+                    <text class="inst-grade-label">{{item.gradeLabel}}</text>
+                </view>
+                <view class="card-scores">
+                    <text class="score-item">综合得分 <text class="score-val">{{item.totalScore}}</text></text>
+                    <text class="score-item">距离 <text class="score-val">{{item.distance}}km</text></text>
+                </view>
+                <view class="card-meta">
+                    <text class="meta-item">专长分 {{item.specialtyScore}}</text>
+                    <text class="meta-item">等待约 {{item.waitTime}}天</text>
+                    <text class="meta-item">评分 {{item.userScore}}</text>
+                </view>
+                <text class="inst-info">📍 {{item.address}}</text>
+            </view>
+        </view>
+
     </view>
 
     <!-- 地图视图 -->
     <view wx:elif="{{viewMode === 'map'}}" class="map-section">
         <map class="map-view" latitude="{{userLat}}" longitude="{{userLng}}" markers="{{markers}}" scale="10" show-location="{{true}}" />
+    </view>
+
+    <!-- ===== 列表浏览底部弹窗 ===== -->
+    <view wx:if="{{showListMenu}}" class="sheet-mask" bindtap="closeListMenu">
+        <view class="sheet-panel" catchtap="">
+            <text class="sheet-title">选择浏览模式</text>
+            <view class="sheet-option" bindtap="selectViewMode" data-type="thumb">
+                <text class="sheet-option-icon">🔲</text>
+                <text class="sheet-option-label">总览缩略</text>
+            </view>
+            <view class="sheet-divider"></view>
+            <view class="sheet-option" bindtap="selectViewMode" data-type="region">
+                <text class="sheet-option-icon">🗺</text>
+                <text class="sheet-option-label">按地区选择</text>
+            </view>
+            <view class="sheet-divider"></view>
+            <view class="sheet-option" bindtap="selectViewMode" data-type="rank">
+                <text class="sheet-option-icon">🏆</text>
+                <text class="sheet-option-label">评分排行</text>
+            </view>
+            <view class="sheet-divider"></view>
+            <view class="sheet-option" bindtap="selectViewMode" data-type="city">
+                <text class="sheet-option-icon">🏙</text>
+                <text class="sheet-option-label">按城市选择</text>
+            </view>
+            <view class="sheet-divider"></view>
+            <view class="sheet-cancel" bindtap="closeListMenu">取消</view>
+        </view>
+    </view>
+
+    <!-- ===== 城市选择底部弹窗 ===== -->
+    <view wx:if="{{showCityPicker}}" class="sheet-mask" bindtap="closeCityPicker">
+        <view class="sheet-panel" catchtap="">
+            <text class="sheet-title">选择城市</text>
+            <view class="city-grid">
+                <view wx:for="{{cityList}}" wx:key="*this" class="city-item {{selectedCity === item ? 'city-item-active' : ''}}" bindtap="selectCity" data-city="{{item}}">
+                    <text>{{item}}</text>
+                </view>
+            </view>
+            <view class="sheet-cancel" bindtap="closeCityPicker">取消</view>
+        </view>
     </view>
 
     <!-- ===== 付费弹窗 ===== -->

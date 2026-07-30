@@ -32,6 +32,10 @@ Page({
         });
     },
 
+    goBack() {
+        wx.navigateBack();
+    },
+
     getStatusClass(status) {
         const map = { '待确认': 's-pending', '已确认': 's-confirmed', '已取消': 's-cancelled', '已完成': 's-done' };
         return map[status] || 's-pending';

@@ -65,10 +65,19 @@ Page({
     switchTab(e) { this.setData({ tab: e.currentTarget.dataset.t }); },
     viewRecord(e) { wx.navigateTo({ url: '/pages/result/result?recordId=' + e.currentTarget.dataset.id }); },
     doLogout() {
-        wx.removeStorageSync('token');
-        app.globalData.isAdminLoggedIn = false;
-        app.saveToStorage();
-        wx.redirectTo({ url: '/pages/index/index' });
+        wx.showModal({
+            title: '确认退出',
+            content: '确定要退出管理员后台吗？',
+            success: (res) => {
+                if (res.confirm) {
+                    wx.removeStorageSync('token');
+                    wx.removeStorageSync('adminToken');
+                    app.globalData.isAdminLoggedIn = false;
+                    app.saveToStorage();
+                    wx.switchTab({ url: '/pages/index/index' });
+                }
+            }
+        });
     },
     // 导出数据按钮事件：data-type 指定导出类型，data-format 指定文件格式
     exportData(e) {
