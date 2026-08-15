@@ -124,7 +124,7 @@ Page({
             wx.hideLoading();
             const questions = (questionnaire.questions || []).map(q => ({
                 id: q.id,
-                videoUrl: q.video_url || '',
+                videoUrl: this._resolveVideoUrl(q.video_url),
                 content: q.content,
                 options: q.options,
                 isReverse: q.is_reverse
@@ -251,5 +251,12 @@ Page({
 
     onVideoError() {
         this.setData({ videoError: true });
+    },
+
+    // 把数据库里的相对路径（如 /api/video/12m/q1.mp4）解析为完整可播放 URL
+    _resolveVideoUrl(url) {
+        if (!url) return '';
+        if (url.indexOf('http') === 0) return url;
+        return request.BASE_URL + url;
     }
 });

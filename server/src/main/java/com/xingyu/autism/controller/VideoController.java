@@ -25,7 +25,7 @@ public class VideoController {
     @Value("${autism.allowed-referer:}")
     private String allowedReferer;
 
-    @GetMapping("/{name:.+}")
+    @GetMapping("/{*name}")
     public void stream(@PathVariable String name, HttpServletRequest req, HttpServletResponse resp) throws IOException {
         // 防盗链：校验 Referer（配置为空时跳过）
         if (allowedReferer != null && !allowedReferer.isBlank()) {
@@ -36,8 +36,11 @@ public class VideoController {
             }
         }
 
-        Path file = Paths.get(videoDir).resolve(name).normalize();
-        if (!file.startsWith(Paths.get(videoDir).normalize()) || !Files.exists(file)) {
+        // 去掉可能的前导斜杠，避免 resolve 成绝对路径；videoPath 用绝对路径保证 startsWith 判断一致
+        String cleanName = name == null ? "" : name.replaceAll("^/+", "");
+        Path videoPath = Paths.get(videoDir).toAbsolutePath().normalize();
+        Path file = videoPath.resolve(cleanName).normalize();
+        if (cleanName.isEmpty() || !file.startsWith(videoPath) || !Files.exists(file) || Files.isDirectory(file)) {
             resp.sendError(404, "视频不存在");
             return;
         }
