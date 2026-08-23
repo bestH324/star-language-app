@@ -9,3 +9,39 @@
 .risk-message-card.high .risk-message-text { color: #C62828; }
 .risk-message-card.medium .risk-message-text { color: #E65100; }
 .risk-message-card.low .risk-message-text { color: #2E7D32; }
+
+/* ==================== 信息卡片 ==================== */
+.info-card {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+}
+.info-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: block;
+    margin-bottom: 10px;
+}
+.info-line {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    display: block;
+}
+
+/* ==================== 重要提醒 ==================== */
+.info-card.warn {
+    background: #FFF5F5;
+    border: 2rpx solid #FFCDD2;
+}
+.info-card.warn .info-title {
+    color: #D32F2F;
+}
+.warn-text {
+    font-size: 14px;
+    color: #D32F2F;
+    line-height: 1.7;
+    display: block;
+}

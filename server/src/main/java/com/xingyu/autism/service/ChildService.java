@@ -29,7 +29,7 @@ public class ChildService {
                 uid);
     }
 
-    /** 新增（年龄限制 1-5 岁） */
+    /** 新增（年龄限制 11-60 个月） */
     public Map<String, Object> add(ChildRequest req) {
         validateAge(req.getBirthDate());
         long uid = AuthContext.currentUserId();
@@ -86,13 +86,13 @@ public class ChildService {
         return rows.get(0);
     }
 
-    /** 校验年龄 1-5 岁（12-60 个月） */
+    /** 校验年龄 11-60 个月 */
     private void validateAge(String birthDate) {
         try {
             LocalDate birth = LocalDate.parse(birthDate);
             long months = Period.between(birth, LocalDate.now()).toTotalMonths();
-            if (months < 12 || months > 60) {
-                throw new BizException("本筛查适用于1-5岁（12-60个月）的儿童");
+            if (months < 11 || months > 60) {
+                throw new BizException("本筛查适用于11-60个月的儿童");
             }
         } catch (BizException e) {
             throw e;

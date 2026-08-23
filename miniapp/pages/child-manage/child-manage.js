@@ -16,6 +16,13 @@ Page({
         timelineData: []
     },
 
+    onLoad(options) {
+        // 从筛查页“新建宝宝档案”入口跳转而来，自动展开添加表单
+        if (options && options.add === '1') {
+            this.showForm();
+        }
+    },
+
     onShow() {
         const t = new Date();
         const ts = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
@@ -148,8 +155,8 @@ Page({
             return;
         }
         const m = (new Date() - new Date(birth)) / (1000 * 60 * 60 * 24 * 30.44);
-        if (m < 12 || m > 60) {
-            wx.showToast({ title: '本筛查适用于1-5岁（12-60个月）的儿童', icon: 'none', duration: 2500 });
+        if (m < 11 || m > 60) {
+            wx.showToast({ title: '本筛查适用于11-60个月的儿童', icon: 'none', duration: 2500 });
             return;
         }
 

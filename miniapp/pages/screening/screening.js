@@ -88,6 +88,10 @@ Page({
         }
     },
 
+    goAddChild() {
+        wx.navigateTo({ url: '/pages/child-manage/child-manage?add=1' });
+    },
+
     _loadQuestionnaireInfo(childId) {
         request.get('/api/questionnaire/match?childId=' + childId).then(info => {
             this.setData({ questionnaireInfo: info });

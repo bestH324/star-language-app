@@ -10,7 +10,7 @@
         </swiper-item>
         <swiper-item>
             <view class="banner-slide">
-                <text class="banner-title">权威量表 · SACS改编</text>
+                <text class="banner-title">权威量表 · 改编</text>
                 <text class="banner-desc">基于国际标准，专业可靠</text>
             </view>
         </swiper-item>

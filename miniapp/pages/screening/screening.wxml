@@ -10,8 +10,7 @@
         <view class="screening-info-card">
             <text class="info-title">📋 筛查须知</text>
             <view class="info-list">
-                <text wx:if="{{questionnaireInfo}}">• 本筛查采用SACS改编量表，适用于 <text style="font-weight:bold">{{questionnaireInfo.minAgeMonths}}-{{questionnaireInfo.maxAgeMonths}}个月</text> 儿童</text>
-                <text wx:else>• 本筛查采用SACS改编量表，适用于 <text style="font-weight:bold">1-5岁</text> 儿童</text>
+                <text>• 本筛查采用改编量表，适用于 <text style="font-weight:bold">11-60个月</text> 儿童</text>
                 <text wx:if="{{questionnaireInfo}}">• 共 <text style="font-weight:bold">{{questionnaireInfo.totalQuestions}}道题</text>，每道题前有一段示范视频</text>
                 <text wx:else>• 共 <text style="font-weight:bold">20道题</text>，每道题前有一段示范视频</text>
                 <text>• 请仔细观看视频后，根据 <text style="font-weight:bold">宝宝日常表现</text> 作答</text>
@@ -24,12 +23,16 @@
 
         <view class="form-group">
             <text class="form-label">选择筛查宝宝</text>
-            <picker mode="selector" range="{{childList}}" range-key="label" value="{{pickerValue}}" bindchange="onSelectChild">
+            <picker wx:if="{{childList.length > 0}}" mode="selector" range="{{childList}}" range-key="label" value="{{pickerValue}}" bindchange="onSelectChild">
                 <view class="form-input" style="line-height:48px">{{selectedChildLabel || '-- 请选择宝宝 --'}}</view>
             </picker>
+            <view wx:elif="{{!loading}}" class="no-child-entry">
+                <text class="no-child-tip">👶 还没有宝宝档案，先添加一位宝宝再开始筛查</text>
+                <button class="btn btn-outline btn-block" bindtap="goAddChild">＋ 新建宝宝档案</button>
+            </view>
         </view>
 
-        <button class="btn btn-primary btn-block" bindtap="startScreening">开始筛查</button>
+        <button wx:if="{{childList.length > 0}}" class="btn btn-primary btn-block" bindtap="startScreening">开始筛查</button>
     </view>
 
     <!-- 筛查中 -->
