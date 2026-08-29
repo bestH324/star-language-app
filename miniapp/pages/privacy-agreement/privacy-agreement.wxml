@@ -1,6 +1,10 @@
 <view class="page-content">
     <scroll-view scroll-y class="agreement-scroll" bindscroll="onScroll" scroll-with-animation>
         <text class="agreement-title">知情同意与信息保密承诺书</text>
+        <view class="scroll-down-tip">
+            <text class="scroll-down-tip-icon">↓</text>
+            <text>向下翻页，阅读全文</text>
+        </view>
         <text class="agreement-text">您好，本小程序提供婴幼儿孤独症线上风险初筛服务，您填写的监护人信息、儿童身份、月龄、全部问卷作答记录、筛查风险结果均属于未成年人医疗健康敏感信息，平台严格履行保密义务，请您完整阅读以下全部条款：
 
 1. 信息收集与使用范围

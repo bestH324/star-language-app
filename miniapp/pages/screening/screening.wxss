@@ -3,6 +3,7 @@
 
 .screening-info-card { background: #fff; border-radius: var(--radius); padding: 16px; margin-bottom: 20px; }
 .no-child-entry { margin-top: 4px; }
+.add-child-link { margin-top: 10px; text-align: center; font-size: 14px; color: var(--primary); padding: 6px 0; }
 .no-child-tip { display: block; font-size: 14px; color: var(--text-secondary); margin-bottom: 12px; }
 .info-title { font-size: 17px; font-weight: 600; display: block; margin-bottom: 10px; }
 .info-list > text { display: block; font-size: 14px; color: var(--text-secondary); line-height: 1.8; }

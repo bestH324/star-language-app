@@ -30,6 +30,7 @@
                 <text class="no-child-tip">👶 还没有宝宝档案，先添加一位宝宝再开始筛查</text>
                 <button class="btn btn-outline btn-block" bindtap="goAddChild">＋ 新建宝宝档案</button>
             </view>
+            <view wx:if="{{childList.length > 0}}" class="add-child-link" bindtap="goAddChild">＋ 新建宝宝</view>
         </view>
 
         <button wx:if="{{childList.length > 0}}" class="btn btn-primary btn-block" bindtap="startScreening">开始筛查</button>
